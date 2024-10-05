@@ -1,4 +1,3 @@
-#include "Game.hpp"
-#include <raylib.h>
+#include "Raytris.hpp"
 
-int main(void) { Game().run(); }
+int main() { Raytris().run(); }

@@ -1,3 +1,6 @@
+#ifndef NEXT_QUEUE_H
+#define NEXT_QUEUE_H
+
 #include "FallingPiece.hpp"
 #include <random>
 
@@ -19,3 +22,5 @@ public:
   void pushNewBagIfNeeded();
   const Tetromino &operator[](std::size_t index) const;
 };
+
+#endif

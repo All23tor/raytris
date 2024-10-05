@@ -18,6 +18,7 @@ endif()
 
 set(SOURCES
     ./src/FallingPiece.cpp
+    ./src/Menu.cpp
     ./src/Playfield.cpp
     ./src/NextQueue.cpp
     ./src/Game.cpp

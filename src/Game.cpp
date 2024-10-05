@@ -1,45 +1,22 @@
 #include "Game.hpp"
 #include "raylib.h"
 
-Game::Game() {
+Game::Game()
+    : position(
+          {(GetScreenWidth() - block_length * Playfield::WIDTH) / 2,
+           (GetScreenHeight() -
+            block_length * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
+               2}),
+      block_length(GetScreenHeight() * 0.7 / Playfield::VISIBLE_HEIGHT) {
   undoMoveStack.push(playfield);
-  InitWindow(WINDOWED_WIDTH, WINDOWED_HEIGHT, "RayTris");
-  SetTargetFPS(60);
-  block_length = GetScreenHeight() * 0.7 / Playfield::VISIBLE_HEIGHT;
-  position = {(GetScreenWidth() - block_length * Playfield::WIDTH) / 2,
-              (GetScreenHeight() -
-               block_length * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
-                  2};
 }
-
-Game::~Game() { CloseWindow(); }
 
 inline Rectangle Game::getBlockRectangle(int i, int j) {
   return {position.x + i * block_length, position.y + j * block_length,
           block_length, block_length};
 }
 
-void Game::toogleFullScreen() {
-  if (IsWindowFullscreen()) {
-    SetWindowSize(WINDOWED_WIDTH, WINDOWED_HEIGHT);
-  } else {
-    int monitor = GetCurrentMonitor();
-    SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-  }
-
-  ToggleFullscreen();
-  block_length = GetScreenHeight() * 0.7 / Playfield::VISIBLE_HEIGHT;
-  position = {(GetScreenWidth() - block_length * Playfield::WIDTH) / 2,
-              (GetScreenHeight() -
-               block_length * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
-                  2};
-}
-
 void Game::update() {
-  if (IsKeyPressed(KEY_F)) {
-    ToggleFullscreen();
-  }
-
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z)) {
     if (!undoMoveStack.empty()) {
       playfield = undoMoveStack.top();
@@ -189,7 +166,7 @@ void Game::draw() {
 }
 
 void Game::run() {
-  while (!WindowShouldClose()) {
+  while (!IsKeyDown(KEY_ESCAPE)) {
     update();
     BeginDrawing();
     draw();

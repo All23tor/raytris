@@ -7,5 +7,5 @@
 - Space: Hard drop falling piece
 - A: Turn falling piece 180 degrees
 - C: Swap falling piece with hold piece
-- F: Toggle fullscreen
 - Esc: Close raytris
+- R: Restart Game
