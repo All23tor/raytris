@@ -2,64 +2,66 @@
 #include "raylib.h"
 #include <cstdio>
 
-std::pair<int, int> getResolution(Resolutions resolution) {
+Menu::Menu()
+    : fullScreenWidth(GetMonitorWidth(GetCurrentMonitor())),
+      fullScreenHeight(GetMonitorHeight(GetCurrentMonitor())),
+      windowWidth(INITIAL_WIDTH), windowHeight(INITIAL_HEIGHT) {}
 
+const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
   switch (resolution) {
   case Resolutions::SMALL:
-    return {640, 480};
+    return {INITIAL_WIDTH, INITIAL_HEIGHT};
   case Resolutions::MEDIUM:
     return {1280, 720};
   case Resolutions::BIG:
     return {1600, 900};
   case Resolutions::FULLSCREEN: {
     int monitor = GetCurrentMonitor();
-    return {GetMonitorWidth(monitor), GetMonitorHeight(monitor)};
+    return {fullScreenWidth, fullScreenHeight};
   }
   default:
     return {0, 0};
   }
 }
 
-void Menu::toggleFullscreen() {
+void Menu::resizeScreen() {
   resolution =
       static_cast<Resolutions>((static_cast<int>(resolution) + 1) %
                                (static_cast<int>(Resolutions::FULLSCREEN) + 1));
+
+  std::pair<int, int> resolutionSizes = getResolution(resolution);
+  windowWidth = resolutionSizes.first;
+  windowHeight = resolutionSizes.second;
+  SetWindowSize(resolutionSizes.first, resolutionSizes.second);
 
   if (IsWindowFullscreen()) {
     ToggleFullscreen();
   }
 
   if (resolution == Resolutions::FULLSCREEN) {
-    SetConfigFlags(FLAG_FULLSCREEN_MODE);
     ToggleFullscreen();
-  } else {
-    SetConfigFlags(~FLAG_FULLSCREEN_MODE);
   }
-
-  std::pair<int, int> resolutionSizes = getResolution(resolution);
-  SetWindowSize(resolutionSizes.first, resolutionSizes.second);
 }
 
 void Menu::draw() const {
-  auto [width, height] = getResolution(resolution);
-  const float fontSize = height / 10.0;
+  const float fontSize = windowHeight / 10.0;
   ClearBackground(LIGHTGRAY);
   char score[255];
-  sprintf(score, "%d x %d", width, height);
-  DrawText(score, width / 2.0 + -(float)MeasureText("YOU LOST", fontSize) / 2,
-           height / 2, fontSize, BLUE);
+  sprintf(score, "%d x %d", windowWidth, windowHeight);
+  DrawText(score, windowWidth / 2.0 + -(float)MeasureText(score, fontSize) / 2,
+           windowHeight / 2, fontSize, BLUE);
   DrawText("Press F to resize",
-           width / 2.0 + -(float)MeasureText("Press F to resize", fontSize) / 2,
-           height / 2.0 + fontSize, fontSize, BLACK);
+           windowWidth / 2.0 - MeasureText("Press F to resize", fontSize) / 2.0,
+           windowHeight / 2.0 + fontSize, fontSize, BLACK);
   DrawText("Press Enter to Play",
-           width / 2.0 +
-               -(float)MeasureText("Press Enter to play", fontSize) / 2,
-           height / 2.0 + fontSize * 2, fontSize, BLACK);
+           windowWidth / 2.0 +
+               -MeasureText("Press Enter to play", fontSize) / 2.0,
+           windowHeight / 2.0 + 2 * fontSize, fontSize, BLACK);
 }
 
 void Menu::update() {
   if (IsKeyPressed(KEY_F))
-    toggleFullscreen();
+    resizeScreen();
 }
 
 void Menu::run() {

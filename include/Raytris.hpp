@@ -8,8 +8,7 @@
 class Raytris {
 public:
   Raytris() {
-    auto [width, height] = getResolution(Resolutions::SMALL);
-    InitWindow(width, height, "RayTris");
+    InitWindow(640, 480, "RayTris");
     SetTargetFPS(60);
   }
 
