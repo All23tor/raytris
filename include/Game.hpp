@@ -10,6 +10,7 @@ class Game {
   const Vector2 position;
   // Playfield
   Playfield playfield;
+  bool paused = false;
   // Previous moves
   std::stack<Playfield> undoMoveStack;
 
@@ -21,7 +22,6 @@ private:
 public:
   Game();
   void run();
-  void toogleFullScreen();
 };
 
 #endif

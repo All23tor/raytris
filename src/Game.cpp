@@ -25,20 +25,18 @@ void Game::update() {
     }
   }
 
+  if (IsKeyPressed(KEY_ENTER))
+    paused = !paused;
+
+  if (paused)
+    return;
+
   if (playfield.update())
     undoMoveStack.push(playfield);
 }
 
 void Game::draw() {
   ClearBackground(LIGHTGRAY);
-  if (playfield.hasLost) {
-    DrawText("YOU LOST",
-             position.x + Playfield::WIDTH * block_length / 2 -
-                 (float)MeasureText("YOU LOST", block_length * 5) / 2,
-             position.y + Playfield::VISIBLE_HEIGHT * block_length,
-             block_length * 5, RED);
-    return;
-  }
 
   DrawRectangle(position.x,
                 position.y + block_length * Playfield::VISIBLE_HEIGHT,
@@ -163,10 +161,32 @@ void Game::draw() {
   DrawText("SCORE: ", score_text_block.x, score_text_block.y, fontSize, BLACK);
   DrawText(str_score, score_text_block.x + MeasureText("SCORE: ", fontSize),
            score_text_block.y, fontSize, BLACK);
+
+  if (!playfield.hasLost && !paused)
+    return;
+  // Game over or paused
+  float screenWidth = GetScreenWidth();
+  float screenHeight = GetScreenHeight();
+  int fontSizeBig = block_length * 5;
+  DrawRectangle(0, 0, screenWidth, screenHeight, {0, 0, 0, 100});
+
+  if (playfield.hasLost) {
+    DrawText("YOU LOST",
+             (screenWidth - MeasureText("YOU LOST", fontSizeBig)) / 2.0,
+             screenHeight / 2.0, fontSizeBig, RED);
+
+  } else if (paused) {
+    DrawText("GAME PAUSED",
+             (screenWidth - MeasureText("GAME PAUSED", fontSizeBig)) / 2.0,
+             screenHeight / 2.0, fontSizeBig, BLUE);
+  }
+  DrawText("Press Esc to quit",
+           (screenWidth - MeasureText("Press Enter to quit", fontSize)) / 2.0,
+           screenHeight / 2.0 + fontSizeBig, fontSize, WHITE);
 }
 
 void Game::run() {
-  while (!IsKeyPressed(KEY_ESCAPE)) {
+  while (!IsKeyPressed(KEY_ESCAPE) || !paused) {
     update();
     BeginDrawing();
     draw();

@@ -7,7 +7,8 @@
 - Space: Hard drop falling piece
 - A: Turn falling piece 180 degrees
 - C: Swap falling piece with hold piece
-- Esc: (In game)Exit to Menu, (In Menu)Close raytris
+- Esc: (In Menu)Close raytris
+- Enter: (In Game)Pause game
 - R: Restart Game
 ## Depencencies
 You need to have raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.

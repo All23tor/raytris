@@ -46,16 +46,18 @@ void Menu::resizeScreen() {
 void Menu::draw() const {
   const float fontSize = windowHeight / 10.0;
   ClearBackground(LIGHTGRAY);
+  DrawText("RAYTRIS",
+           (windowWidth - MeasureText("RAYTRIS", fontSize * 2)) / 2.0,
+           windowHeight / 2.0 - 3 * fontSize, fontSize * 2, RED);
   char score[255];
   sprintf(score, "%d x %d", windowWidth, windowHeight);
-  DrawText(score, windowWidth / 2.0 + -(float)MeasureText(score, fontSize) / 2,
+  DrawText(score, (windowWidth - MeasureText(score, fontSize)) / 2.0,
            windowHeight / 2, fontSize, BLUE);
   DrawText("Press F to resize",
-           windowWidth / 2.0 - MeasureText("Press F to resize", fontSize) / 2.0,
+           (windowWidth - MeasureText("Press F to resize", fontSize)) / 2.0,
            windowHeight / 2.0 + fontSize, fontSize, BLACK);
   DrawText("Press Enter to Play",
-           windowWidth / 2.0 +
-               -MeasureText("Press Enter to play", fontSize) / 2.0,
+           (windowWidth - MeasureText("Press Enter to play", fontSize)) / 2.0,
            windowHeight / 2.0 + 2 * fontSize, fontSize, BLACK);
 }
 

@@ -14,6 +14,11 @@ Raytris::~Raytris() { CloseWindow(); }
 void Raytris::run() {
   Menu menu;
   while (menu.run()) {
+    BeginDrawing();
+    EndDrawing();
     Game().run();
+    // Required to update keyboard inputs
+    BeginDrawing();
+    EndDrawing();
   }
 }
