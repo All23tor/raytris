@@ -7,8 +7,10 @@
 - Space: Hard drop falling piece
 - A: Turn falling piece 180 degrees
 - C: Swap falling piece with hold piece
-- Esc: Close raytris
+- Esc: (In game)Exit to Menu, (In Menu)Close raytris
 - R: Restart Game
+## Depencencies
+You need to have raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.
 ## Building
 1. Clone the repo with `git clone https://github.com/All23tor/raytris/` and `cd raytris` to it
 2. `mkdir build && cd build` to make build directory

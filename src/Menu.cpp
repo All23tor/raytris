@@ -64,11 +64,13 @@ void Menu::update() {
     resizeScreen();
 }
 
-void Menu::run() {
-  while (!IsKeyDown(KEY_ENTER)) {
+bool Menu::run() {
+  while (!IsKeyPressed(KEY_ENTER) && !IsKeyPressed(KEY_ESCAPE)) {
     update();
     BeginDrawing();
     draw();
     EndDrawing();
   }
+
+  return IsKeyDown(KEY_ENTER);
 }

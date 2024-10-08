@@ -22,6 +22,7 @@ set(SOURCES
     ./src/Playfield.cpp
     ./src/NextQueue.cpp
     ./src/Game.cpp
+    ./src/Raytris.cpp
     ./src/main.cpp
 )
 add_executable(${PROJECT_NAME} ${SOURCES})

@@ -166,7 +166,7 @@ void Game::draw() {
 }
 
 void Game::run() {
-  while (!IsKeyDown(KEY_ESCAPE)) {
+  while (!IsKeyPressed(KEY_ESCAPE)) {
     update();
     BeginDrawing();
     draw();

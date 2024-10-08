@@ -21,7 +21,7 @@ class Menu {
 
 public:
   Menu();
-  void run();
+  bool run();
   const std::pair<int, int> getResolution(Resolutions resolution) const;
 };
 
