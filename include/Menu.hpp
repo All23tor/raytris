@@ -5,7 +5,7 @@
 
 enum class Resolutions { SMALL, MEDIUM, BIG, FULLSCREEN };
 constexpr int INITIAL_WIDTH = 640;
-constexpr int INITIAL_HEIGHT = 480;
+constexpr int INITIAL_HEIGHT = 360;
 
 class Menu {
   Resolutions resolution = Resolutions::SMALL;

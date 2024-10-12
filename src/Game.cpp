@@ -1,13 +1,16 @@
 #include "Game.hpp"
 #include "raylib.h"
 
+static constexpr float heightScaleFactor = 0.8;
+
 Game::Game()
-    : position(
+    : block_length(GetScreenHeight() * heightScaleFactor /
+                   Playfield::VISIBLE_HEIGHT),
+      position(
           {(GetScreenWidth() - block_length * Playfield::WIDTH) / 2,
            (GetScreenHeight() -
             block_length * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
-               2}),
-      block_length(GetScreenHeight() * 0.7 / Playfield::VISIBLE_HEIGHT) {
+               2}) {
   undoMoveStack.push(playfield);
 }
 
@@ -99,7 +102,7 @@ void Game::draw() {
 
   // Line Clear message
   if (playfield.message.timer > 0) {
-    Rectangle clear_text_block = getBlockRectangle(-5, Playfield::HEIGHT);
+    Rectangle clear_text_block = getBlockRectangle(-10, Playfield::HEIGHT);
     const float color_scale_factor =
         (float)playfield.message.timer / LineClearMessage::DURATION;
     const char *text_message;
@@ -135,39 +138,39 @@ void Game::draw() {
 
   // Combo
   if (playfield.combo >= 2) {
-    Rectangle combo_text_block = getBlockRectangle(-5, Playfield::HEIGHT + 2);
-    char str_score[5];
-    snprintf(str_score, sizeof str_score, "%d", playfield.combo);
+    Rectangle combo_text_block = getBlockRectangle(-10, Playfield::HEIGHT - 2);
+    char str_combo[5];
+    snprintf(str_combo, sizeof str_combo, "%d", playfield.combo);
     DrawText("COMBO ", combo_text_block.x, combo_text_block.y, fontSize, BLUE);
-    DrawText(str_score, combo_text_block.x + MeasureText("COMBO ", fontSize),
+    DrawText(str_combo, combo_text_block.x + MeasureText("COMBO ", fontSize),
              combo_text_block.y, fontSize, BLUE);
   }
 
   // Back to Back (B2B)
   if (playfield.b2b >= 2) {
-    Rectangle b2b_text_block = getBlockRectangle(-7, Playfield::HEIGHT - 2);
-    char str_score[5];
-    snprintf(str_score, sizeof str_score, "%d", playfield.b2b - 1);
+    Rectangle b2b_text_block = getBlockRectangle(-10, Playfield::HEIGHT - 4);
+    char str_b2b[5];
+    snprintf(str_b2b, sizeof str_b2b, "%d", playfield.b2b - 1);
     DrawText("B2B ", b2b_text_block.x, b2b_text_block.y, fontSize, BLUE);
-    DrawText(str_score, b2b_text_block.x + MeasureText("B2B ", fontSize),
+    DrawText(str_b2b, b2b_text_block.x + MeasureText("B2B ", fontSize),
              b2b_text_block.y, fontSize, BLUE);
   }
 
   // Score
-  Rectangle score_text_block =
-      getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT);
-  char str_score[11];
-  snprintf(str_score, sizeof str_score, "%08ld", playfield.score);
+  Rectangle score_text_block = getBlockRectangle(11, Playfield::HEIGHT - 2);
   DrawText("SCORE: ", score_text_block.x, score_text_block.y, fontSize, BLACK);
-  DrawText(str_score, score_text_block.x + MeasureText("SCORE: ", fontSize),
-           score_text_block.y, fontSize, BLACK);
+  Rectangle score_number_block = getBlockRectangle(11, Playfield::HEIGHT);
+  char str_score[10];
+  snprintf(str_score, sizeof str_score, "%09ld", playfield.score);
+  DrawText(str_score, score_number_block.x, score_number_block.y, fontSize,
+           BLACK);
 
   if (!playfield.hasLost && !paused)
     return;
   // Game over or paused
-  float screenWidth = GetScreenWidth();
-  float screenHeight = GetScreenHeight();
-  int fontSizeBig = block_length * 5;
+  const float screenWidth = GetScreenWidth();
+  const float screenHeight = GetScreenHeight();
+  const int fontSizeBig = block_length * 5;
   DrawRectangle(0, 0, screenWidth, screenHeight, {0, 0, 0, 100});
 
   if (playfield.hasLost) {

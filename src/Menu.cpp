@@ -12,9 +12,9 @@ const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
   case Resolutions::SMALL:
     return {INITIAL_WIDTH, INITIAL_HEIGHT};
   case Resolutions::MEDIUM:
-    return {1280, 720};
+    return {960, 540};
   case Resolutions::BIG:
-    return {1600, 900};
+    return {1280, 720};
   case Resolutions::FULLSCREEN: {
     int monitor = GetCurrentMonitor();
     return {fullScreenWidth, fullScreenHeight};

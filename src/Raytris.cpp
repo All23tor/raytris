@@ -1,11 +1,10 @@
-
 #include "Raytris.hpp"
 #include "Game.hpp"
 #include "Menu.hpp"
 #include <raylib.h>
 
 Raytris::Raytris() {
-  InitWindow(640, 480, "RayTris");
+  InitWindow(INITIAL_WIDTH, INITIAL_HEIGHT, "RayTris");
   SetTargetFPS(60);
 }
 
