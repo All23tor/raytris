@@ -13,7 +13,7 @@ public:
 private:
   std::vector<Tetromino> queue;
 
-  void pop_back();
+  void popBack();
   void pushNewBag();
 
 public:

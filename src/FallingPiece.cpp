@@ -4,9 +4,9 @@
 FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position,
                            char _vertical_position)
     : tetromino(_tetromino), orientation(Orientation::UP),
-      horizontal_position(_horizontal_position),
-      vertical_position(_vertical_position),
-      tetromino_map(initialTetrominoMap(tetromino)) {}
+      horizontalPosition(_horizontal_position),
+      verticalPosition(_vertical_position),
+      tetrominoMap(initialTetrominoMap(tetromino)) {}
 
 Color getTetrominoColor(const Tetromino tetromino) {
   switch (tetromino) {
@@ -50,14 +50,14 @@ TetrominoMap initialTetrominoMap(Tetromino tetromino) {
   }
 }
 
-void FallingPiece::fall() { vertical_position += 1; }
+void FallingPiece::fall() { verticalPosition += 1; }
 
-void FallingPiece::shiftLeft() { horizontal_position -= 1; }
+void FallingPiece::shiftLeft() { horizontalPosition -= 1; }
 
-void FallingPiece::shiftRight() { horizontal_position += 1; }
+void FallingPiece::shiftRight() { horizontalPosition += 1; }
 
 void FallingPiece::turnClockwise() {
-  for (CoordinatePair &pcp : tetromino_map) {
+  for (CoordinatePair &pcp : tetrominoMap) {
     pcp = {static_cast<signed char>(-pcp.y), pcp.x};
   }
 
@@ -78,7 +78,7 @@ void FallingPiece::turnClockwise() {
 }
 
 void FallingPiece::turnCounterClockwise() {
-  for (CoordinatePair &pcp : tetromino_map) {
+  for (CoordinatePair &pcp : tetrominoMap) {
     pcp = (CoordinatePair){pcp.y, static_cast<signed char>(-pcp.x)};
   }
 

@@ -22,9 +22,9 @@ TetrominoMap initialTetrominoMap(const Tetromino);
 struct FallingPiece {
   enum Tetromino tetromino;
   enum Orientation orientation;
-  char horizontal_position;
-  char vertical_position;
-  TetrominoMap tetromino_map;
+  char horizontalPosition;
+  char verticalPosition;
+  TetrominoMap tetrominoMap;
 
   void fall();
   void shiftLeft();

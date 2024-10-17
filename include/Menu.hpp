@@ -13,7 +13,7 @@ class Menu {
   const int fullScreenHeight;
   int windowHeight;
   int windowWidth;
-  unsigned char DAS;
+  unsigned char Das;
 
   void draw() const;
   void update();

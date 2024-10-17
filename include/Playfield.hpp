@@ -49,13 +49,13 @@ private:
   std::array<std::array<Tetromino, WIDTH>, HEIGHT> grid;
   FallingPiece fallingPiece;
   Tetromino holdingPiece = Tetromino::EMPTY;
-  NextQueue next_queue;
+  NextQueue nextQueue;
   // State
   bool canSwap = false;
-  unsigned char frames_since_last_fall = 0;
-  unsigned char lock_delay_frames = 0;
-  unsigned char lock_delay_moves = 0;
-  int signed_frames_pressed = 0;
+  unsigned char framesSinceLastFall = 0;
+  unsigned char lockDelayFrames = 0;
+  unsigned char lockDelayMoves = 0;
+  int signedFramesPressed = 0;
   unsigned char combo = 0;
   bool hasLost = false;
   unsigned long score = 0;

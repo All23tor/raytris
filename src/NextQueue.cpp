@@ -1,7 +1,7 @@
 #include "NextQueue.hpp"
 #include <algorithm>
 
-void NextQueue::pop_back() { queue.pop_back(); }
+void NextQueue::popBack() { queue.pop_back(); }
 
 void NextQueue::pushNewBag() {
   queue.insert(queue.begin(),

@@ -4,19 +4,19 @@
 static constexpr float heightScaleFactor = 0.8;
 
 Game::Game()
-    : block_length(GetScreenHeight() * heightScaleFactor /
-                   Playfield::VISIBLE_HEIGHT),
+    : blockLength(GetScreenHeight() * heightScaleFactor /
+                  Playfield::VISIBLE_HEIGHT),
       position(
-          {(GetScreenWidth() - block_length * Playfield::WIDTH) / 2,
+          {(GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
            (GetScreenHeight() -
-            block_length * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
+            blockLength * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
                2}) {
   undoMoveStack.push(playfield);
 }
 
 inline Rectangle Game::getBlockRectangle(int i, int j) {
-  return {position.x + i * block_length, position.y + j * block_length,
-          block_length, block_length};
+  return {position.x + i * blockLength, position.y + j * blockLength,
+          blockLength, blockLength};
 }
 
 void Game::update() {
@@ -42,9 +42,9 @@ void Game::draw() {
   ClearBackground(LIGHTGRAY);
 
   DrawRectangle(position.x,
-                position.y + block_length * Playfield::VISIBLE_HEIGHT,
-                block_length * Playfield::WIDTH,
-                block_length * Playfield::VISIBLE_HEIGHT, BLACK);
+                position.y + blockLength * Playfield::VISIBLE_HEIGHT,
+                blockLength * Playfield::WIDTH,
+                blockLength * Playfield::VISIBLE_HEIGHT, BLACK);
 
   for (int j = 0; j < Playfield::HEIGHT; ++j) {
     for (int i = 0; i < Playfield::WIDTH; ++i) {
@@ -56,33 +56,33 @@ void Game::draw() {
   // Ghost piece calculation
   FallingPiece ghostPiece = playfield.getGhostPiece();
   // Ghost piece drawing
-  for (const CoordinatePair &coordinates : ghostPiece.tetromino_map) {
-    int i = coordinates.x + ghostPiece.horizontal_position;
-    int j = coordinates.y + ghostPiece.vertical_position;
+  for (const CoordinatePair &coordinates : ghostPiece.tetrominoMap) {
+    int i = coordinates.x + ghostPiece.horizontalPosition;
+    int j = coordinates.y + ghostPiece.verticalPosition;
     DrawRectangleRec(getBlockRectangle(i, j), (Color){100, 100, 100, 255});
   }
   // Falling piece drawing
   for (const CoordinatePair &coordinates :
-       playfield.fallingPiece.tetromino_map) {
-    int i = coordinates.x + playfield.fallingPiece.horizontal_position;
-    int j = coordinates.y + playfield.fallingPiece.vertical_position;
+       playfield.fallingPiece.tetrominoMap) {
+    int i = coordinates.x + playfield.fallingPiece.horizontalPosition;
+    int j = coordinates.y + playfield.fallingPiece.verticalPosition;
     DrawRectangleRec(getBlockRectangle(i, j),
                      getTetrominoColor(playfield.fallingPiece.tetromino));
   }
 
-  const int fontSize = block_length * 2;
+  const int fontSize = blockLength * 2;
   // Next coming pieces
-  Rectangle next_text_block =
+  Rectangle nextTextBlock =
       getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT);
-  DrawText("NEXT", next_text_block.x, next_text_block.y, fontSize, BLACK);
+  DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, BLACK);
   for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
-    Tetromino currentTetromino = playfield.next_queue[id];
+    Tetromino currentTetromino = playfield.nextQueue[id];
     TetrominoMap currentTetrominoMap = initialTetrominoMap(currentTetromino);
     for (const CoordinatePair &coordinates : currentTetrominoMap) {
-      int horizontal_offset = Playfield::WIDTH + 2;
-      int vertical_offset = 3 * (id + 1) + Playfield::VISIBLE_HEIGHT;
-      int i = coordinates.x + horizontal_offset;
-      int j = coordinates.y + vertical_offset;
+      int horizontalOffset = Playfield::WIDTH + 2;
+      int verticalOffset = 3 * (id + 1) + Playfield::VISIBLE_HEIGHT;
+      int i = coordinates.x + horizontalOffset;
+      int j = coordinates.y + verticalOffset;
       DrawRectangleRec(getBlockRectangle(i, j),
                        getTetrominoColor(currentTetromino));
     }
@@ -102,75 +102,76 @@ void Game::draw() {
 
   // Line Clear message
   if (playfield.message.timer > 0) {
-    Rectangle clear_text_block = getBlockRectangle(-10, Playfield::HEIGHT);
-    const float color_scale_factor =
+    Rectangle clearTextBlock = getBlockRectangle(-10, Playfield::HEIGHT);
+    const float colorScaleFactor =
         (float)playfield.message.timer / LineClearMessage::DURATION;
-    const char *text_message;
+    const char *textMessage;
 
-    Color text_color = {0, 0, 0,
-                        static_cast<unsigned char>(255 * color_scale_factor)};
+    Color textColor = {0, 0, 0,
+                       static_cast<unsigned char>(255 * colorScaleFactor)};
     switch (playfield.message.message) {
     case MessageType::SINGLE:
-      text_message = "SINGLE";
+      textMessage = "SINGLE";
+
       break;
     case MessageType::DOUBLE:
-      text_message = "DOUBLE";
-      text_color = (Color){235, 149, 52, text_color.a};
+      textMessage = "DOUBLE";
+      textColor = (Color){235, 149, 52, textColor.a};
       break;
     case MessageType::TRIPLE:
-      text_message = "TRIPLE";
-      text_color = (Color){88, 235, 52, text_color.a};
+      textMessage = "TRIPLE";
+      textColor = (Color){88, 235, 52, textColor.a};
       break;
     case MessageType::TETRIS:
-      text_message = "TETRIS";
-      text_color = (Color){52, 164, 236, text_color.a};
+      textMessage = "TETRIS";
+      textColor = (Color){52, 164, 236, textColor.a};
       break;
     case MessageType::ALLCLEAR:
-      text_message = "ALL CLEAR";
-      text_color = (Color){235, 52, 213, text_color.a};
+      textMessage = "ALL CLEAR";
+      textColor = (Color){235, 52, 213, textColor.a};
       break;
     case MessageType::EMPTY_MESSAGE:
-      text_message = "";
+      textMessage = "";
     }
-    DrawText(text_message, clear_text_block.x, clear_text_block.y, fontSize,
-             text_color);
+    DrawText(textMessage, clearTextBlock.x, clearTextBlock.y, fontSize,
+             textColor);
   }
 
   // Combo
   if (playfield.combo >= 2) {
-    Rectangle combo_text_block = getBlockRectangle(-10, Playfield::HEIGHT - 2);
-    char str_combo[5];
-    snprintf(str_combo, sizeof str_combo, "%d", playfield.combo);
-    DrawText("COMBO ", combo_text_block.x, combo_text_block.y, fontSize, BLUE);
-    DrawText(str_combo, combo_text_block.x + MeasureText("COMBO ", fontSize),
-             combo_text_block.y, fontSize, BLUE);
+    Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
+    char strCombo[5];
+    snprintf(strCombo, sizeof strCombo, "%d", playfield.combo);
+    DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
+    DrawText(strCombo, comboTextBlock.x + MeasureText("COMBO ", fontSize),
+             comboTextBlock.y, fontSize, BLUE);
   }
 
   // Back to Back (B2B)
   if (playfield.b2b >= 2) {
-    Rectangle b2b_text_block = getBlockRectangle(-10, Playfield::HEIGHT - 4);
-    char str_b2b[5];
-    snprintf(str_b2b, sizeof str_b2b, "%d", playfield.b2b - 1);
-    DrawText("B2B ", b2b_text_block.x, b2b_text_block.y, fontSize, BLUE);
-    DrawText(str_b2b, b2b_text_block.x + MeasureText("B2B ", fontSize),
-             b2b_text_block.y, fontSize, BLUE);
+    Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 4);
+    char strB2b[5];
+    snprintf(strB2b, sizeof strB2b, "%d", playfield.b2b - 1);
+    DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
+    DrawText(strB2b, b2bTextBlock.x + MeasureText("B2B ", fontSize),
+             b2bTextBlock.y, fontSize, BLUE);
   }
 
   // Score
-  Rectangle score_text_block = getBlockRectangle(11, Playfield::HEIGHT - 2);
-  DrawText("SCORE: ", score_text_block.x, score_text_block.y, fontSize, BLACK);
-  Rectangle score_number_block = getBlockRectangle(11, Playfield::HEIGHT);
-  char str_score[10];
-  snprintf(str_score, sizeof str_score, "%09ld", playfield.score);
-  DrawText(str_score, score_number_block.x, score_number_block.y, fontSize,
-           BLACK);
+  Rectangle scoreTextBlock = getBlockRectangle(11, Playfield::HEIGHT - 2);
+  DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
+  Rectangle scoreNumberBlock = getBlockRectangle(11, Playfield::HEIGHT);
+  char strScore[10];
+  snprintf(strScore, sizeof strScore, "%09ld", playfield.score);
+  DrawText(strScore, scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
 
   if (!playfield.hasLost && !paused)
     return;
+
   // Game over or paused
   const float screenWidth = GetScreenWidth();
   const float screenHeight = GetScreenHeight();
-  const int fontSizeBig = block_length * 5;
+  const int fontSizeBig = blockLength * 5;
   DrawRectangle(0, 0, screenWidth, screenHeight, {0, 0, 0, 100});
 
   if (playfield.hasLost) {

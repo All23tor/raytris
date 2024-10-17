@@ -6,7 +6,7 @@
 
 class Game {
   // Drawing details
-  const float block_length;
+  const float blockLength;
   const Vector2 position;
   // Playfield
   Playfield playfield;
