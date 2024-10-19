@@ -14,6 +14,15 @@ Game::Game()
   undoMoveStack.push(playfield);
 }
 
+void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline) {
+  if (fill.a == 0)
+    return;
+
+  outline.a = 100;
+  DrawRectangleRec(rec, fill);
+  DrawRectangleLinesEx(rec, blockLength / 8, outline);
+}
+
 inline Rectangle Game::getBlockRectangle(int i, int j) {
   return {position.x + i * blockLength, position.y + j * blockLength,
           blockLength, blockLength};
@@ -48,8 +57,8 @@ void Game::draw() {
 
   for (int j = 0; j < Playfield::HEIGHT; ++j) {
     for (int i = 0; i < Playfield::WIDTH; ++i) {
-      DrawRectangleRec(getBlockRectangle(i, j),
-                       getTetrominoColor(playfield.grid[j][i]));
+      DrawRectangleRecPretty(getBlockRectangle(i, j),
+                             getTetrominoColor(playfield.grid[j][i]), BLACK);
     }
   }
 
@@ -59,15 +68,17 @@ void Game::draw() {
   for (const CoordinatePair &coordinates : ghostPiece.tetrominoMap) {
     int i = coordinates.x + ghostPiece.horizontalPosition;
     int j = coordinates.y + ghostPiece.verticalPosition;
-    DrawRectangleRec(getBlockRectangle(i, j), (Color){100, 100, 100, 255});
+    DrawRectangleRecPretty(getBlockRectangle(i, j), (Color){100, 100, 100, 255},
+                           GRAY);
   }
   // Falling piece drawing
   for (const CoordinatePair &coordinates :
        playfield.fallingPiece.tetrominoMap) {
     int i = coordinates.x + playfield.fallingPiece.horizontalPosition;
     int j = coordinates.y + playfield.fallingPiece.verticalPosition;
-    DrawRectangleRec(getBlockRectangle(i, j),
-                     getTetrominoColor(playfield.fallingPiece.tetromino));
+    DrawRectangleRecPretty(getBlockRectangle(i, j),
+                           getTetrominoColor(playfield.fallingPiece.tetromino),
+                           GRAY);
   }
 
   const int fontSize = blockLength * 2;

@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "Playfield.hpp"
+#include <raylib.h>
 #include <stack>
 
 class Game {
@@ -16,6 +17,7 @@ class Game {
 
 private:
   Rectangle getBlockRectangle(int, int);
+  void DrawRectangleRecPretty(Rectangle, Color, Color);
   void update();
   void draw();
 
