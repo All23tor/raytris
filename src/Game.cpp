@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "Playfield.hpp"
 #include "raylib.h"
 
 static constexpr float heightScaleFactor = 0.8;
@@ -14,12 +15,15 @@ Game::Game()
   undoMoveStack.push(playfield);
 }
 
-void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline) {
+void Game::DrawRectangleRecPretty(Rectangle rec, Color fill,
+                                  Color outline = BLACK) {
   if (fill.a == 0)
     return;
 
-  outline.a = 100;
+  outline.a /= 8;
   DrawRectangleRec(rec, fill);
+  DrawRectangle(rec.x + blockLength / 3, rec.y + blockLength / 3, rec.width / 3,
+                rec.height / 3, outline);
   DrawRectangleLinesEx(rec, blockLength / 8, outline);
 }
 
@@ -50,15 +54,15 @@ void Game::update() {
 void Game::draw() {
   ClearBackground(LIGHTGRAY);
 
-  DrawRectangle(position.x,
-                position.y + blockLength * Playfield::VISIBLE_HEIGHT,
-                blockLength * Playfield::WIDTH,
-                blockLength * Playfield::VISIBLE_HEIGHT, BLACK);
+  Rectangle tetrion = Rectangle{
+      position.x, position.y + blockLength * Playfield::VISIBLE_HEIGHT,
+      blockLength * Playfield::WIDTH, blockLength * Playfield::VISIBLE_HEIGHT};
+  DrawRectangleRec(tetrion, BLACK);
 
   for (int j = 0; j < Playfield::HEIGHT; ++j) {
     for (int i = 0; i < Playfield::WIDTH; ++i) {
       DrawRectangleRecPretty(getBlockRectangle(i, j),
-                             getTetrominoColor(playfield.grid[j][i]), BLACK);
+                             getTetrominoColor(playfield.grid[j][i]));
     }
   }
 
@@ -68,8 +72,7 @@ void Game::draw() {
   for (const CoordinatePair &coordinates : ghostPiece.tetrominoMap) {
     int i = coordinates.x + ghostPiece.horizontalPosition;
     int j = coordinates.y + ghostPiece.verticalPosition;
-    DrawRectangleRecPretty(getBlockRectangle(i, j), (Color){100, 100, 100, 255},
-                           GRAY);
+    DrawRectangleRecPretty(getBlockRectangle(i, j), GRAY);
   }
   // Falling piece drawing
   for (const CoordinatePair &coordinates :
@@ -77,8 +80,7 @@ void Game::draw() {
     int i = coordinates.x + playfield.fallingPiece.horizontalPosition;
     int j = coordinates.y + playfield.fallingPiece.verticalPosition;
     DrawRectangleRecPretty(getBlockRectangle(i, j),
-                           getTetrominoColor(playfield.fallingPiece.tetromino),
-                           GRAY);
+                           getTetrominoColor(playfield.fallingPiece.tetromino));
   }
 
   const int fontSize = blockLength * 2;
@@ -94,8 +96,8 @@ void Game::draw() {
       int verticalOffset = 3 * (id + 1) + Playfield::VISIBLE_HEIGHT;
       int i = coordinates.x + horizontalOffset;
       int j = coordinates.y + verticalOffset;
-      DrawRectangleRec(getBlockRectangle(i, j),
-                       getTetrominoColor(currentTetromino));
+      DrawRectangleRecPretty(getBlockRectangle(i, j),
+                             getTetrominoColor(currentTetromino));
     }
   }
 
@@ -106,9 +108,9 @@ void Game::draw() {
       playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
   TetrominoMap hold_tetromino_map = initialTetrominoMap(playfield.holdingPiece);
   for (const CoordinatePair &coordinates : hold_tetromino_map) {
-    int i = coordinates.x - 3;
+    int i = coordinates.x - 4;
     int j = coordinates.y + 3 + Playfield::VISIBLE_HEIGHT;
-    DrawRectangleRec(getBlockRectangle(i, j), hold_color);
+    DrawRectangleRecPretty(getBlockRectangle(i, j), hold_color);
   }
 
   // Line Clear message
