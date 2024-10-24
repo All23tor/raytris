@@ -284,7 +284,6 @@ bool Playfield::update() {
     Tetromino new_tetromino = nextQueue.getNextTetromino();
     fallingPiece = FallingPiece(new_tetromino, INITIAL_HORIAZONTAL_POSITION,
                                 INITIAL_VERTICAL_POSITION);
-    canSwap = true;
     framesSinceLastFall = 0;
     lockDelayFrames = 0;
     lockDelayMoves = 0;

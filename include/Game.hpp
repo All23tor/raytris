@@ -16,10 +16,11 @@ class Game {
   std::stack<Playfield> undoMoveStack;
 
 private:
-  Rectangle getBlockRectangle(int, int);
-  void DrawRectangleRecPretty(Rectangle, Color, Color);
+  Rectangle getBlockRectangle(int, int) const;
+  void DrawRectangleRecPretty(Rectangle, Color, Color) const;
+  void DrawTetrion() const;
   void update();
-  void draw();
+  void draw() const;
 
 public:
   Game();

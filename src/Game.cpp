@@ -16,7 +16,8 @@ Game::Game()
 }
 
 void Game::DrawRectangleRecPretty(Rectangle rec, Color fill,
-                                  Color outline = BLACK) {
+                                  Color outline = BLACK) const {
+
   if (fill.a == 0)
     return;
 
@@ -27,7 +28,7 @@ void Game::DrawRectangleRecPretty(Rectangle rec, Color fill,
   DrawRectangleLinesEx(rec, blockLength / 8, outline);
 }
 
-inline Rectangle Game::getBlockRectangle(int i, int j) {
+inline Rectangle Game::getBlockRectangle(int i, int j) const {
   return {position.x + i * blockLength, position.y + j * blockLength,
           blockLength, blockLength};
 }
@@ -51,13 +52,24 @@ void Game::update() {
     undoMoveStack.push(playfield);
 }
 
-void Game::draw() {
-  ClearBackground(LIGHTGRAY);
-
+void Game::DrawTetrion() const {
   Rectangle tetrion = Rectangle{
       position.x, position.y + blockLength * Playfield::VISIBLE_HEIGHT,
       blockLength * Playfield::WIDTH, blockLength * Playfield::VISIBLE_HEIGHT};
   DrawRectangleRec(tetrion, BLACK);
+
+  for (int i = 1; i < Playfield::WIDTH; ++i) {
+    Rectangle rec = getBlockRectangle(i, Playfield::VISIBLE_HEIGHT);
+    DrawLineEx({rec.x, rec.y},
+               {rec.x, rec.y + Playfield::VISIBLE_HEIGHT * blockLength},
+               blockLength / 20, DARKGRAY);
+  }
+
+  for (int j = 1; j < Playfield::VISIBLE_HEIGHT; ++j) {
+    Rectangle rec = getBlockRectangle(0, j + Playfield::VISIBLE_HEIGHT);
+    DrawLineEx({rec.x, rec.y}, {rec.x + blockLength * Playfield::WIDTH, rec.y},
+               blockLength / 20, DARKGRAY);
+  }
 
   for (int j = 0; j < Playfield::HEIGHT; ++j) {
     for (int i = 0; i < Playfield::WIDTH; ++i) {
@@ -65,6 +77,12 @@ void Game::draw() {
                              getTetrominoColor(playfield.grid[j][i]));
     }
   }
+}
+
+void Game::draw() const {
+  ClearBackground(LIGHTGRAY);
+
+  DrawTetrion();
 
   // Ghost piece calculation
   FallingPiece ghostPiece = playfield.getGhostPiece();

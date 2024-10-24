@@ -51,7 +51,7 @@ private:
   Tetromino holdingPiece = Tetromino::EMPTY;
   NextQueue nextQueue;
   // State
-  bool canSwap = false;
+  bool canSwap = true;
   unsigned char framesSinceLastFall = 0;
   unsigned char lockDelayFrames = 0;
   unsigned char lockDelayMoves = 0;
