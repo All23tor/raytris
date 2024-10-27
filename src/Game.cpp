@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "NextQueue.hpp"
 #include "Playfield.hpp"
 #include "raylib.h"
 
@@ -105,13 +106,20 @@ void Game::draw() const {
   // Next coming pieces
   Rectangle nextTextBlock =
       getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT);
+  Rectangle nextQueueBackground =
+      getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT + 2);
+  nextQueueBackground.width = blockLength * 6;
+  nextQueueBackground.height =
+      blockLength * (3 * (NextQueue::NEXT_COMING_SIZE) + 1);
+  DrawRectangleRec(nextQueueBackground, GRAY);
+  DrawRectangleLinesEx(nextQueueBackground, blockLength / 4, BLACK);
   DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, BLACK);
   for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
     Tetromino currentTetromino = playfield.nextQueue[id];
     TetrominoMap currentTetrominoMap = initialTetrominoMap(currentTetromino);
     for (const CoordinatePair &coordinates : currentTetrominoMap) {
-      int horizontalOffset = Playfield::WIDTH + 2;
-      int verticalOffset = 3 * (id + 1) + Playfield::VISIBLE_HEIGHT;
+      int horizontalOffset = Playfield::WIDTH + 3;
+      int verticalOffset = 3 * (id + 1) + Playfield::VISIBLE_HEIGHT + 1;
       int i = coordinates.x + horizontalOffset;
       int j = coordinates.y + verticalOffset;
       DrawRectangleRecPretty(getBlockRectangle(i, j),
@@ -120,14 +128,20 @@ void Game::draw() const {
   }
 
   // Draw hold piece
-  Rectangle hold_text_block = getBlockRectangle(-6, Playfield::VISIBLE_HEIGHT);
-  DrawText("HOLD", hold_text_block.x, hold_text_block.y, fontSize, BLACK);
+  Rectangle holdTextBlock = getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT);
+  DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, fontSize, BLACK);
+  Rectangle holdPieceBackground =
+      getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT + 2);
+  holdPieceBackground.width = blockLength * 6;
+  holdPieceBackground.height = blockLength * 4;
+  DrawRectangleRec(holdPieceBackground, GRAY);
+  DrawRectangleLinesEx(holdPieceBackground, blockLength / 4, BLACK);
   Color hold_color =
       playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
   TetrominoMap hold_tetromino_map = initialTetrominoMap(playfield.holdingPiece);
   for (const CoordinatePair &coordinates : hold_tetromino_map) {
-    int i = coordinates.x - 4;
-    int j = coordinates.y + 3 + Playfield::VISIBLE_HEIGHT;
+    int i = coordinates.x - 5;
+    int j = coordinates.y + 4 + Playfield::VISIBLE_HEIGHT;
     DrawRectangleRecPretty(getBlockRectangle(i, j), hold_color);
   }
 
