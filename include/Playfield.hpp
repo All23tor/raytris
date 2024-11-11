@@ -36,7 +36,7 @@ public:
   static constexpr std::size_t WIDTH = 10;
   static constexpr std::size_t HEIGHT = 40;
   static constexpr std::size_t VISIBLE_HEIGHT = 20;
-  static constexpr std::size_t INITIAL_HORIAZONTAL_POSITION = (WIDTH - 1) / 2;
+  static constexpr std::size_t INITIAL_HORIZONTAL_POSITION = (WIDTH - 1) / 2;
   static constexpr std::size_t INITIAL_VERTICAL_POSITION = VISIBLE_HEIGHT - 1;
   static constexpr unsigned GRAVITY_FRAMES = 20;
   static constexpr unsigned SOFT_DROP_FRAMES = 1;

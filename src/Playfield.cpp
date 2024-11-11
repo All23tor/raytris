@@ -1,17 +1,17 @@
 #include "Playfield.hpp"
 
-Playfield::Playfield()
-    : fallingPiece(Tetromino::EMPTY, INITIAL_HORIAZONTAL_POSITION,
-                   INITIAL_VERTICAL_POSITION) {
+Playfield::Playfield() : fallingPiece(Tetromino::EMPTY, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION) {
   std::array<Tetromino, WIDTH> emptyRow;
   emptyRow.fill(Tetromino::EMPTY);
   grid.fill((emptyRow));
 }
 
-void Playfield::restart() { *this = Playfield(); }
+void Playfield::restart() {
+  *this = Playfield();
+}
 
 bool Playfield::checkFallingCollisions() {
-  for (const CoordinatePair &pair : fallingPiece.tetrominoMap) {
+  for (const CoordinatePair& pair : fallingPiece.tetrominoMap) {
     int i = pair.x + fallingPiece.horizontalPosition;
     int j = pair.y + fallingPiece.verticalPosition;
     if (j > HEIGHT - 1 || grid[j][i] != Tetromino::EMPTY) {
@@ -33,7 +33,7 @@ bool Playfield::shiftFallingPiece(Shift shift) {
   }
   bool passedCheck = true;
 
-  for (const CoordinatePair &pair : fallingPiece.tetrominoMap) {
+  for (const CoordinatePair& pair : fallingPiece.tetrominoMap) {
     int i = pair.x + fallingPiece.horizontalPosition;
     int j = pair.y + fallingPiece.verticalPosition;
     if (i < 0 || i >= WIDTH || grid[j][i] != Tetromino::EMPTY) {
@@ -70,22 +70,18 @@ void Playfield::checkRotationCollision(RotationType rotationType) {
   }
   OffsetTable endOffsetValues = getOffsetTable(fallingPiece);
 
-  for (int offsetNumber = 0; offsetNumber < startOffsetValues.size();
-       ++offsetNumber) {
+  for (int offsetNumber = 0; offsetNumber < startOffsetValues.size(); ++offsetNumber) {
     bool passed = true;
     int new_horizontal_position = fallingPiece.horizontalPosition +
-                                  startOffsetValues[offsetNumber].x -
-                                  endOffsetValues[offsetNumber].x;
+      startOffsetValues[offsetNumber].x - endOffsetValues[offsetNumber].x;
     int new_vertical_position = fallingPiece.verticalPosition -
-                                startOffsetValues[offsetNumber].y +
-                                endOffsetValues[offsetNumber].y;
+      startOffsetValues[offsetNumber].y + endOffsetValues[offsetNumber].y;
 
     TetrominoMap map = fallingPiece.tetrominoMap;
-    for (const CoordinatePair &coordinates : map) {
+    for (const CoordinatePair& coordinates : map) {
       int i = coordinates.x + new_horizontal_position;
       int j = coordinates.y + new_vertical_position;
-      if (grid[j][i] != Tetromino::EMPTY || i < 0 || i >= WIDTH ||
-          j >= HEIGHT) {
+      if (grid[j][i] != Tetromino::EMPTY || i < 0 || i >= WIDTH || j >= HEIGHT) {
         passed = false;
         break;
       }
@@ -109,7 +105,7 @@ void Playfield::checkRotationCollision(RotationType rotationType) {
 
 void Playfield::solidifyFallingPiece() {
   bool passed = false;
-  for (const CoordinatePair &pair : fallingPiece.tetrominoMap) {
+  for (const CoordinatePair& pair : fallingPiece.tetrominoMap) {
     int i = pair.x + fallingPiece.horizontalPosition;
     int j = pair.y + fallingPiece.verticalPosition;
     grid[j][i] = fallingPiece.tetromino;
@@ -119,12 +115,11 @@ void Playfield::solidifyFallingPiece() {
   }
 
   Tetromino new_tetromino = nextQueue.getNextTetromino();
-  fallingPiece = FallingPiece(new_tetromino, INITIAL_HORIAZONTAL_POSITION,
-                              INITIAL_VERTICAL_POSITION);
+  fallingPiece = FallingPiece(new_tetromino, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION);
   canSwap = true;
 
   TetrominoMap map = fallingPiece.tetrominoMap;
-  for (const CoordinatePair &coordinates : map) {
+  for (const CoordinatePair& coordinates : map) {
     int i = coordinates.x + fallingPiece.horizontalPosition;
     int j = coordinates.y + fallingPiece.verticalPosition;
     if (grid[j][i] != Tetromino::EMPTY)
@@ -139,7 +134,7 @@ void Playfield::solidifyFallingPiece() {
   lockDelayMoves = 0;
 }
 
-void Playfield::clearRows(std::vector<int> &rowIDs, char count = 0) {
+void Playfield::clearRows(std::vector<int>& rowIDs, char count = 0) {
   if (rowIDs.empty())
     return;
 
@@ -150,7 +145,7 @@ void Playfield::clearRows(std::vector<int> &rowIDs, char count = 0) {
     }
   }
 
-  for (auto &mino : grid[0]) {
+  for (auto& mino : grid[0]) {
     mino = Tetromino::EMPTY;
   }
 
@@ -159,8 +154,8 @@ void Playfield::clearRows(std::vector<int> &rowIDs, char count = 0) {
 }
 
 bool Playfield::isAllClear() {
-  for (const auto &row : grid)
-    for (const auto &mino : row)
+  for (const auto& row : grid)
+    for (const auto& mino : row)
       if (mino != Tetromino::EMPTY)
         return false;
   return true;
@@ -170,7 +165,7 @@ void Playfield::clearLines() {
   std::vector<int> rowsToClear;
   for (int j = 0; j < HEIGHT; ++j) {
     bool allTrue = true;
-    for (const auto &mino : grid[j]) {
+    for (const auto& mino : grid[j]) {
       if (mino == Tetromino::EMPTY) {
         allTrue = false;
         break;
@@ -230,7 +225,7 @@ FallingPiece Playfield::getGhostPiece() const {
   while (true) {
     ghostPiece.fall();
     bool passed = true;
-    for (const CoordinatePair &pair : ghostPiece.tetrominoMap) {
+    for (const CoordinatePair& pair : ghostPiece.tetrominoMap) {
       int i = pair.x + ghostPiece.horizontalPosition;
       int j = pair.y + ghostPiece.verticalPosition;
       if (j > HEIGHT - 1 || grid[j][i] != Tetromino::EMPTY) {
@@ -250,8 +245,7 @@ FallingPiece Playfield::getGhostPiece() const {
 
 void Playfield::swapTetromino() {
   Tetromino currentTetromino = fallingPiece.tetromino;
-  fallingPiece = FallingPiece(holdingPiece, INITIAL_HORIAZONTAL_POSITION,
-                              INITIAL_VERTICAL_POSITION);
+  fallingPiece = FallingPiece(holdingPiece, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION);
   holdingPiece = currentTetromino;
   canSwap = false;
   framesSinceLastFall = 0;
@@ -267,11 +261,10 @@ void Playfield::updateTimers() {
 }
 
 bool Playfield::update() {
-  bool solidified = false;
   if (IsKeyPressed(KEY_R))
     restart();
   if (hasLost)
-    return solidified;
+    return false;
 
   if (IsKeyPressed(KEY_C) && canSwap) {
     swapTetromino();
@@ -282,8 +275,7 @@ bool Playfield::update() {
 
   if (fallingPiece.tetromino == Tetromino::EMPTY) {
     Tetromino new_tetromino = nextQueue.getNextTetromino();
-    fallingPiece = FallingPiece(new_tetromino, INITIAL_HORIAZONTAL_POSITION,
-                                INITIAL_VERTICAL_POSITION);
+    fallingPiece = FallingPiece(new_tetromino, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION);
     framesSinceLastFall = 0;
     lockDelayFrames = 0;
     lockDelayMoves = 0;
@@ -323,56 +315,56 @@ bool Playfield::update() {
     checkRotationCollision(RotationType::OneEighty);
   }
 
-  bool isFallStep = false;
+  FallingPiece oldPiece = fallingPiece;
 
   if (IsKeyPressed(KEY_SPACE)) {
-    FallingPiece old_piece = fallingPiece;
-    while (true) {
-      fallingPiece.fall();
-      if (!checkFallingCollisions()) {
-        fallingPiece = old_piece;
-        solidifyFallingPiece();
-        solidified = true;
-        break;
-      }
-      old_piece = fallingPiece;
+    while (checkFallingCollisions()) {
+      oldPiece = fallingPiece;
       score += 2;
+      fallingPiece.fall();
     }
+
+    fallingPiece = oldPiece;
+    solidifyFallingPiece();
     lockDelayMoves = 0;
     lockDelayFrames = 0;
     clearLines();
-  } else {
-    FallingPiece old_piece = fallingPiece;
-    fallingPiece.fall();
 
-    if (IsKeyDown(KEY_DOWN)) {
-      if (framesSinceLastFall >= SOFT_DROP_FRAMES) {
-        framesSinceLastFall = 0;
-        isFallStep = true;
-      }
-    } else if (framesSinceLastFall >= GRAVITY_FRAMES) {
+    return true;
+  }
+
+  bool isFallStep = false;
+
+  if (IsKeyDown(KEY_DOWN)) {
+    if (framesSinceLastFall >= SOFT_DROP_FRAMES) {
       framesSinceLastFall = 0;
       isFallStep = true;
     }
-
-    if (!checkFallingCollisions()) {
-      fallingPiece = old_piece;
-
-      if (lockDelayFrames > MAX_LOCK_DELAY_FRAMES ||
-          lockDelayMoves > MAX_LOCK_DELAY_RESETS) {
-        solidifyFallingPiece();
-        solidified = true;
-        clearLines();
-      }
-    } else {
-      if (isFallStep) {
-        lockDelayFrames = 0;
-        lockDelayMoves = 0;
-      } else {
-        fallingPiece = old_piece;
-      }
-    }
+  } else if (framesSinceLastFall >= GRAVITY_FRAMES) {
+    framesSinceLastFall = 0;
+    isFallStep = true;
   }
 
-  return solidified;
+  fallingPiece.fall();
+  if (checkFallingCollisions()) {
+    if (isFallStep) {
+      lockDelayFrames = 0;
+      lockDelayMoves = 0;
+    } else {
+      fallingPiece = oldPiece;
+    }
+
+    return false;
+  }
+
+  bool hasPieceSolidified = false;
+  fallingPiece = oldPiece;
+
+  if (lockDelayFrames > MAX_LOCK_DELAY_FRAMES || lockDelayMoves > MAX_LOCK_DELAY_RESETS) {
+    solidifyFallingPiece();
+    hasPieceSolidified = true;
+    clearLines();
+  }
+
+  return hasPieceSolidified;
 }
