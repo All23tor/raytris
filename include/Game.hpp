@@ -21,6 +21,7 @@ private:
   void DrawTetrion() const;
   void update();
   void draw() const;
+  void drawPiece(const TetrominoMap &, Color, int, int) const; 
 
 public:
   Game();
