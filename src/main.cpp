@@ -1,3 +1,6 @@
 #include "Raytris.hpp"
 
-int main() { Raytris().run(); }
+int main() {
+  Raytris raytris;
+  raytris.run();
+}

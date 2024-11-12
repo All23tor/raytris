@@ -1,6 +1,6 @@
 #include "Menu.hpp"
 #include "raylib.h"
-#include <cstdio>
+#include <format>
 
 Menu::Menu()
     : fullScreenWidth(GetMonitorWidth(GetCurrentMonitor())),
@@ -49,9 +49,8 @@ void Menu::draw() const {
   DrawText("RAYTRIS",
            (windowWidth - MeasureText("RAYTRIS", fontSize * 2)) / 2.0,
            windowHeight / 2.0 - 3 * fontSize, fontSize * 2, RED);
-  char score[255];
-  sprintf(score, "%d x %d", windowWidth, windowHeight);
-  DrawText(score, (windowWidth - MeasureText(score, fontSize)) / 2.0,
+  std::string score = std::format("{} x {}", windowWidth,windowHeight);
+  DrawText(score.c_str(), (windowWidth - MeasureText(score.c_str(), fontSize)) / 2.0,
            windowHeight / 2, fontSize, BLUE);
   DrawText("Press F to resize",
            (windowWidth - MeasureText("Press F to resize", fontSize)) / 2.0,
@@ -66,7 +65,7 @@ void Menu::update() {
     resizeScreen();
 }
 
-bool Menu::run() {
+Menu::ExitCode Menu::run() {
   while (!IsKeyPressed(KEY_ENTER) && !IsKeyPressed(KEY_ESCAPE)) {
     update();
     BeginDrawing();
@@ -74,5 +73,9 @@ bool Menu::run() {
     EndDrawing();
   }
 
-  return IsKeyDown(KEY_ENTER);
+  ExitCode exitCode = IsKeyDown(KEY_ENTER) ? ExitCode::Game : ExitCode::Exit;
+  BeginDrawing();
+  EndDrawing();
+
+  return exitCode;
 }

@@ -21,7 +21,8 @@ class Menu {
 
 public:
   Menu();
-  bool run();
+  enum class ExitCode { Game, Exit };
+  ExitCode run();
   const std::pair<int, int> getResolution(Resolutions resolution) const;
 };
 

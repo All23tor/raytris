@@ -8,16 +8,13 @@ Raytris::Raytris() {
   SetTargetFPS(60);
 }
 
-Raytris::~Raytris() { CloseWindow(); }
+Raytris::~Raytris() {
+  CloseWindow();
+}
 
 void Raytris::run() {
   Menu menu;
-  while (menu.run()) {
-    BeginDrawing();
-    EndDrawing();
+  while (menu.run() == Menu::ExitCode::Game) {
     Game().run();
-    // Required to update keyboard inputs
-    BeginDrawing();
-    EndDrawing();
   }
 }
