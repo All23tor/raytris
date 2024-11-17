@@ -2,23 +2,21 @@
 #include "NextQueue.hpp"
 #include "Playfield.hpp"
 #include "raylib.h"
+#include <format>
 
 static constexpr float heightScaleFactor = 0.8;
 
 Game::Game()
   : blockLength(GetScreenHeight()* heightScaleFactor /
     Playfield::VISIBLE_HEIGHT),
-  position(
-    { (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
-     (GetScreenHeight() -
-      blockLength * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) /
-         2 }) {
+  position({
+    (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
+    (GetScreenHeight() - blockLength * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) / 2 }
+    ) {
   undoMoveStack.push(playfield);
 }
 
-void Game::DrawRectangleRecPretty(Rectangle rec, Color fill,
-  Color outline = BLACK) const {
-
+void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline = BLACK) const {
   if (fill.a == 0)
     return;
 
@@ -70,7 +68,7 @@ void Game::DrawTetrion() const {
 
   for (int j = 1; j < Playfield::VISIBLE_HEIGHT; ++j) {
     Rectangle rec = getBlockRectangle(0, j + Playfield::VISIBLE_HEIGHT);
-      rec.x = std::floor(rec.x);
+    rec.x = std::floor(rec.x);
     rec.y = std::floor(rec.y);
     DrawLineEx({ rec.x, rec.y },
       { std::floor(rec.x + blockLength * Playfield::WIDTH), rec.y },
@@ -99,8 +97,7 @@ void Game::draw() const {
   DrawTetrion();
 
   FallingPiece ghostPiece = playfield.getGhostPiece();
-  drawPiece(ghostPiece.tetrominoMap, GRAY,
-    ghostPiece.horizontalPosition, ghostPiece.verticalPosition);
+  drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition);
   const FallingPiece& fallingPiece = playfield.fallingPiece;
   drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
     fallingPiece.horizontalPosition, fallingPiece.verticalPosition);
@@ -133,8 +130,7 @@ void Game::draw() const {
   DrawRectangleRec(holdPieceBackground, GRAY);
   DrawRectangleLinesEx(holdPieceBackground, blockLength / 4, BLACK);
 
-  Color holdColor =
-    playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
+  Color holdColor = playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
   drawPiece(initialTetrominoMap(playfield.holdingPiece), holdColor, -5, 4 + Playfield::VISIBLE_HEIGHT);
 
   // Line Clear message
@@ -177,20 +173,18 @@ void Game::draw() const {
   // Combo
   if (playfield.combo >= 2) {
     Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
-    char strCombo[5];
-    snprintf(strCombo, sizeof strCombo, "%d", playfield.combo);
+    std::string combo = std::format("{}", playfield.combo);
     DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
-    DrawText(strCombo, comboTextBlock.x + MeasureText("COMBO ", fontSize),
+    DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize),
       comboTextBlock.y, fontSize, BLUE);
   }
 
   // Back to Back (B2B)
   if (playfield.b2b >= 2) {
     Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 4);
-    char strB2b[5];
-    snprintf(strB2b, sizeof strB2b, "%d", playfield.b2b - 1);
+    std::string b2b = std::format("{}", playfield.b2b - 1);
     DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
-    DrawText(strB2b, b2bTextBlock.x + MeasureText("B2B ", fontSize),
+    DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize),
       b2bTextBlock.y, fontSize, BLUE);
   }
 
@@ -198,9 +192,8 @@ void Game::draw() const {
   Rectangle scoreTextBlock = getBlockRectangle(11, Playfield::HEIGHT - 2);
   DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
   Rectangle scoreNumberBlock = getBlockRectangle(11, Playfield::HEIGHT);
-  char strScore[10];
-  snprintf(strScore, sizeof strScore, "%09ld", playfield.score);
-  DrawText(strScore, scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
+  std::string score = std::format("{:09}", playfield.score);
+  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
 
   if (!playfield.hasLost && !paused)
     return;
