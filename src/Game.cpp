@@ -11,7 +11,7 @@ Game::Game()
     Playfield::VISIBLE_HEIGHT),
   position({
     (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
-    (GetScreenHeight() - blockLength * (Playfield::HEIGHT + Playfield::VISIBLE_HEIGHT)) / 2 }
+    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }
     ) {
   undoMoveStack.push(playfield);
 }
@@ -21,14 +21,14 @@ void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline = BLA
     return;
 
   outline.a /= 8;
-  DrawRectangleRec(rec, fill);
+  DrawRectangleRec(rec, fill);  
   DrawRectangle(rec.x + blockLength / 3, rec.y + blockLength / 3, rec.width / 3,
     rec.height / 3, outline);
   DrawRectangleLinesEx(rec, blockLength / 8, outline);
 }
 
 inline Rectangle Game::getBlockRectangle(int i, int j) const {
-  return { position.x + i * blockLength, position.y + j * blockLength,
+  return { position.x + i * blockLength, position.y + (j - static_cast<int>(Playfield::VISIBLE_HEIGHT)) * blockLength,
           blockLength, blockLength };
 }
 
@@ -53,9 +53,10 @@ void Game::update() {
 
 void Game::DrawTetrion() const {
   Rectangle tetrion = Rectangle{
-      position.x, position.y + blockLength * Playfield::VISIBLE_HEIGHT,
+      position.x, position.y,
       blockLength * Playfield::WIDTH, blockLength * Playfield::VISIBLE_HEIGHT };
   DrawRectangleRec(tetrion, BLACK);
+  DrawRectangleLinesEx(tetrion, blockLength / 10, DARKGRAY);
 
   for (int i = 1; i < Playfield::WIDTH; ++i) {
     Rectangle rec = getBlockRectangle(i, Playfield::VISIBLE_HEIGHT);
