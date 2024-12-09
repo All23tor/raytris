@@ -9,11 +9,7 @@ constexpr int INITIAL_HEIGHT = 360;
 
 class Menu {
   Resolutions resolution = Resolutions::SMALL;
-  const int fullScreenWidth;
-  const int fullScreenHeight;
-  int windowHeight;
-  int windowWidth;
-  unsigned char Das;
+  std::pair<int, int> windowResolution;
 
   void draw() const;
   void update();

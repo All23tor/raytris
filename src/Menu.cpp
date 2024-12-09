@@ -2,10 +2,7 @@
 #include "raylib.h"
 #include <format>
 
-Menu::Menu()
-  : fullScreenWidth(GetMonitorWidth(GetCurrentMonitor())),
-  fullScreenHeight(GetMonitorHeight(GetCurrentMonitor())),
-  windowWidth(INITIAL_WIDTH), windowHeight(INITIAL_HEIGHT) {}
+Menu::Menu(): windowResolution{INITIAL_WIDTH, INITIAL_HEIGHT} {}
 
 const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
   switch (resolution) {
@@ -16,8 +13,7 @@ const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
   case Resolutions::BIG:
     return { 1280, 720 };
   case Resolutions::FULLSCREEN: {
-    int monitor = GetCurrentMonitor();
-    return { fullScreenWidth, fullScreenHeight };
+    return { GetScreenWidth(), GetScreenHeight() };
   }
   default:
     return { 0, 0 };
@@ -36,15 +32,13 @@ static Resolutions nextResolution(Resolutions res) {
 
 void Menu::resizeScreen() {
   resolution = nextResolution(resolution);
-
-  std::pair<int, int> resolutionSizes = getResolution(resolution);
-  windowWidth = resolutionSizes.first;
-  windowHeight = resolutionSizes.second;
-  SetWindowSize(resolutionSizes.first, resolutionSizes.second);
+  windowResolution = getResolution(resolution);
 
   if (IsWindowFullscreen()) {
     ToggleFullscreen();
   }
+
+  SetWindowSize(windowResolution.first, windowResolution.second);
 
   if (resolution == Resolutions::FULLSCREEN) {
     ToggleFullscreen();
@@ -52,13 +46,16 @@ void Menu::resizeScreen() {
 }
 
 void Menu::draw() const {
+  const int windowWidth = windowResolution.first;
+  const int windowHeight = windowResolution.second;
   const float fontSize = windowHeight / 10.0;
+
   ClearBackground(LIGHTGRAY);
   DrawText("RAYTRIS",
     (windowWidth - MeasureText("RAYTRIS", fontSize * 2)) / 2.0,
     windowHeight / 2.0 - 3 * fontSize, fontSize * 2, RED);
-  std::string score = std::format("{} x {}", windowWidth, windowHeight);
-  DrawText(score.c_str(), (windowWidth - MeasureText(score.c_str(), fontSize)) / 2.0,
+  std::string resolution = std::format("{} x {}", windowWidth, windowHeight);
+  DrawText(resolution.c_str(), (windowWidth - MeasureText(resolution.c_str(), fontSize)) / 2.0,
     windowHeight / 2, fontSize, BLUE);
   DrawText("Press F to resize",
     (windowWidth - MeasureText("Press F to resize", fontSize)) / 2.0,
