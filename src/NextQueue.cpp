@@ -1,16 +1,15 @@
 #include "NextQueue.hpp"
 #include <algorithm>
 
-void NextQueue::popBack() { queue.pop_back(); }
-
 void NextQueue::pushNewBag() {
-  queue.insert(queue.begin(),
-               {Tetromino::I, Tetromino::O, Tetromino::T, Tetromino::S,
-                Tetromino::Z, Tetromino::J, Tetromino::L});
+  using enum Tetromino;
+  queue.insert(queue.begin(), { I, O, T, S, Z, J, L });
   std::shuffle(queue.begin(), queue.begin() + SIZE_OF_BAG, generator);
 }
 
-NextQueue::NextQueue() { pushNewBag(); }
+NextQueue::NextQueue() {
+  pushNewBag();
+}
 
 Tetromino NextQueue::getNextTetromino() {
   Tetromino tmp = queue.back();
@@ -24,6 +23,6 @@ void NextQueue::pushNewBagIfNeeded() {
   }
 }
 
-const Tetromino &NextQueue::operator[](std::size_t index) const {
+const Tetromino& NextQueue::operator[](std::size_t index) const {
   return queue[queue.size() - 1 - index];
 }
