@@ -190,9 +190,9 @@ void Game::draw() const {
   }
 
   // Score
-  Rectangle scoreTextBlock = getBlockRectangle(11, Playfield::HEIGHT - 2);
+  Rectangle scoreTextBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
   DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
-  Rectangle scoreNumberBlock = getBlockRectangle(11, Playfield::HEIGHT);
+  Rectangle scoreNumberBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT);
   std::string score = std::format("{:09}", playfield.score);
   DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
 
