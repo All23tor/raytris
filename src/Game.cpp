@@ -37,8 +37,11 @@ void Game::update() {
     if (!undoMoveStack.empty()) {
       playfield = undoMoveStack.top();
       undoMoveStack.pop();
+      if (undoMoveStack.empty()) {
+        undoMoveStack.push(playfield);
+      }
       return;
-    }
+    } 
   }
 
   if (IsKeyPressed(KEY_ENTER))
