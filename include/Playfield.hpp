@@ -72,10 +72,12 @@ private:
   bool shiftFallingPiece(Shift);
   void checkRotationCollision(RotationType);
   void solidifyFallingPiece();
-  void clearRows(std::vector<int> &, char);
-  bool isAllClear();
-  void clearLines();
+  void clearRows(std::vector<std::size_t>&);
+  void updateScore(std::size_t);
+  bool isAllClear() const;
+  std::size_t clearLines();
   void swapTetromino();
+  void replaceNextPiece();
   void updateTimers();
   FallingPiece getGhostPiece() const;
 };
