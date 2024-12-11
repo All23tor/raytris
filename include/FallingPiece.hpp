@@ -4,8 +4,10 @@
 #include "raylib.h"
 #include <array>
 
-enum class Tetromino : unsigned char { I, O, T, Z, S, J, L, EMPTY };
-enum Orientation : unsigned char { UP, LEFT, DOWN, RIGHT };
+enum class Tetromino : unsigned char { I, O, T, Z, S, J, L, Empty };
+enum Orientation : unsigned char { Up, Right, Down, Left };
+enum class Shift : unsigned char { Left, Right };
+enum class RotationType : unsigned char { Clockwise, CounterClockwise, OneEighty };
 
 struct CoordinatePair {
   signed char x : 4;
@@ -13,8 +15,7 @@ struct CoordinatePair {
 };
 
 using OffsetTable = std::array<CoordinatePair, 5>; // 5 offsets to try
-using TetrominoMap =
-    std::array<CoordinatePair, 4>; // 4 minos per Tetromino in a 5x5 matrix
+using TetrominoMap = std::array<CoordinatePair, 4>; // 4 minos per Tetromino in a 5x5 matrix
 
 Color getTetrominoColor(const Tetromino);
 TetrominoMap initialTetrominoMap(const Tetromino);
@@ -26,15 +27,17 @@ struct FallingPiece {
   char verticalPosition;
   TetrominoMap tetrominoMap;
 
-  void fall();
-  void shiftLeft();
-  void shiftRight();
-  void turnClockwise();
-  void turnCounterClockwise();
-
   FallingPiece(Tetromino, char, char);
+  FallingPiece& fall();
+  FallingPiece& shift(Shift);
+  FallingPiece& rotate(RotationType);
+  FallingPiece& translate(CoordinatePair translation);
+  FallingPiece fallen() const;
+  FallingPiece shifted(Shift) const;
+  FallingPiece rotated(RotationType) const;
+  FallingPiece translated(CoordinatePair translation) const;
 };
 
-OffsetTable getOffsetTable(const FallingPiece);
+OffsetTable getOffsetTable(const FallingPiece&);
 
 #endif

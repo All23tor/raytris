@@ -3,13 +3,6 @@
 
 #include "NextQueue.hpp"
 
-enum class Shift : unsigned char { LEFT, RIGHT };
-enum class RotationType : unsigned char {
-  Clockwise,
-  CounterClockwise,
-  OneEighty
-};
-
 enum class MessageType : unsigned char {
   SINGLE,
   DOUBLE,
@@ -48,7 +41,7 @@ private:
   // Game abstractions
   std::array<std::array<Tetromino, WIDTH>, HEIGHT> grid;
   FallingPiece fallingPiece;
-  Tetromino holdingPiece = Tetromino::EMPTY;
+  Tetromino holdingPiece = Tetromino::Empty;
   NextQueue nextQueue;
   // State
   bool canSwap = true;
@@ -68,14 +61,14 @@ public:
   void restart();
 
 private:
-  bool checkFallingCollisions();
-  bool shiftFallingPiece(Shift);
-  void checkRotationCollision(RotationType);
-  void solidifyFallingPiece();
-  void clearRows(std::vector<std::size_t>&);
+  bool isValidPosition(const FallingPiece&) const;
+  bool tryShifting(Shift);
+  bool tryRotating(RotationType);
+  void solidify();
+  void clearRows(const std::vector<std::size_t>&);
   void updateScore(std::size_t);
   bool isAllClear() const;
-  std::size_t clearLines();
+  void clearLines();
   void swapTetromino();
   void replaceNextPiece();
   void updateTimers();

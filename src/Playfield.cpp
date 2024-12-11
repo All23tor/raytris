@@ -1,9 +1,9 @@
 #include "Playfield.hpp"
 #include <algorithm>
 
-Playfield::Playfield() : fallingPiece(Tetromino::EMPTY, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION) {
+Playfield::Playfield() : fallingPiece(Tetromino::Empty, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION) {
   std::array<Tetromino, WIDTH> emptyRow;
-  emptyRow.fill(Tetromino::EMPTY);
+  emptyRow.fill(Tetromino::Empty);
   grid.fill(emptyRow);
 }
 
@@ -11,151 +11,109 @@ void Playfield::restart() {
   *this = Playfield();
 }
 
-bool Playfield::checkFallingCollisions() {
-  return std::all_of(fallingPiece.tetrominoMap.begin(), fallingPiece.tetrominoMap.end(),
-    [&](const CoordinatePair& pair) {
-    int i = pair.x + fallingPiece.horizontalPosition;
-    int j = pair.y + fallingPiece.verticalPosition;
-    return i <= HEIGHT - 1 && grid[j][i] == Tetromino::EMPTY;
+bool Playfield::isValidPosition(const FallingPiece& piece) const {
+  return std::all_of(piece.tetrominoMap.begin(), piece.tetrominoMap.end(),
+    [&](const CoordinatePair& coordinates) {
+    int i = coordinates.x + piece.horizontalPosition;
+    int j = coordinates.y + piece.verticalPosition;
+    return i >= 0 && i < WIDTH && j >= 0 && j < HEIGHT && grid[j][i] == Tetromino::Empty;
   });
 }
 
-bool Playfield::shiftFallingPiece(Shift shift) {
-  FallingPiece oldPiece = fallingPiece;
-  switch (shift) {
-  case Shift::LEFT:
-    fallingPiece.shiftLeft();
-    break;
-  case Shift::RIGHT:
-    fallingPiece.shiftRight();
-    break;
-  }
-
-  bool passedCheck = std::all_of(fallingPiece.tetrominoMap.begin(), fallingPiece.tetrominoMap.end(),
-    [&](const CoordinatePair& pair) {
-    int i = pair.x + fallingPiece.horizontalPosition;
-    int j = pair.y + fallingPiece.verticalPosition;
-    return i >= 0 && i < WIDTH && grid[j][i] == Tetromino::EMPTY;
-  });
-
-  if (!passedCheck) {
-    fallingPiece = oldPiece;
-  } else {
+bool Playfield::tryShifting(Shift shift) {
+  const FallingPiece shiftedPiece = fallingPiece.shifted(shift);
+  if (isValidPosition(shiftedPiece)) {
+    fallingPiece = shiftedPiece;
     lockDelayFrames = 0;
     lockDelayMoves += 1;
+
+    return true;
   }
 
-  return passedCheck;
+  return false;
 }
 
-void Playfield::checkRotationCollision(RotationType rotationType) {
-  FallingPiece oldPiece = fallingPiece;
-  OffsetTable startOffsetValues = getOffsetTable(fallingPiece);
-  switch (rotationType) {
-  case RotationType::Clockwise:
-    fallingPiece.turnClockwise();
-    break;
-  case RotationType::CounterClockwise:
-    fallingPiece.turnCounterClockwise();
-    break;
-  case RotationType::OneEighty:
-    fallingPiece.turnClockwise();
-    fallingPiece.turnClockwise();
-    break;
-  }
-  OffsetTable endOffsetValues = getOffsetTable(fallingPiece);
-  OffsetTable offsets;
-  std::transform(startOffsetValues.begin(), startOffsetValues.end(), endOffsetValues.begin(), offsets.begin(),
+static OffsetTable calculateOffsetDifferences(const OffsetTable& startOffsets, const OffsetTable& endOffsets) {
+  OffsetTable result;
+  std::transform(startOffsets.begin(), startOffsets.end(), endOffsets.begin(), result.begin(),
     [](const CoordinatePair& p1, const CoordinatePair& p2) -> CoordinatePair {
     return { static_cast<signed char>(p1.x - p2.x), static_cast<signed char>(p1.y - p2.y) };
   });
+  return result;
+}
 
-  bool couldRotate = false;
-  for (const CoordinatePair& offset : offsets) {
-    int new_horizontal_position = fallingPiece.horizontalPosition + offset.x;
-    int new_vertical_position = fallingPiece.verticalPosition - offset.y;
+bool Playfield::tryRotating(RotationType rotationType) {
+  const OffsetTable startOffsetValues = getOffsetTable(fallingPiece);
+  const FallingPiece rotatedPiece = fallingPiece.rotated(rotationType);
+  const OffsetTable endOffsetValues = getOffsetTable(rotatedPiece);
+  const OffsetTable trueOffsets = calculateOffsetDifferences(startOffsetValues, endOffsetValues);
 
-    bool passed = std::all_of(fallingPiece.tetrominoMap.begin(), fallingPiece.tetrominoMap.end(),
-      [&](const CoordinatePair& coordinates) {
-      int i = coordinates.x + new_horizontal_position;
-      int j = coordinates.y + new_vertical_position;
-      return  i >= 0 && i < WIDTH && j < HEIGHT && grid[j][i] == Tetromino::EMPTY;
-    });
-
-    if (passed) {
-      fallingPiece.horizontalPosition = new_horizontal_position;
-      fallingPiece.verticalPosition = new_vertical_position;
-      couldRotate = true;
-      break;
+  for (const CoordinatePair& offset : trueOffsets) {
+    const FallingPiece translatedPiece = rotatedPiece.translated(offset);
+    if (isValidPosition(translatedPiece)) {
+      fallingPiece = translatedPiece;
+      lockDelayFrames = 0;
+      lockDelayMoves += 1;
+      return true;
     }
   }
 
-  if (!couldRotate) {
-    fallingPiece = oldPiece;
-  } else {
-    lockDelayFrames = 0;
-    lockDelayMoves += 1;
-  }
+  return false;
 }
 
-void Playfield::solidifyFallingPiece() {
-  bool passed = false;
+void Playfield::solidify() {
+  bool anyMinoSolidifedAboveVisibleHeight = false;
+
   for (const CoordinatePair& pair : fallingPiece.tetrominoMap) {
     int i = pair.x + fallingPiece.horizontalPosition;
     int j = pair.y + fallingPiece.verticalPosition;
     grid[j][i] = fallingPiece.tetromino;
 
     if (j >= VISIBLE_HEIGHT)
-      passed = true;
+      anyMinoSolidifedAboveVisibleHeight = true;
   }
 
   replaceNextPiece();
   canSwap = true;
 
-  for (const CoordinatePair& coordinates : fallingPiece.tetrominoMap) {
+  bool canSpawnPiece = std::all_of(fallingPiece.tetrominoMap.begin(), fallingPiece.tetrominoMap.end(),
+    [&](const CoordinatePair& coordinates) {
     int i = coordinates.x + fallingPiece.horizontalPosition;
     int j = coordinates.y + fallingPiece.verticalPosition;
-    if (grid[j][i] != Tetromino::EMPTY)
-      passed = false;
-    break;
-  }
+    return grid[j][i] == Tetromino::Empty;
+  });
 
-  hasLost = !passed;
-  std::size_t linesCleared = clearLines();
-  updateScore(linesCleared);
+  hasLost = !anyMinoSolidifedAboveVisibleHeight || !canSpawnPiece;
+  clearLines();
 }
 
-void Playfield::clearRows(std::vector<std::size_t>& rowsToClear) {
-  for (int count = 0; !rowsToClear.empty(); rowsToClear.pop_back()) {
-    for (int row = rowsToClear.back() + count++; row > 0; --row) {
-      grid[row] = std::move(grid[row - 1]);
-    }
-    grid[0].fill(Tetromino::EMPTY);
+void Playfield::clearRows(const std::vector<std::size_t>& rowsToClear) {
+  for (std::size_t rowIndex : rowsToClear) {
+    std::copy_backward(grid.begin(), grid.begin() + rowIndex, grid.begin() + rowIndex + 1);
+    grid[0].fill(Tetromino::Empty);
   }
 }
 
 bool Playfield::isAllClear() const {
   for (const auto& row : grid)
     for (const auto& mino : row)
-      if (mino != Tetromino::EMPTY)
+      if (mino != Tetromino::Empty)
         return false;
   return true;
 }
 
-std::size_t Playfield::clearLines() {
+void Playfield::clearLines() {
   std::vector<std::size_t> rowsToClear;
   for (std::size_t j = 0; j < HEIGHT && rowsToClear.size() != 4; ++j) {
     bool isRowFull = std::all_of(grid[j].begin(), grid[j].end(),
-      [](auto mino) {return mino != Tetromino::EMPTY;}
+      [](auto mino) {return mino != Tetromino::Empty;}
     );
 
     if (isRowFull) rowsToClear.push_back(j);
   }
 
-  std::size_t clearedLines = rowsToClear.size();
   clearRows(rowsToClear);
-
-  return clearedLines;
+  updateScore(rowsToClear.size());
 }
 
 void Playfield::updateScore(std::size_t clearedLines) {
@@ -197,25 +155,9 @@ void Playfield::updateScore(std::size_t clearedLines) {
 
 FallingPiece Playfield::getGhostPiece() const {
   FallingPiece ghostPiece = fallingPiece;
-  FallingPiece oldGhostPiece = fallingPiece;
-  while (true) {
+  while (isValidPosition(ghostPiece.fallen())) {
     ghostPiece.fall();
-    bool passed = true;
-    for (const CoordinatePair& pair : ghostPiece.tetrominoMap) {
-      int i = pair.x + ghostPiece.horizontalPosition;
-      int j = pair.y + ghostPiece.verticalPosition;
-      if (j > HEIGHT - 1 || grid[j][i] != Tetromino::EMPTY) {
-        passed = false;
-        break;
-      }
-    }
-    if (!passed) {
-      ghostPiece = oldGhostPiece;
-      break;
-    }
-    oldGhostPiece = ghostPiece;
   }
-
   return ghostPiece;
 }
 
@@ -257,15 +199,15 @@ bool Playfield::update() {
   updateTimers();
   nextQueue.pushNewBagIfNeeded();
 
-  if (fallingPiece.tetromino == Tetromino::EMPTY) {
+  if (fallingPiece.tetromino == Tetromino::Empty) {
     replaceNextPiece();
   }
 
   // Shift
   if (IsKeyPressed(KEY_LEFT)) {
-    shiftFallingPiece(Shift::LEFT);
+    tryShifting(Shift::Left);
   } else if (IsKeyPressed(KEY_RIGHT)) {
-    shiftFallingPiece(Shift::RIGHT);
+    tryShifting(Shift::Right);
   }
 
   // DAS
@@ -274,7 +216,7 @@ bool Playfield::update() {
       signedFramesPressed = 0;
     signedFramesPressed += 1;
     while (signedFramesPressed > DAS) {
-      if (!shiftFallingPiece(Shift::LEFT))
+      if (!tryShifting(Shift::Left))
         break;
     }
   } else if (IsKeyDown(KEY_RIGHT)) {
@@ -282,7 +224,7 @@ bool Playfield::update() {
       signedFramesPressed = 0;
     signedFramesPressed -= 1;
     while (-signedFramesPressed > DAS) {
-      if (!shiftFallingPiece(Shift::RIGHT))
+      if (!tryShifting(Shift::Right))
         break;
     }
   } else {
@@ -291,17 +233,17 @@ bool Playfield::update() {
 
   // Rotations
   if (IsKeyPressed(KEY_UP)) {
-    checkRotationCollision(RotationType::Clockwise);
+    tryRotating(RotationType::Clockwise);
   } else if (IsKeyPressed(KEY_Z)) {
-    checkRotationCollision(RotationType::CounterClockwise);
+    tryRotating(RotationType::CounterClockwise);
   } else if (IsKeyPressed(KEY_A)) {
-    checkRotationCollision(RotationType::OneEighty);
+    tryRotating(RotationType::OneEighty);
   }
 
   if (IsKeyPressed(KEY_SPACE)) {
     // Hard Drop
     fallingPiece = getGhostPiece();
-    solidifyFallingPiece();
+    solidify();
     return true;
   }
 
@@ -318,24 +260,19 @@ bool Playfield::update() {
     isFallStep = true;
   }
 
-  FallingPiece oldPiece = fallingPiece;
-  fallingPiece.fall();
-  if (checkFallingCollisions()) {
+  if (isValidPosition(fallingPiece.fallen())) {
     // Is not touching ground
     if (isFallStep) {
+      fallingPiece.fall();
       lockDelayFrames = 0;
       lockDelayMoves = 0;
-    } else {
-      fallingPiece = oldPiece;
     }
 
     return false;
   }
   // Is touching ground
-  fallingPiece = oldPiece;
-
   if (lockDelayFrames > MAX_LOCK_DELAY_FRAMES || lockDelayMoves > MAX_LOCK_DELAY_RESETS) {
-    solidifyFallingPiece();
+    solidify();
     return true;
   }
   return false;
