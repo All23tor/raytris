@@ -11,7 +11,7 @@
 - Enter: (In Game)Pause game
 - R: Restart Game
 ## Depencencies
-You need to have raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.
+You need to have a C++ 20 compiler and raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.
 ## Building
 1. Clone the repo with `git clone https://github.com/All23tor/raytris/` and `cd raytris` to it
 2. `mkdir build && cd build` to make build directory
