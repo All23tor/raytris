@@ -61,6 +61,48 @@ bool Playfield::tryRotating(RotationType rotationType) {
   return false;
 }
 
+SpinType Playfield::isSpin() const {
+  if (!wasLastMoveRotation) return SpinType::No;
+  TetrominoMap corners = { {{-1, -1}, {1, -1}, {1, 1}, {-1, 1}} };
+  std::array<CoordinatePair, 2> frontCorners, backCorners;
+  switch (fallingPiece.orientation) {
+  case Orientation::Up:
+    frontCorners = { {corners[0], corners[1]} };
+    backCorners = { {corners[2], corners[3]} };
+    break;
+  case Orientation::Right:
+    frontCorners = { {corners[1], corners[2]} };
+    backCorners = { {corners[3], corners[0]} };
+    break;
+  case Orientation::Down:
+    frontCorners = { {corners[2], corners[3]} };
+    backCorners = { {corners[0], corners[1]} };
+    break;
+  case Orientation::Left:
+    frontCorners = { {corners[3], corners[0]} };
+    backCorners = { {corners[1], corners[2]} };
+    break;
+  }
+
+  int frontCornerCount = std::count_if(frontCorners.begin(), frontCorners.end(),
+    [&](const CoordinatePair& coordinates) {
+    int i = fallingPiece.horizontalPosition + coordinates.x;
+    int j = fallingPiece.verticalPosition + coordinates.y;
+    return i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT || grid[j][i] != Tetromino::Empty;
+  });
+
+  int backCornerCount = std::count_if(backCorners.begin(), backCorners.end(),
+    [&](const CoordinatePair& coordinates) {
+    int i = fallingPiece.horizontalPosition + coordinates.x;
+    int j = fallingPiece.verticalPosition + coordinates.y;
+    return i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT || grid[j][i] != Tetromino::Empty;
+  });
+
+  if (frontCornerCount + backCornerCount < 3) return SpinType::No;
+  if (frontCornerCount == 2) return SpinType::Proper;
+  return SpinType::Mini;
+}
+
 void Playfield::solidify() {
   bool anyMinoSolidifedAboveVisibleHeight = false;
 
@@ -73,6 +115,7 @@ void Playfield::solidify() {
       anyMinoSolidifedAboveVisibleHeight = true;
   }
 
+  clearLines();
   replaceNextPiece();
   canSwap = true;
 
@@ -84,7 +127,6 @@ void Playfield::solidify() {
   });
 
   hasLost = !anyMinoSolidifedAboveVisibleHeight || !canSpawnPiece;
-  clearLines();
 }
 
 void Playfield::clearRows(const std::vector<std::size_t>& rowsToClear) {
@@ -112,40 +154,70 @@ void Playfield::clearLines() {
     if (isRowFull) rowsToClear.push_back(j);
   }
 
+  SpinType spinType = (fallingPiece.tetromino == Tetromino::T) ? isSpin() : SpinType::No;
+  updateScore(rowsToClear.size(), spinType);
+
   clearRows(rowsToClear);
-  updateScore(rowsToClear.size());
 }
 
-void Playfield::updateScore(std::size_t clearedLines) {
+void Playfield::updateScore(std::size_t clearedLines, SpinType spinType) {
   if (clearedLines == 0) {
     combo = 0;
-    return;
-  }
-
-  if (clearedLines == 4) {
-    b2b += 1;
   } else {
-    b2b = 0;
+    combo += 1;
+    score += combo * 50;
+    if ((clearedLines == 4) || (spinType != SpinType::No)) {
+      b2b += 1;
+    } else {
+      b2b = 0;
+    }
   }
 
-  combo += 1;
-  score += combo * 50;
+  float b2bFactor = (b2b >= 2) ? 1.5f : 1.0f;
 
-  float b2bFactor = b2b >= 2 ? 1.5f : 1.0f;
-
-  if (clearedLines == 1) {
-    message = MessageType::SINGLE;
-    score += 100 * b2bFactor;
-  } else if (clearedLines == 2) {
-    message = MessageType::DOUBLE;
-    score += 300 * b2bFactor;
-  } else if (clearedLines == 3) {
-    message = MessageType::TRIPLE;
-    score += 500 * b2bFactor;
-  } else if (clearedLines == 4) {
-    message = MessageType::TETRIS;
-    score += 800 * b2bFactor;
+  if (spinType == SpinType::Proper) {
+    if (clearedLines == 1) {
+      message = MessageType::SINGLE;
+      score += 800 * b2bFactor;
+    } else if (clearedLines == 2) {
+      message = MessageType::DOUBLE;
+      score += 1200 * b2bFactor;
+    } else if (clearedLines == 3) {
+      message = MessageType::TRIPLE;
+      score += 1600 * b2bFactor;
+    } else {
+      message = MessageType::EMPTY;
+      score += 400 * b2bFactor;
+    }
+    message.spinType = SpinType::Proper;
+  } else if (spinType == SpinType::Mini) {
+    if (clearedLines == 1) {
+      message = MessageType::SINGLE;
+      score += 200 * b2bFactor;
+    } else if (clearedLines == 2) {
+      message = MessageType::DOUBLE;
+      score += 400 * b2bFactor;
+    } else {
+      message = MessageType::EMPTY;
+      score += 100 * b2bFactor;
+    }
+    message.spinType = SpinType::Mini;
+  } else {
+    if (clearedLines == 1) {
+      message = MessageType::SINGLE;
+      score += 100 * b2bFactor;
+    } else if (clearedLines == 2) {
+      message = MessageType::DOUBLE;
+      score += 300 * b2bFactor;
+    } else if (clearedLines == 3) {
+      message = MessageType::TRIPLE;
+      score += 500 * b2bFactor;
+    } else if (clearedLines == 4) {
+      message = MessageType::TETRIS;
+      score += 800 * b2bFactor;
+    }
   }
+
 
   if (isAllClear()) {
     message = MessageType::ALLCLEAR;
@@ -194,6 +266,7 @@ bool Playfield::update() {
 
   if (IsKeyPressed(KEY_C) && canSwap) {
     swapTetromino();
+    wasLastMoveRotation = false;
   }
 
   updateTimers();
@@ -205,9 +278,11 @@ bool Playfield::update() {
 
   // Shift
   if (IsKeyPressed(KEY_LEFT)) {
-    tryShifting(Shift::Left);
+    if (tryShifting(Shift::Left))
+      wasLastMoveRotation = false;
   } else if (IsKeyPressed(KEY_RIGHT)) {
-    tryShifting(Shift::Right);
+    if (tryShifting(Shift::Right))
+      wasLastMoveRotation = false;
   }
 
   // DAS
@@ -218,6 +293,8 @@ bool Playfield::update() {
     while (signedFramesPressed > DAS) {
       if (!tryShifting(Shift::Left))
         break;
+      else
+        wasLastMoveRotation = false;
     }
   } else if (IsKeyDown(KEY_RIGHT)) {
     if (signedFramesPressed > 0)
@@ -226,6 +303,8 @@ bool Playfield::update() {
     while (-signedFramesPressed > DAS) {
       if (!tryShifting(Shift::Right))
         break;
+      else
+        wasLastMoveRotation = false;
     }
   } else {
     signedFramesPressed = 0;
@@ -233,15 +312,19 @@ bool Playfield::update() {
 
   // Rotations
   if (IsKeyPressed(KEY_UP)) {
-    tryRotating(RotationType::Clockwise);
+    if (tryRotating(RotationType::Clockwise))
+      wasLastMoveRotation = true;
   } else if (IsKeyPressed(KEY_Z)) {
-    tryRotating(RotationType::CounterClockwise);
+    if (tryRotating(RotationType::CounterClockwise))
+      wasLastMoveRotation = true;
   } else if (IsKeyPressed(KEY_A)) {
-    tryRotating(RotationType::OneEighty);
+    if (tryRotating(RotationType::OneEighty))
+      wasLastMoveRotation = true;
   }
 
   if (IsKeyPressed(KEY_SPACE)) {
     // Hard Drop
+    if (isValidPosition(fallingPiece.fallen())) wasLastMoveRotation = false;
     fallingPiece = getGhostPiece();
     solidify();
     return true;
@@ -263,6 +346,7 @@ bool Playfield::update() {
   if (isValidPosition(fallingPiece.fallen())) {
     // Is not touching ground
     if (isFallStep) {
+      wasLastMoveRotation = false;
       fallingPiece.fall();
       lockDelayFrames = 0;
       lockDelayMoves = 0;

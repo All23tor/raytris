@@ -9,17 +9,20 @@ enum class MessageType : unsigned char {
   TRIPLE,
   TETRIS,
   ALLCLEAR,
-  EMPTY_MESSAGE
+  EMPTY
 };
+
+enum class SpinType { No, Proper, Mini };
 
 struct LineClearMessage {
   static constexpr unsigned char DURATION = 180;
 
   MessageType message;
   unsigned char timer;
+  SpinType spinType;
 
-  LineClearMessage() : message(MessageType::EMPTY_MESSAGE), timer(0) {}
-  LineClearMessage(MessageType type) : message(type), timer(DURATION) {}
+  LineClearMessage() : message(MessageType::EMPTY), timer(0), spinType(SpinType::No) {}
+  LineClearMessage(MessageType type) : message(type), timer(DURATION), spinType(SpinType::No) {}
 };
 
 class Playfield {
@@ -53,6 +56,7 @@ private:
   bool hasLost = false;
   unsigned long score = 0;
   unsigned char b2b = 0;
+  bool wasLastMoveRotation = false;
   LineClearMessage message;
 
 public:
@@ -64,9 +68,10 @@ private:
   bool isValidPosition(const FallingPiece&) const;
   bool tryShifting(Shift);
   bool tryRotating(RotationType);
+  SpinType isSpin() const;
   void solidify();
   void clearRows(const std::vector<std::size_t>&);
-  void updateScore(std::size_t);
+  void updateScore(std::size_t, SpinType);
   bool isAllClear() const;
   void clearLines();
   void swapTetromino();

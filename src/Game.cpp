@@ -6,13 +6,11 @@
 
 static constexpr float heightScaleFactor = 0.8;
 
-Game::Game()
-  : blockLength(GetScreenHeight()* heightScaleFactor /
-    Playfield::VISIBLE_HEIGHT),
+Game::Game() :
+  blockLength(heightScaleFactor* GetScreenHeight() / Playfield::VISIBLE_HEIGHT),
   position({
     (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
-    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }
-    ) {
+    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }) {
   undoMoveStack.push(playfield);
 }
 
@@ -21,15 +19,16 @@ void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline = BLA
     return;
 
   outline.a /= 8;
-  DrawRectangleRec(rec, fill);  
+  DrawRectangleRec(rec, fill);
   DrawRectangle(rec.x + blockLength / 3, rec.y + blockLength / 3, rec.width / 3,
     rec.height / 3, outline);
   DrawRectangleLinesEx(rec, blockLength / 8, outline);
 }
 
 inline Rectangle Game::getBlockRectangle(int i, int j) const {
-  return { position.x + i * blockLength, position.y + (j - static_cast<int>(Playfield::VISIBLE_HEIGHT)) * blockLength,
-          blockLength, blockLength };
+  return { position.x + i * blockLength,
+           position.y + (j - static_cast<int>(Playfield::VISIBLE_HEIGHT)) * blockLength,
+           blockLength, blockLength };
 }
 
 void Game::update() {
@@ -37,21 +36,14 @@ void Game::update() {
     if (!undoMoveStack.empty()) {
       playfield = undoMoveStack.top();
       undoMoveStack.pop();
-      if (undoMoveStack.empty()) {
-        undoMoveStack.push(playfield);
-      }
+      if (undoMoveStack.empty()) undoMoveStack.push(playfield);
       return;
-    } 
+    }
   }
 
-  if (IsKeyPressed(KEY_ENTER))
-    paused = !paused;
-
-  if (paused)
-    return;
-
-  if (playfield.update())
-    undoMoveStack.push(playfield);
+  if (IsKeyPressed(KEY_ENTER)) paused = !paused;
+  if (paused) return;
+  if (playfield.update()) undoMoveStack.push(playfield);
 }
 
 void Game::DrawTetrion() const {
@@ -100,7 +92,7 @@ void Game::draw() const {
 
   DrawTetrion();
 
-  FallingPiece ghostPiece = playfield.getGhostPiece();
+  const FallingPiece ghostPiece = playfield.getGhostPiece();
   drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition);
   const FallingPiece& fallingPiece = playfield.fallingPiece;
   drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
@@ -113,8 +105,7 @@ void Game::draw() const {
   Rectangle nextQueueBackground =
     getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT + 2);
   nextQueueBackground.width = blockLength * 6;
-  nextQueueBackground.height =
-    blockLength * (3 * (NextQueue::NEXT_COMING_SIZE)+1);
+  nextQueueBackground.height = blockLength * (3 * (NextQueue::NEXT_COMING_SIZE)+1);
   DrawRectangleRec(nextQueueBackground, GRAY);
   DrawRectangleLinesEx(nextQueueBackground, blockLength / 4, BLACK);
   DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, BLACK);
@@ -140,56 +131,62 @@ void Game::draw() const {
   // Line Clear message
   if (playfield.message.timer > 0) {
     Rectangle clearTextBlock = getBlockRectangle(-10, Playfield::HEIGHT);
-    const float colorScaleFactor =
-      (float)playfield.message.timer / LineClearMessage::DURATION;
-    const char* textMessage;
+    const float colorScaleFactor = static_cast<float>(playfield.message.timer) / LineClearMessage::DURATION;
+    std::string lineClearMessage;
 
-    Color textColor = { 0, 0, 0,
-                       static_cast<unsigned char>(255 * colorScaleFactor) };
+    Color textColor = BLANK;
+    unsigned char alpha = static_cast<unsigned char>(255 * colorScaleFactor);
     switch (playfield.message.message) {
     case MessageType::SINGLE:
-      textMessage = "SINGLE";
-
+      lineClearMessage = "SINGLE";
+      textColor = { 0, 0, 0, alpha };
       break;
     case MessageType::DOUBLE:
-      textMessage = "DOUBLE";
-      textColor = (Color){ 235, 149, 52, textColor.a };
+      lineClearMessage = "DOUBLE";
+      textColor = { 235, 149, 52, alpha };
       break;
     case MessageType::TRIPLE:
-      textMessage = "TRIPLE";
-      textColor = (Color){ 88, 235, 52, textColor.a };
+      lineClearMessage = "TRIPLE";
+      textColor = { 88, 235, 52, alpha };
       break;
     case MessageType::TETRIS:
-      textMessage = "TETRIS";
-      textColor = (Color){ 52, 164, 236, textColor.a };
+      lineClearMessage = "TETRIS";
+      textColor = { 52, 164, 236, alpha };
       break;
     case MessageType::ALLCLEAR:
-      textMessage = "ALL CLEAR";
-      textColor = (Color){ 235, 52, 213, textColor.a };
+      lineClearMessage = "ALL CLEAR";
+      textColor = { 235, 52, 213, alpha };
       break;
-    case MessageType::EMPTY_MESSAGE:
-      textMessage = "";
+    case MessageType::EMPTY:
+      lineClearMessage = "";
     }
-    DrawText(textMessage, clearTextBlock.x, clearTextBlock.y, fontSize,
-      textColor);
+    DrawText(lineClearMessage.c_str(), clearTextBlock.x, clearTextBlock.y, fontSize, textColor);
+
+    Color tSpinTextColor = getTetrominoColor(Tetromino::T);
+    tSpinTextColor.a = alpha;
+    Rectangle tSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
+    if (playfield.message.spinType == SpinType::Proper) {
+      DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
+    } else if (playfield.message.spinType == SpinType::Mini) {
+      DrawText("TSPIN MINI", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
+    }
   }
+
 
   // Combo
   if (playfield.combo >= 2) {
-    Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
+    Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 6);
     std::string combo = std::format("{}", playfield.combo);
     DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
-    DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize),
-      comboTextBlock.y, fontSize, BLUE);
+    DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize), comboTextBlock.y, fontSize, BLUE);
   }
 
   // Back to Back (B2B)
   if (playfield.b2b >= 2) {
-    Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 4);
+    Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 8);
     std::string b2b = std::format("{}", playfield.b2b - 1);
     DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
-    DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize),
-      b2bTextBlock.y, fontSize, BLUE);
+    DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize), b2bTextBlock.y, fontSize, BLUE);
   }
 
   // Score
@@ -199,8 +196,7 @@ void Game::draw() const {
   std::string score = std::format("{:09}", playfield.score);
   DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
 
-  if (!playfield.hasLost && !paused)
-    return;
+  if (!playfield.hasLost && !paused) return;
 
   // Game over or paused
   const float screenWidth = GetScreenWidth();
