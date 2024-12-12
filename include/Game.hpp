@@ -8,6 +8,7 @@
 class Game {
   // Drawing details
   const float blockLength;
+  const int fontSize;
   const Vector2 position;
   // Playfield
   Playfield playfield;
@@ -19,6 +20,12 @@ private:
   Rectangle getBlockRectangle(int, int) const;
   void DrawRectangleRecPretty(Rectangle, Color, Color) const;
   void DrawTetrion() const;
+  void DrawNextComingPieces() const;
+  void DrawHoldPiece() const;
+  void DrawLineClearMessage() const;
+  void DrawCombo() const;
+  void DrawBackToBack() const;
+  void DrawScore() const;
   void update();
   void draw() const;
   void drawPiece(const TetrominoMap &, Color, int, int) const; 

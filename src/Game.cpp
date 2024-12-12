@@ -8,6 +8,7 @@ static constexpr float heightScaleFactor = 0.8;
 
 Game::Game() :
   blockLength(heightScaleFactor* GetScreenHeight() / Playfield::VISIBLE_HEIGHT),
+  fontSize(blockLength * 2),
   position({
     (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
     (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }) {
@@ -87,6 +88,101 @@ void Game::drawPiece(const TetrominoMap& map, Color color, int horizontalOffset,
   }
 }
 
+void Game::DrawNextComingPieces() const {
+  Rectangle nextTextBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT);
+  Rectangle nextQueueBackground = getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT + 2);
+  nextQueueBackground.width = blockLength * 6;
+  nextQueueBackground.height = blockLength * (3 * (NextQueue::NEXT_COMING_SIZE)+1);
+  DrawRectangleRec(nextQueueBackground, GRAY);
+  DrawRectangleLinesEx(nextQueueBackground, blockLength / 4, BLACK);
+  DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, BLACK);
+  for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
+    Tetromino currentTetromino = playfield.nextQueue[id];
+    drawPiece(initialTetrominoMap(currentTetromino), getTetrominoColor(currentTetromino),
+      Playfield::WIDTH + 3, 3 * (id + 1) + Playfield::VISIBLE_HEIGHT + 1);
+  }
+}
+
+void Game::DrawHoldPiece() const {
+  Rectangle holdTextBlock = getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT);
+  DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, fontSize, BLACK);
+  Rectangle holdPieceBackground = getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT + 2);
+  holdPieceBackground.width = blockLength * 6;
+  holdPieceBackground.height = blockLength * 4;
+  DrawRectangleRec(holdPieceBackground, GRAY);
+  DrawRectangleLinesEx(holdPieceBackground, blockLength / 4, BLACK);
+
+  Color holdColor = playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
+  drawPiece(initialTetrominoMap(playfield.holdingPiece), holdColor, -5, 4 + Playfield::VISIBLE_HEIGHT);
+}
+
+void Game::DrawLineClearMessage() const {
+  if (playfield.message.timer <= 0) return;
+
+  Rectangle clearTextBlock = getBlockRectangle(-10, Playfield::HEIGHT);
+  const float colorScaleFactor = static_cast<float>(playfield.message.timer) / LineClearMessage::DURATION;
+  std::string lineClearMessage;
+
+  Color textColor = BLANK;
+  unsigned char alpha = static_cast<unsigned char>(255 * colorScaleFactor);
+  switch (playfield.message.message) {
+  case MessageType::SINGLE:
+    lineClearMessage = "SINGLE";
+    textColor = { 0, 0, 0, alpha };
+    break;
+  case MessageType::DOUBLE:
+    lineClearMessage = "DOUBLE";
+    textColor = { 235, 149, 52, alpha };
+    break;
+  case MessageType::TRIPLE:
+    lineClearMessage = "TRIPLE";
+    textColor = { 88, 235, 52, alpha };
+    break;
+  case MessageType::TETRIS:
+    lineClearMessage = "TETRIS";
+    textColor = { 52, 164, 236, alpha };
+    break;
+  case MessageType::ALLCLEAR:
+    lineClearMessage = "ALL CLEAR";
+    textColor = { 235, 52, 213, alpha };
+    break;
+  case MessageType::EMPTY:
+    lineClearMessage = "";
+  }
+  DrawText(lineClearMessage.c_str(), clearTextBlock.x, clearTextBlock.y, fontSize, textColor);
+
+  Color tSpinTextColor = getTetrominoColor(Tetromino::T);
+  tSpinTextColor.a = alpha;
+  Rectangle tSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
+  if (playfield.message.spinType == SpinType::Proper) {
+    DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
+  } else if (playfield.message.spinType == SpinType::Mini) {
+    DrawText("TSPIN MINI", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
+  }
+}
+
+void Game::DrawCombo() const {
+  if (playfield.combo < 2) return;
+  Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 6);
+  std::string combo = std::format("{}", playfield.combo);
+  DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
+  DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize), comboTextBlock.y, fontSize, BLUE);
+}
+void Game::DrawBackToBack() const {
+  if (playfield.b2b < 2) return;
+  Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 8);
+  std::string b2b = std::format("{}", playfield.b2b - 1);
+  DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
+  DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize), b2bTextBlock.y, fontSize, BLUE);
+}
+void Game::DrawScore() const {
+  Rectangle scoreTextBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
+  DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
+  Rectangle scoreNumberBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT);
+  std::string score = std::format("{:09}", playfield.score);
+  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
+}
+
 void Game::draw() const {
   ClearBackground(LIGHTGRAY);
 
@@ -98,103 +194,11 @@ void Game::draw() const {
   drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
     fallingPiece.horizontalPosition, fallingPiece.verticalPosition);
 
-  const int fontSize = blockLength * 2;
-  // Next coming pieces
-  Rectangle nextTextBlock =
-    getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT);
-  Rectangle nextQueueBackground =
-    getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT + 2);
-  nextQueueBackground.width = blockLength * 6;
-  nextQueueBackground.height = blockLength * (3 * (NextQueue::NEXT_COMING_SIZE)+1);
-  DrawRectangleRec(nextQueueBackground, GRAY);
-  DrawRectangleLinesEx(nextQueueBackground, blockLength / 4, BLACK);
-  DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, BLACK);
-  for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
-    Tetromino currentTetromino = playfield.nextQueue[id];
-    drawPiece(initialTetrominoMap(currentTetromino), getTetrominoColor(currentTetromino),
-      Playfield::WIDTH + 3, 3 * (id + 1) + Playfield::VISIBLE_HEIGHT + 1);
-  }
-
-  // Draw hold piece
-  Rectangle holdTextBlock = getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT);
-  DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, fontSize, BLACK);
-  Rectangle holdPieceBackground =
-    getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT + 2);
-  holdPieceBackground.width = blockLength * 6;
-  holdPieceBackground.height = blockLength * 4;
-  DrawRectangleRec(holdPieceBackground, GRAY);
-  DrawRectangleLinesEx(holdPieceBackground, blockLength / 4, BLACK);
-
-  Color holdColor = playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
-  drawPiece(initialTetrominoMap(playfield.holdingPiece), holdColor, -5, 4 + Playfield::VISIBLE_HEIGHT);
-
-  // Line Clear message
-  if (playfield.message.timer > 0) {
-    Rectangle clearTextBlock = getBlockRectangle(-10, Playfield::HEIGHT);
-    const float colorScaleFactor = static_cast<float>(playfield.message.timer) / LineClearMessage::DURATION;
-    std::string lineClearMessage;
-
-    Color textColor = BLANK;
-    unsigned char alpha = static_cast<unsigned char>(255 * colorScaleFactor);
-    switch (playfield.message.message) {
-    case MessageType::SINGLE:
-      lineClearMessage = "SINGLE";
-      textColor = { 0, 0, 0, alpha };
-      break;
-    case MessageType::DOUBLE:
-      lineClearMessage = "DOUBLE";
-      textColor = { 235, 149, 52, alpha };
-      break;
-    case MessageType::TRIPLE:
-      lineClearMessage = "TRIPLE";
-      textColor = { 88, 235, 52, alpha };
-      break;
-    case MessageType::TETRIS:
-      lineClearMessage = "TETRIS";
-      textColor = { 52, 164, 236, alpha };
-      break;
-    case MessageType::ALLCLEAR:
-      lineClearMessage = "ALL CLEAR";
-      textColor = { 235, 52, 213, alpha };
-      break;
-    case MessageType::EMPTY:
-      lineClearMessage = "";
-    }
-    DrawText(lineClearMessage.c_str(), clearTextBlock.x, clearTextBlock.y, fontSize, textColor);
-
-    Color tSpinTextColor = getTetrominoColor(Tetromino::T);
-    tSpinTextColor.a = alpha;
-    Rectangle tSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
-    if (playfield.message.spinType == SpinType::Proper) {
-      DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
-    } else if (playfield.message.spinType == SpinType::Mini) {
-      DrawText("TSPIN MINI", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
-    }
-  }
-
-
-  // Combo
-  if (playfield.combo >= 2) {
-    Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 6);
-    std::string combo = std::format("{}", playfield.combo);
-    DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
-    DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize), comboTextBlock.y, fontSize, BLUE);
-  }
-
-  // Back to Back (B2B)
-  if (playfield.b2b >= 2) {
-    Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 8);
-    std::string b2b = std::format("{}", playfield.b2b - 1);
-    DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
-    DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize), b2bTextBlock.y, fontSize, BLUE);
-  }
-
-  // Score
-  Rectangle scoreTextBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
-  DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
-  Rectangle scoreNumberBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT);
-  std::string score = std::format("{:09}", playfield.score);
-  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
+  DrawNextComingPieces();
+  DrawHoldPiece();
+  DrawCombo();
+  DrawBackToBack();
+  DrawScore();
 
   if (!playfield.hasLost && !paused) return;
 
