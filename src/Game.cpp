@@ -168,6 +168,7 @@ void Game::DrawCombo() const {
   DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
   DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize), comboTextBlock.y, fontSize, BLUE);
 }
+
 void Game::DrawBackToBack() const {
   if (playfield.b2b < 2) return;
   Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 8);
@@ -175,6 +176,7 @@ void Game::DrawBackToBack() const {
   DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
   DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize), b2bTextBlock.y, fontSize, BLUE);
 }
+
 void Game::DrawScore() const {
   Rectangle scoreTextBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
   DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
@@ -196,6 +198,7 @@ void Game::draw() const {
 
   DrawNextComingPieces();
   DrawHoldPiece();
+  DrawLineClearMessage();
   DrawCombo();
   DrawBackToBack();
   DrawScore();
