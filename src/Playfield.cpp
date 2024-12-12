@@ -153,11 +153,10 @@ void Playfield::clearLines() {
 
     if (isRowFull) rowsToClear.push_back(j);
   }
-
+  
   SpinType spinType = (fallingPiece.tetromino == Tetromino::T) ? isSpin() : SpinType::No;
-  updateScore(rowsToClear.size(), spinType);
-
   clearRows(rowsToClear);
+  updateScore(rowsToClear.size(), spinType);
 }
 
 void Playfield::updateScore(std::size_t clearedLines, SpinType spinType) {
