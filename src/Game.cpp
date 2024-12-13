@@ -9,6 +9,8 @@ static constexpr float heightScaleFactor = 0.8;
 Game::Game() :
   blockLength(heightScaleFactor* GetScreenHeight() / Playfield::VISIBLE_HEIGHT),
   fontSize(blockLength * 2),
+  fontSizeBig(blockLength * 5),
+  fontSizeSmall(blockLength),
   position({
     (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
     (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }) {
@@ -154,10 +156,10 @@ void Game::DrawLineClearMessage() const {
   Color tSpinTextColor = getTetrominoColor(Tetromino::T);
   tSpinTextColor.a = alpha;
   Rectangle tSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
-  if (playfield.message.spinType == SpinType::Proper) {
-    DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
-  } else if (playfield.message.spinType == SpinType::Mini) {
-    DrawText("TSPIN MINI", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
+  DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
+  if (playfield.message.spinType == SpinType::Mini) {
+    Rectangle miniTSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 3);
+    DrawText("MINI", miniTSpinTextBlock.x, miniTSpinTextBlock.y, fontSizeSmall, tSpinTextColor);
   }
 }
 
@@ -208,7 +210,6 @@ void Game::draw() const {
   // Game over or paused
   const float screenWidth = GetScreenWidth();
   const float screenHeight = GetScreenHeight();
-  const int fontSizeBig = blockLength * 5;
   DrawRectangle(0, 0, screenWidth, screenHeight, { 0, 0, 0, 100 });
 
   if (playfield.hasLost) {

@@ -9,6 +9,8 @@ class Game {
   // Drawing details
   const float blockLength;
   const int fontSize;
+  const int fontSizeBig;
+  const int fontSizeSmall;
   const Vector2 position;
   // Playfield
   Playfield playfield;
