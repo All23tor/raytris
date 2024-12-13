@@ -153,6 +153,7 @@ void Game::DrawLineClearMessage() const {
   }
   DrawText(lineClearMessage.c_str(), clearTextBlock.x, clearTextBlock.y, fontSize, textColor);
 
+  if (playfield.message.spinType == SpinType::No) return;
   Color tSpinTextColor = getTetrominoColor(Tetromino::T);
   tSpinTextColor.a = alpha;
   Rectangle tSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
