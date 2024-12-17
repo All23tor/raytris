@@ -7,26 +7,7 @@ FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position, char
   verticalPosition(_vertical_position),
   tetrominoMap(initialTetrominoMap(tetromino)) {}
 
-Color getTetrominoColor(const Tetromino tetromino) {
-  switch (tetromino) {
-  case Tetromino::I:
-    return (Color) { 49, 199, 239, 255 };
-  case Tetromino::O:
-    return (Color) { 247, 211, 8, 255 };
-  case Tetromino::T:
-    return (Color) { 173, 77, 156, 255 };
-  case Tetromino::S:
-    return (Color) { 66, 182, 66, 255 };
-  case Tetromino::Z:
-    return (Color) { 239, 32, 41, 255 };
-  case Tetromino::J:
-    return (Color) { 90, 101, 173, 255 };
-  case Tetromino::L:
-    return (Color) { 239, 121, 33, 255 };
-  default:
-    return BLANK;
-  }
-}
+
 
 TetrominoMap initialTetrominoMap(Tetromino tetromino) {
   switch (tetromino) {

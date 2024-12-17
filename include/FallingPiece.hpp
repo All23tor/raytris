@@ -1,11 +1,10 @@
 #ifndef FALLING_PIECE_H
 #define FALLING_PIECE_H
 
-#include "raylib.h"
 #include <array>
 
 enum class Tetromino : unsigned char { I, O, T, Z, S, J, L, Empty };
-enum Orientation : unsigned char { Up, Right, Down, Left };
+enum class Orientation : unsigned char { Up, Right, Down, Left };
 enum class Shift : unsigned char { Left, Right };
 enum class RotationType : unsigned char { Clockwise, CounterClockwise, OneEighty };
 
@@ -17,12 +16,11 @@ struct CoordinatePair {
 using OffsetTable = std::array<CoordinatePair, 5>; // 5 offsets to try
 using TetrominoMap = std::array<CoordinatePair, 4>; // 4 minos per Tetromino in a 5x5 matrix
 
-Color getTetrominoColor(const Tetromino);
 TetrominoMap initialTetrominoMap(const Tetromino);
 
 struct FallingPiece {
-  enum Tetromino tetromino;
-  enum Orientation orientation;
+  Tetromino tetromino;
+  Orientation orientation;
   char horizontalPosition;
   char verticalPosition;
   TetrominoMap tetrominoMap;

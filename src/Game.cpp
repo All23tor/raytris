@@ -4,10 +4,31 @@
 #include "raylib.h"
 #include <format>
 
-static constexpr float heightScaleFactor = 0.8;
+static constexpr float heightScaleFactor = 0.85;
+
+constexpr Color getTetrominoColor(Tetromino tetromino) {
+  switch (tetromino) {
+  case Tetromino::I:
+    return (Color) { 49, 199, 239, 255 };
+  case Tetromino::O:
+    return (Color) { 247, 211, 8, 255 };
+  case Tetromino::T:
+    return (Color) { 173, 77, 156, 255 };
+  case Tetromino::S:
+    return (Color) { 66, 182, 66, 255 };
+  case Tetromino::Z:
+    return (Color) { 239, 32, 41, 255 };
+  case Tetromino::J:
+    return (Color) { 90, 101, 173, 255 };
+  case Tetromino::L:
+    return (Color) { 239, 121, 33, 255 };
+  default:
+    return BLANK;
+  }
+}
 
 Game::Game() :
-  blockLength(heightScaleFactor* GetScreenHeight() / Playfield::VISIBLE_HEIGHT),
+  blockLength(heightScaleFactor* GetScreenHeight() / (Playfield::VISIBLE_HEIGHT)),
   fontSize(blockLength * 2),
   fontSizeBig(blockLength * 5),
   fontSizeSmall(blockLength),
@@ -71,7 +92,7 @@ void Game::DrawTetrion() const {
     rec.y = std::floor(rec.y);
     DrawLineEx({ rec.x, rec.y },
       { std::floor(rec.x + blockLength * Playfield::WIDTH), rec.y },
-      blockLength / 10, DARKGRAY);
+      blockLength / 10, GRAY);
   }
 
   for (int j = 0; j < Playfield::HEIGHT; ++j) {
@@ -80,6 +101,14 @@ void Game::DrawTetrion() const {
         getTetrominoColor(playfield.grid[j][i]));
     }
   }
+}
+
+void Game::DrawPieces() const {
+  const FallingPiece ghostPiece = playfield.getGhostPiece();
+  drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition);
+  const FallingPiece& fallingPiece = playfield.fallingPiece;
+  drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
+    fallingPiece.horizontalPosition, fallingPiece.verticalPosition);
 }
 
 void Game::drawPiece(const TetrominoMap& map, Color color, int horizontalOffset, int verticalOffset) const {
@@ -121,7 +150,7 @@ void Game::DrawHoldPiece() const {
 void Game::DrawLineClearMessage() const {
   if (playfield.message.timer <= 0) return;
 
-  Rectangle clearTextBlock = getBlockRectangle(-10, Playfield::HEIGHT);
+  Rectangle clearTextBlock = getBlockRectangle(LEFT_BORDER, Playfield::HEIGHT - 4);
   const float colorScaleFactor = static_cast<float>(playfield.message.timer) / LineClearMessage::DURATION;
   std::string lineClearMessage;
 
@@ -145,7 +174,7 @@ void Game::DrawLineClearMessage() const {
     textColor = { 52, 164, 236, alpha };
     break;
   case MessageType::ALLCLEAR:
-    lineClearMessage = "ALL CLEAR";
+    lineClearMessage = "ALL\nCLEAR";
     textColor = { 235, 52, 213, alpha };
     break;
   case MessageType::EMPTY:
@@ -156,17 +185,17 @@ void Game::DrawLineClearMessage() const {
   if (playfield.message.spinType == SpinType::No) return;
   Color tSpinTextColor = getTetrominoColor(Tetromino::T);
   tSpinTextColor.a = alpha;
-  Rectangle tSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 2);
+  Rectangle tSpinTextBlock = getBlockRectangle(LEFT_BORDER, Playfield::HEIGHT - 6);
   DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, fontSize, tSpinTextColor);
   if (playfield.message.spinType == SpinType::Mini) {
-    Rectangle miniTSpinTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 3);
+    Rectangle miniTSpinTextBlock = getBlockRectangle(LEFT_BORDER, Playfield::HEIGHT - 7);
     DrawText("MINI", miniTSpinTextBlock.x, miniTSpinTextBlock.y, fontSizeSmall, tSpinTextColor);
   }
 }
 
 void Game::DrawCombo() const {
   if (playfield.combo < 2) return;
-  Rectangle comboTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 6);
+  Rectangle comboTextBlock = getBlockRectangle(LEFT_BORDER, Playfield::HEIGHT - 10);
   std::string combo = std::format("{}", playfield.combo);
   DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, fontSize, BLUE);
   DrawText(combo.c_str(), comboTextBlock.x + MeasureText("COMBO ", fontSize), comboTextBlock.y, fontSize, BLUE);
@@ -174,41 +203,21 @@ void Game::DrawCombo() const {
 
 void Game::DrawBackToBack() const {
   if (playfield.b2b < 2) return;
-  Rectangle b2bTextBlock = getBlockRectangle(-10, Playfield::HEIGHT - 8);
+  Rectangle b2bTextBlock = getBlockRectangle(LEFT_BORDER, Playfield::HEIGHT - 12);
   std::string b2b = std::format("{}", playfield.b2b - 1);
   DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, fontSize, BLUE);
   DrawText(b2b.c_str(), b2bTextBlock.x + MeasureText("B2B ", fontSize), b2bTextBlock.y, fontSize, BLUE);
 }
 
 void Game::DrawScore() const {
-  Rectangle scoreTextBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
-  DrawText("SCORE: ", scoreTextBlock.x, scoreTextBlock.y, fontSize, BLACK);
-  Rectangle scoreNumberBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT);
+  Rectangle scoreNumberBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
   std::string score = std::format("{:09}", playfield.score);
-  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y, fontSize, BLACK);
+  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y + blockLength * 0.5, fontSize, BLACK);
 }
 
-void Game::draw() const {
-  ClearBackground(LIGHTGRAY);
-
-  DrawTetrion();
-
-  const FallingPiece ghostPiece = playfield.getGhostPiece();
-  drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition);
-  const FallingPiece& fallingPiece = playfield.fallingPiece;
-  drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
-    fallingPiece.horizontalPosition, fallingPiece.verticalPosition);
-
-  DrawNextComingPieces();
-  DrawHoldPiece();
-  DrawLineClearMessage();
-  DrawCombo();
-  DrawBackToBack();
-  DrawScore();
-
+void Game::DrawPauseMenu() const {
   if (!playfield.hasLost && !paused) return;
 
-  // Game over or paused
   const float screenWidth = GetScreenWidth();
   const float screenHeight = GetScreenHeight();
   DrawRectangle(0, 0, screenWidth, screenHeight, { 0, 0, 0, 100 });
@@ -226,6 +235,19 @@ void Game::draw() const {
   DrawText("Press Esc to quit",
     (screenWidth - MeasureText("Press Enter to quit", fontSize)) / 2.0,
     screenHeight / 2.0 + fontSizeBig, fontSize, WHITE);
+}
+
+void Game::draw() const {
+  ClearBackground(LIGHTGRAY);
+  DrawTetrion();
+  DrawPieces();
+  DrawNextComingPieces();
+  DrawHoldPiece();
+  DrawLineClearMessage();
+  DrawCombo();
+  DrawBackToBack();
+  DrawScore();
+  DrawPauseMenu();
 }
 
 void Game::run() {
