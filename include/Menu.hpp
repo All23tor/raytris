@@ -3,12 +3,16 @@
 
 #include <utility>
 
-enum class Resolutions { SMALL, MEDIUM, BIG, FULLSCREEN };
-constexpr int INITIAL_WIDTH = 640;
-constexpr int INITIAL_HEIGHT = 360;
+enum class Resolutions { Small, Medium, Big, FullScreen };
+
 
 class Menu {
-  Resolutions resolution = Resolutions::SMALL;
+public:
+  static constexpr int INITIAL_WIDTH = 640;
+  static constexpr int INITIAL_HEIGHT = 360;
+
+private:
+  Resolutions resolution = Resolutions::Small;
   std::pair<int, int> windowResolution;
 
   void draw() const;

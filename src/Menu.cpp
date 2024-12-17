@@ -6,13 +6,13 @@ Menu::Menu(): windowResolution{INITIAL_WIDTH, INITIAL_HEIGHT} {}
 
 const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
   switch (resolution) {
-  case Resolutions::SMALL:
+  case Resolutions::Small:
     return { INITIAL_WIDTH, INITIAL_HEIGHT };
-  case Resolutions::MEDIUM:
+  case Resolutions::Medium:
     return { 960, 540 };
-  case Resolutions::BIG:
+  case Resolutions::Big:
     return { 1280, 720 };
-  case Resolutions::FULLSCREEN: {
+  case Resolutions::FullScreen: {
     return { GetScreenWidth(), GetScreenHeight() };
   }
   default:
@@ -22,11 +22,11 @@ const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
 
 static Resolutions nextResolution(Resolutions res) {
   switch (res) {
-  case Resolutions::SMALL: return Resolutions::MEDIUM;
-  case Resolutions::MEDIUM: return Resolutions::BIG;
-  case Resolutions::BIG: return Resolutions::FULLSCREEN;
-  case Resolutions::FULLSCREEN: return Resolutions::SMALL;
-  default: return Resolutions::SMALL;
+  case Resolutions::Small: return Resolutions::Medium;
+  case Resolutions::Medium: return Resolutions::Big;
+  case Resolutions::Big: return Resolutions::FullScreen;
+  case Resolutions::FullScreen: return Resolutions::Small;
+  default: return Resolutions::Small;
   }
 }
 
@@ -40,7 +40,7 @@ void Menu::resizeScreen() {
 
   SetWindowSize(windowResolution.first, windowResolution.second);
 
-  if (resolution == Resolutions::FULLSCREEN) {
+  if (resolution == Resolutions::FullScreen) {
     ToggleFullscreen();
   }
 }

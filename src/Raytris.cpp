@@ -4,7 +4,7 @@
 #include <raylib.h>
 
 Raytris::Raytris() {
-  InitWindow(INITIAL_WIDTH, INITIAL_HEIGHT, "RayTris");
+  InitWindow(Menu::INITIAL_WIDTH, Menu::INITIAL_HEIGHT, "RayTris");
   SetTargetFPS(60);
 }
 
@@ -14,7 +14,9 @@ Raytris::~Raytris() {
 
 void Raytris::run() {
   Menu menu;
-  while (menu.run() == Menu::ExitCode::Game) {
-    Game().run();
+  for (Menu::ExitCode exitCode = menu.run(); exitCode != Menu::ExitCode::Exit; exitCode = menu.run()) {
+    if (exitCode == Menu::ExitCode::Game) {
+      Game().run();
+    }
   }
 }
