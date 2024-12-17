@@ -7,8 +7,6 @@ FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position, char
   verticalPosition(_vertical_position),
   tetrominoMap(initialTetrominoMap(tetromino)) {}
 
-
-
 TetrominoMap initialTetrominoMap(Tetromino tetromino) {
   switch (tetromino) {
   case Tetromino::I:

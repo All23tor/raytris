@@ -5,7 +5,6 @@
 
 enum class Resolutions { Small, Medium, Big, FullScreen };
 
-
 class Menu {
 public:
   static constexpr int INITIAL_WIDTH = 640;
