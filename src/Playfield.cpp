@@ -1,6 +1,21 @@
 #include "raylib.h"
 #include "Playfield.hpp"
 #include <algorithm>
+#include <functional>
+
+namespace {
+  std::function<bool()> checkRestartInput = []() -> bool {return IsKeyPressed(KEY_R);};
+  std::function<bool()> checkSwapInput = []() -> bool {return IsKeyPressed(KEY_C);};
+  std::function<bool()> checkLeftInput = []() -> bool {return IsKeyPressed(KEY_LEFT);};
+  std::function<bool()> checkRightInput = []() -> bool {return IsKeyPressed(KEY_RIGHT);};
+  std::function<bool()> checkLeftDasInput = []() -> bool {return IsKeyDown(KEY_LEFT);};
+  std::function<bool()> checkRightDasInput = []() -> bool {return IsKeyDown(KEY_RIGHT);};
+  std::function<bool()> checkClockwiseInput = []() -> bool {return IsKeyPressed(KEY_UP);};
+  std::function<bool()> checkCounterClockwiseInput = []() -> bool {return IsKeyPressed(KEY_Z);};
+  std::function<bool()> checkOneEightyInput = []() -> bool {return IsKeyPressed(KEY_A);};
+  std::function<bool()> checkHardDropInput = []() -> bool {return IsKeyPressed(KEY_SPACE);};
+  std::function<bool()> checkSoftDropInput = []() -> bool {return IsKeyDown(KEY_DOWN);};
+}
 
 Playfield::Playfield() : fallingPiece(Tetromino::Empty, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION) {
   std::array<Tetromino, WIDTH> emptyRow;
@@ -154,7 +169,7 @@ void Playfield::clearLines() {
 
     if (isRowFull) rowsToClear.push_back(j);
   }
-  
+
   SpinType spinType = (fallingPiece.tetromino == Tetromino::T) ? isSpin() : SpinType::No;
   clearRows(rowsToClear);
   updateScore(rowsToClear.size(), spinType);
@@ -258,35 +273,24 @@ void Playfield::updateTimers() {
     message.timer -= 1;
 }
 
-bool Playfield::update() {
-  if (IsKeyPressed(KEY_R))
-    restart();
-  if (hasLost)
-    return false;
-
-  if (IsKeyPressed(KEY_C) && canSwap) {
+void Playfield::handleSpecialInput() {
+  if (checkRestartInput()) restart();
+  if (checkSwapInput() && canSwap) {
     swapTetromino();
     wasLastMoveRotation = false;
   }
+}
 
-  updateTimers();
-  nextQueue.pushNewBagIfNeeded();
-
-  if (fallingPiece.tetromino == Tetromino::Empty) {
-    replaceNextPiece();
-  }
-
-  // Shift
-  if (IsKeyPressed(KEY_LEFT)) {
+void Playfield::handleShiftInput() {
+  if (checkLeftInput()) {
     if (tryShifting(Shift::Left))
       wasLastMoveRotation = false;
-  } else if (IsKeyPressed(KEY_RIGHT)) {
+  } else if (checkRightInput()) {
     if (tryShifting(Shift::Right))
       wasLastMoveRotation = false;
   }
 
-  // DAS
-  if (IsKeyDown(KEY_LEFT)) {
+  if (checkLeftDasInput()) {
     if (signedFramesPressed < 0)
       signedFramesPressed = 0;
     signedFramesPressed += 1;
@@ -296,7 +300,7 @@ bool Playfield::update() {
       else
         wasLastMoveRotation = false;
     }
-  } else if (IsKeyDown(KEY_RIGHT)) {
+  } else if (checkRightDasInput()) {
     if (signedFramesPressed > 0)
       signedFramesPressed = 0;
     signedFramesPressed -= 1;
@@ -309,20 +313,23 @@ bool Playfield::update() {
   } else {
     signedFramesPressed = 0;
   }
+}
 
-  // Rotations
-  if (IsKeyPressed(KEY_UP)) {
+void Playfield::handleRotationInput() {
+  if (checkClockwiseInput()) {
     if (tryRotating(RotationType::Clockwise))
       wasLastMoveRotation = true;
-  } else if (IsKeyPressed(KEY_Z)) {
+  } else if (checkCounterClockwiseInput()) {
     if (tryRotating(RotationType::CounterClockwise))
       wasLastMoveRotation = true;
-  } else if (IsKeyPressed(KEY_A)) {
+  } else if (checkOneEightyInput()) {
     if (tryRotating(RotationType::OneEighty))
       wasLastMoveRotation = true;
   }
+}
 
-  if (IsKeyPressed(KEY_SPACE)) {
+bool Playfield::handleDropInput() {
+  if (checkHardDropInput()) {
     // Hard Drop
     if (isValidPosition(fallingPiece.fallen())) wasLastMoveRotation = false;
     fallingPiece = getGhostPiece();
@@ -331,7 +338,7 @@ bool Playfield::update() {
   }
 
   bool isFallStep = false;
-  if (IsKeyDown(KEY_DOWN)) {
+  if (checkSoftDropInput()) {
     // Soft Drop
     if (framesSinceLastFall >= SOFT_DROP_FRAMES) {
       framesSinceLastFall = 0;
@@ -360,4 +367,15 @@ bool Playfield::update() {
     return true;
   }
   return false;
+}
+
+bool Playfield::update() {
+  if (hasLost) return false;
+  handleSpecialInput();
+  updateTimers();
+  nextQueue.pushNewBagIfNeeded();
+  if (fallingPiece.tetromino == Tetromino::Empty) replaceNextPiece();
+  handleShiftInput();
+  handleRotationInput();
+  return handleDropInput();
 }

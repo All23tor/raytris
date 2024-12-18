@@ -4,7 +4,22 @@
 #include "raylib.h"
 #include <format>
 
-static constexpr float heightScaleFactor = 0.85;
+namespace { 
+  constexpr float HEIGHT_SCALE_FACTOR = 0.80; 
+  constexpr Color BACKGROUND_COLOR = LIGHTGRAY;
+  constexpr Color DEFAULT_PRETTY_OUTLINE = BLACK;
+  constexpr Color TETRION_BACKGROUND_COLOR = BLACK;
+  constexpr Color GRIDLINE_COLOR = DARKGRAY;
+  constexpr Color UNAVAILABLE_HOLD_PIECE_COLOR = DARKGRAY;
+  constexpr Color PIECES_BACKGROUND_COLOR = GRAY;
+  constexpr Color INFO_TEXT_COLOR = BLACK;
+  constexpr Color PIECE_BOX_COLOR = BLACK;
+
+  constexpr Color YOU_LOST_COLOR = RED;
+  constexpr Color GAME_PAUSED_COLOR = BLUE;
+  constexpr Color QUIT_COLOR = WHITE;
+  constexpr Color DARKEN_COLOR = { 0, 0, 0, 100 };
+};
 
 constexpr Color getTetrominoColor(Tetromino tetromino) {
   switch (tetromino) {
@@ -28,7 +43,7 @@ constexpr Color getTetrominoColor(Tetromino tetromino) {
 }
 
 Game::Game() :
-  blockLength(heightScaleFactor* GetScreenHeight() / (Playfield::VISIBLE_HEIGHT)),
+  blockLength(HEIGHT_SCALE_FACTOR* GetScreenHeight() / (Playfield::VISIBLE_HEIGHT)),
   fontSize(blockLength * 2),
   fontSizeBig(blockLength * 5),
   fontSizeSmall(blockLength),
@@ -38,7 +53,7 @@ Game::Game() :
   undoMoveStack.push(playfield);
 }
 
-void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline = BLACK) const {
+void Game::DrawRectangleRecPretty(Rectangle rec, Color fill, Color outline = DEFAULT_PRETTY_OUTLINE) const {
   if (fill.a == 0)
     return;
 
@@ -74,8 +89,8 @@ void Game::DrawTetrion() const {
   Rectangle tetrion = Rectangle{
       position.x, position.y,
       blockLength * Playfield::WIDTH, blockLength * Playfield::VISIBLE_HEIGHT };
-  DrawRectangleRec(tetrion, BLACK);
-  DrawRectangleLinesEx(tetrion, blockLength / 10, DARKGRAY);
+  DrawRectangleRec(tetrion, TETRION_BACKGROUND_COLOR);
+  DrawRectangleLinesEx(tetrion, blockLength / 10, GRIDLINE_COLOR);
 
   for (int i = 1; i < Playfield::WIDTH; ++i) {
     Rectangle rec = getBlockRectangle(i, Playfield::VISIBLE_HEIGHT);
@@ -83,7 +98,7 @@ void Game::DrawTetrion() const {
     rec.y = std::floor(rec.y);
     DrawLineEx({ rec.x, rec.y },
       { rec.x, std::floor(rec.y + Playfield::VISIBLE_HEIGHT * blockLength) },
-      blockLength / 10, DARKGRAY);
+      blockLength / 10, GRIDLINE_COLOR);
   }
 
   for (int j = 1; j < Playfield::VISIBLE_HEIGHT; ++j) {
@@ -92,7 +107,7 @@ void Game::DrawTetrion() const {
     rec.y = std::floor(rec.y);
     DrawLineEx({ rec.x, rec.y },
       { std::floor(rec.x + blockLength * Playfield::WIDTH), rec.y },
-      blockLength / 10, GRAY);
+      blockLength / 10, GRIDLINE_COLOR);
   }
 
   for (int j = 0; j < Playfield::HEIGHT; ++j) {
@@ -124,9 +139,9 @@ void Game::DrawNextComingPieces() const {
   Rectangle nextQueueBackground = getBlockRectangle(Playfield::WIDTH + 1, Playfield::VISIBLE_HEIGHT + 2);
   nextQueueBackground.width = blockLength * 6;
   nextQueueBackground.height = blockLength * (3 * (NextQueue::NEXT_COMING_SIZE)+1);
-  DrawRectangleRec(nextQueueBackground, GRAY);
-  DrawRectangleLinesEx(nextQueueBackground, blockLength / 4, BLACK);
-  DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, BLACK);
+  DrawRectangleRec(nextQueueBackground, PIECES_BACKGROUND_COLOR);
+  DrawRectangleLinesEx(nextQueueBackground, blockLength / 4, PIECE_BOX_COLOR);
+  DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, fontSize, INFO_TEXT_COLOR);
   for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
     Tetromino currentTetromino = playfield.nextQueue[id];
     drawPiece(initialTetrominoMap(currentTetromino), getTetrominoColor(currentTetromino),
@@ -136,14 +151,14 @@ void Game::DrawNextComingPieces() const {
 
 void Game::DrawHoldPiece() const {
   Rectangle holdTextBlock = getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT);
-  DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, fontSize, BLACK);
+  DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, fontSize, INFO_TEXT_COLOR);
   Rectangle holdPieceBackground = getBlockRectangle(-7, Playfield::VISIBLE_HEIGHT + 2);
   holdPieceBackground.width = blockLength * 6;
   holdPieceBackground.height = blockLength * 4;
-  DrawRectangleRec(holdPieceBackground, GRAY);
-  DrawRectangleLinesEx(holdPieceBackground, blockLength / 4, BLACK);
+  DrawRectangleRec(holdPieceBackground, PIECES_BACKGROUND_COLOR);
+  DrawRectangleLinesEx(holdPieceBackground, blockLength / 4, PIECE_BOX_COLOR);
 
-  Color holdColor = playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : DARKGRAY;
+  Color holdColor = playfield.canSwap ? getTetrominoColor(playfield.holdingPiece) : UNAVAILABLE_HOLD_PIECE_COLOR;
   drawPiece(initialTetrominoMap(playfield.holdingPiece), holdColor, -5, 4 + Playfield::VISIBLE_HEIGHT);
 }
 
@@ -212,7 +227,7 @@ void Game::DrawBackToBack() const {
 void Game::DrawScore() const {
   Rectangle scoreNumberBlock = getBlockRectangle(Playfield::WIDTH + 1, Playfield::HEIGHT - 2);
   std::string score = std::format("{:09}", playfield.score);
-  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y + blockLength * 0.5, fontSize, BLACK);
+  DrawText(score.c_str(), scoreNumberBlock.x, scoreNumberBlock.y + blockLength * 0.5, fontSize, INFO_TEXT_COLOR);
 }
 
 void Game::DrawPauseMenu() const {
@@ -220,25 +235,25 @@ void Game::DrawPauseMenu() const {
 
   const float screenWidth = GetScreenWidth();
   const float screenHeight = GetScreenHeight();
-  DrawRectangle(0, 0, screenWidth, screenHeight, { 0, 0, 0, 100 });
+  DrawRectangle(0, 0, screenWidth, screenHeight, DARKEN_COLOR);
 
   if (playfield.hasLost) {
     DrawText("YOU LOST",
       (screenWidth - MeasureText("YOU LOST", fontSizeBig)) / 2.0,
-      screenHeight / 2.0, fontSizeBig, RED);
+      screenHeight / 2.0, fontSizeBig, YOU_LOST_COLOR);
 
   } else if (paused) {
     DrawText("GAME PAUSED",
       (screenWidth - MeasureText("GAME PAUSED", fontSizeBig)) / 2.0,
-      screenHeight / 2.0, fontSizeBig, BLUE);
+      screenHeight / 2.0, fontSizeBig, GAME_PAUSED_COLOR);
   }
   DrawText("Press Esc to quit",
     (screenWidth - MeasureText("Press Enter to quit", fontSize)) / 2.0,
-    screenHeight / 2.0 + fontSizeBig, fontSize, WHITE);
+    screenHeight / 2.0 + fontSizeBig, fontSize, QUIT_COLOR);
 }
 
 void Game::draw() const {
-  ClearBackground(LIGHTGRAY);
+  ClearBackground(BACKGROUND_COLOR);
   DrawTetrion();
   DrawPieces();
   DrawNextComingPieces();
@@ -251,7 +266,7 @@ void Game::draw() const {
 }
 
 void Game::run() {
-  while (!IsKeyPressed(KEY_ESCAPE) || !paused) {
+  while (!IsKeyPressed(KEY_ESCAPE) || !(paused || playfield.hasLost)) {
     update();
     BeginDrawing();
     draw();

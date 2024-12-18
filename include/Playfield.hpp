@@ -74,9 +74,14 @@ private:
   void updateScore(std::size_t, SpinType);
   bool isAllClear() const;
   void clearLines();
+
   void swapTetromino();
   void replaceNextPiece();
   void updateTimers();
+  void handleSpecialInput();
+  void handleShiftInput();
+  void handleRotationInput();
+  bool handleDropInput();
   FallingPiece getGhostPiece() const;
 };
 
