@@ -2,6 +2,7 @@
 #define PLAYFIELD_H
 
 #include "NextQueue.hpp"
+#include "Controller.hpp"
 
 enum class MessageType : unsigned char {
   SINGLE,
@@ -61,7 +62,7 @@ private:
 
 public:
   Playfield();
-  bool update();
+  bool update(const Controller&);
   void restart();
 
 private:
@@ -78,10 +79,10 @@ private:
   void swapTetromino();
   void replaceNextPiece();
   void updateTimers();
-  void handleSpecialInput();
-  void handleShiftInput();
-  void handleRotationInput();
-  bool handleDropInput();
+  void handleSpecialInput(const Controller&);
+  void handleShiftInput(const Controller&);
+  void handleRotationInput(const Controller&);
+  bool handleDropInput(const Controller&);
   FallingPiece getGhostPiece() const;
 };
 

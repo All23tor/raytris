@@ -4,8 +4,8 @@
 #include "raylib.h"
 #include <format>
 
-namespace { 
-  constexpr float HEIGHT_SCALE_FACTOR = 0.80; 
+namespace {
+  constexpr float HEIGHT_SCALE_FACTOR = 0.80;
   constexpr Color BACKGROUND_COLOR = LIGHTGRAY;
   constexpr Color DEFAULT_PRETTY_OUTLINE = BLACK;
   constexpr Color TETRION_BACKGROUND_COLOR = BLACK;
@@ -42,14 +42,47 @@ constexpr Color getTetrominoColor(Tetromino tetromino) {
   }
 }
 
+const Controller Game::KEYBOARD_CONTROLS{
+  []() -> bool {return IsKeyPressed(KEY_R);},
+  []() -> bool {return IsKeyPressed(KEY_C);},
+  []() -> bool {return IsKeyPressed(KEY_LEFT);},
+  []() -> bool {return IsKeyPressed(KEY_RIGHT);},
+  []() -> bool {return IsKeyDown(KEY_LEFT);},
+  []() -> bool {return IsKeyDown(KEY_RIGHT);},
+  []() -> bool {return IsKeyPressed(KEY_UP);},
+  []() -> bool {return IsKeyPressed(KEY_Z);},
+  []() -> bool {return IsKeyPressed(KEY_A);},
+  []() -> bool {return IsKeyPressed(KEY_SPACE);},
+  []() -> bool {return IsKeyDown(KEY_DOWN);},
+  []() -> bool {return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z);},
+  []() -> bool {return IsKeyPressed(KEY_ENTER);},
+  []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
+};
+
+// Controller keyboard2{
+// []() -> bool {return IsKeyPressed(KEY_R);},
+// []() -> bool {return IsKeyPressed(KEY_LEFT_SHIFT);},
+// []() -> bool {return IsKeyPressed(KEY_A);},
+// []() -> bool {return IsKeyPressed(KEY_D);},
+// []() -> bool {return IsKeyDown(KEY_A);},
+// []() -> bool {return IsKeyDown(KEY_D);},
+// []() -> bool {return IsKeyPressed(KEY_RIGHT);},
+// []() -> bool {return IsKeyPressed(KEY_LEFT);},
+// []() -> bool {return IsKeyPressed(KEY_UP);},
+// []() -> bool {return IsKeyPressed(KEY_SPACE);},
+// []() -> bool {return IsKeyDown(KEY_DOWN);},
+// []() -> bool {return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z);},
+// []() -> bool {return IsKeyPressed(KEY_ENTER);},
+// []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
+// };
+
 Game::Game() :
   blockLength(HEIGHT_SCALE_FACTOR* GetScreenHeight() / (Playfield::VISIBLE_HEIGHT)),
   fontSize(blockLength * 2),
   fontSizeBig(blockLength * 5),
   fontSizeSmall(blockLength),
-  position({
-    (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2,
-    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }) {
+  position({ (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2, (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2 }),
+  controller(KEYBOARD_CONTROLS) {
   undoMoveStack.push(playfield);
 }
 
@@ -71,7 +104,7 @@ inline Rectangle Game::getBlockRectangle(int i, int j) const {
 }
 
 void Game::update() {
-  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z)) {
+  if (controller.checkUndoInput()) {
     if (!undoMoveStack.empty()) {
       playfield = undoMoveStack.top();
       undoMoveStack.pop();
@@ -80,9 +113,9 @@ void Game::update() {
     }
   }
 
-  if (IsKeyPressed(KEY_ENTER)) paused = !paused;
+  if (controller.checkPauseInput()) paused = !paused;
   if (paused) return;
-  if (playfield.update()) undoMoveStack.push(playfield);
+  if (playfield.update(controller)) undoMoveStack.push(playfield);
 }
 
 void Game::DrawTetrion() const {
@@ -266,7 +299,7 @@ void Game::draw() const {
 }
 
 void Game::run() {
-  while (!IsKeyPressed(KEY_ESCAPE) || !(paused || playfield.hasLost)) {
+  while (!controller.checkQuitInput() || !(paused || playfield.hasLost)) {
     update();
     BeginDrawing();
     draw();

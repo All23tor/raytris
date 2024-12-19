@@ -1,21 +1,8 @@
 #include "raylib.h"
 #include "Playfield.hpp"
 #include <algorithm>
-#include <functional>
 
-namespace {
-  std::function<bool()> checkRestartInput = []() -> bool {return IsKeyPressed(KEY_R);};
-  std::function<bool()> checkSwapInput = []() -> bool {return IsKeyPressed(KEY_C);};
-  std::function<bool()> checkLeftInput = []() -> bool {return IsKeyPressed(KEY_LEFT);};
-  std::function<bool()> checkRightInput = []() -> bool {return IsKeyPressed(KEY_RIGHT);};
-  std::function<bool()> checkLeftDasInput = []() -> bool {return IsKeyDown(KEY_LEFT);};
-  std::function<bool()> checkRightDasInput = []() -> bool {return IsKeyDown(KEY_RIGHT);};
-  std::function<bool()> checkClockwiseInput = []() -> bool {return IsKeyPressed(KEY_UP);};
-  std::function<bool()> checkCounterClockwiseInput = []() -> bool {return IsKeyPressed(KEY_Z);};
-  std::function<bool()> checkOneEightyInput = []() -> bool {return IsKeyPressed(KEY_A);};
-  std::function<bool()> checkHardDropInput = []() -> bool {return IsKeyPressed(KEY_SPACE);};
-  std::function<bool()> checkSoftDropInput = []() -> bool {return IsKeyDown(KEY_DOWN);};
-}
+
 
 Playfield::Playfield() : fallingPiece(Tetromino::Empty, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION) {
   std::array<Tetromino, WIDTH> emptyRow;
@@ -273,24 +260,24 @@ void Playfield::updateTimers() {
     message.timer -= 1;
 }
 
-void Playfield::handleSpecialInput() {
-  if (checkRestartInput()) restart();
-  if (checkSwapInput() && canSwap) {
+void Playfield::handleSpecialInput(const Controller& controller) {
+  if (controller.checkRestartInput()) restart();
+  if (controller.checkSwapInput() && canSwap) {
     swapTetromino();
     wasLastMoveRotation = false;
   }
 }
 
-void Playfield::handleShiftInput() {
-  if (checkLeftInput()) {
+void Playfield::handleShiftInput(const Controller& controller) {
+  if (controller.checkLeftInput()) {
     if (tryShifting(Shift::Left))
       wasLastMoveRotation = false;
-  } else if (checkRightInput()) {
+  } else if (controller.checkRightInput()) {
     if (tryShifting(Shift::Right))
       wasLastMoveRotation = false;
   }
 
-  if (checkLeftDasInput()) {
+  if (controller.checkLeftDasInput()) {
     if (signedFramesPressed < 0)
       signedFramesPressed = 0;
     signedFramesPressed += 1;
@@ -300,7 +287,7 @@ void Playfield::handleShiftInput() {
       else
         wasLastMoveRotation = false;
     }
-  } else if (checkRightDasInput()) {
+  } else if (controller.checkRightDasInput()) {
     if (signedFramesPressed > 0)
       signedFramesPressed = 0;
     signedFramesPressed -= 1;
@@ -315,21 +302,21 @@ void Playfield::handleShiftInput() {
   }
 }
 
-void Playfield::handleRotationInput() {
-  if (checkClockwiseInput()) {
+void Playfield::handleRotationInput(const Controller& controller) {
+  if (controller.checkClockwiseInput()) {
     if (tryRotating(RotationType::Clockwise))
       wasLastMoveRotation = true;
-  } else if (checkCounterClockwiseInput()) {
+  } else if (controller.checkCounterClockwiseInput()) {
     if (tryRotating(RotationType::CounterClockwise))
       wasLastMoveRotation = true;
-  } else if (checkOneEightyInput()) {
+  } else if (controller.checkOneEightyInput()) {
     if (tryRotating(RotationType::OneEighty))
       wasLastMoveRotation = true;
   }
 }
 
-bool Playfield::handleDropInput() {
-  if (checkHardDropInput()) {
+bool Playfield::handleDropInput(const Controller& controller) {
+  if (controller.checkHardDropInput()) {
     // Hard Drop
     if (isValidPosition(fallingPiece.fallen())) wasLastMoveRotation = false;
     fallingPiece = getGhostPiece();
@@ -338,7 +325,7 @@ bool Playfield::handleDropInput() {
   }
 
   bool isFallStep = false;
-  if (checkSoftDropInput()) {
+  if (controller.checkSoftDropInput()) {
     // Soft Drop
     if (framesSinceLastFall >= SOFT_DROP_FRAMES) {
       framesSinceLastFall = 0;
@@ -369,13 +356,13 @@ bool Playfield::handleDropInput() {
   return false;
 }
 
-bool Playfield::update() {
+bool Playfield::update(const Controller& controller) {
   if (hasLost) return false;
-  handleSpecialInput();
+  handleSpecialInput(controller);
   updateTimers();
   nextQueue.pushNewBagIfNeeded();
   if (fallingPiece.tetromino == Tetromino::Empty) replaceNextPiece();
-  handleShiftInput();
-  handleRotationInput();
-  return handleDropInput();
+  handleShiftInput(controller);
+  handleRotationInput(controller);
+  return handleDropInput(controller);
 }

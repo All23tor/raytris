@@ -18,6 +18,9 @@ class Game {
   bool paused = false;
   // Previous moves
   std::stack<Playfield> undoMoveStack;
+  // Controller
+  const Controller controller;
+  const static Controller KEYBOARD_CONTROLS;
 
 private:
   Rectangle getBlockRectangle(int, int) const;
@@ -33,7 +36,7 @@ private:
   void DrawPauseMenu() const;
   void update();
   void draw() const;
-  void drawPiece(const TetrominoMap &, Color, int, int) const; 
+  void drawPiece(const TetrominoMap&, Color, int, int) const;
 
 public:
   Game();
