@@ -19,28 +19,28 @@ namespace {
   constexpr Color GAME_PAUSED_COLOR = BLUE;
   constexpr Color QUIT_COLOR = WHITE;
   constexpr Color DARKEN_COLOR = { 0, 0, 0, 100 };
-};
 
-constexpr Color getTetrominoColor(Tetromino tetromino) {
-  switch (tetromino) {
-  case Tetromino::I:
-    return (Color) { 49, 199, 239, 255 };
-  case Tetromino::O:
-    return (Color) { 247, 211, 8, 255 };
-  case Tetromino::T:
-    return (Color) { 173, 77, 156, 255 };
-  case Tetromino::S:
-    return (Color) { 66, 182, 66, 255 };
-  case Tetromino::Z:
-    return (Color) { 239, 32, 41, 255 };
-  case Tetromino::J:
-    return (Color) { 90, 101, 173, 255 };
-  case Tetromino::L:
-    return (Color) { 239, 121, 33, 255 };
-  default:
-    return BLANK;
+  constexpr Color getTetrominoColor(Tetromino tetromino) {
+    switch (tetromino) {
+    case Tetromino::I:
+      return (Color) { 49, 199, 239, 255 };
+    case Tetromino::O:
+      return (Color) { 247, 211, 8, 255 };
+    case Tetromino::T:
+      return (Color) { 173, 77, 156, 255 };
+    case Tetromino::S:
+      return (Color) { 66, 182, 66, 255 };
+    case Tetromino::Z:
+      return (Color) { 239, 32, 41, 255 };
+    case Tetromino::J:
+      return (Color) { 90, 101, 173, 255 };
+    case Tetromino::L:
+      return (Color) { 239, 121, 33, 255 };
+    default:
+      return BLANK;
+    }
   }
-}
+};
 
 const Controller Game::KEYBOARD_CONTROLS{
   []() -> bool {return IsKeyPressed(KEY_R);},
@@ -59,22 +59,22 @@ const Controller Game::KEYBOARD_CONTROLS{
   []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
 };
 
-// Controller keyboard2{
-// []() -> bool {return IsKeyPressed(KEY_R);},
-// []() -> bool {return IsKeyPressed(KEY_LEFT_SHIFT);},
-// []() -> bool {return IsKeyPressed(KEY_A);},
-// []() -> bool {return IsKeyPressed(KEY_D);},
-// []() -> bool {return IsKeyDown(KEY_A);},
-// []() -> bool {return IsKeyDown(KEY_D);},
-// []() -> bool {return IsKeyPressed(KEY_RIGHT);},
-// []() -> bool {return IsKeyPressed(KEY_LEFT);},
-// []() -> bool {return IsKeyPressed(KEY_UP);},
-// []() -> bool {return IsKeyPressed(KEY_SPACE);},
-// []() -> bool {return IsKeyDown(KEY_DOWN);},
-// []() -> bool {return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z);},
-// []() -> bool {return IsKeyPressed(KEY_ENTER);},
-// []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
-// };
+const Controller Game::KEYBOARD_CONTROLS2{
+[]() -> bool {return IsKeyPressed(KEY_R);},
+[]() -> bool {return IsKeyPressed(KEY_LEFT_SHIFT);},
+[]() -> bool {return IsKeyPressed(KEY_A);},
+[]() -> bool {return IsKeyPressed(KEY_D);},
+[]() -> bool {return IsKeyDown(KEY_A);},
+[]() -> bool {return IsKeyDown(KEY_D);},
+[]() -> bool {return IsKeyPressed(KEY_RIGHT);},
+[]() -> bool {return IsKeyPressed(KEY_LEFT);},
+[]() -> bool {return IsKeyPressed(KEY_UP);},
+[]() -> bool {return IsKeyPressed(KEY_SPACE);},
+[]() -> bool {return IsKeyDown(KEY_DOWN);},
+[]() -> bool {return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z);},
+[]() -> bool {return IsKeyPressed(KEY_ENTER);},
+[]() -> bool {return IsKeyPressed(KEY_ESCAPE);},
+};
 
 Game::Game() :
   blockLength(HEIGHT_SCALE_FACTOR* GetScreenHeight() / (Playfield::VISIBLE_HEIGHT)),

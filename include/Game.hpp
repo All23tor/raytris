@@ -21,6 +21,7 @@ class Game {
   // Controller
   const Controller controller;
   const static Controller KEYBOARD_CONTROLS;
+  const static Controller KEYBOARD_CONTROLS2;
 
 private:
   Rectangle getBlockRectangle(int, int) const;

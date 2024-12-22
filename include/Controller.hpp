@@ -1,18 +1,38 @@
 #include <functional>
 
+using Input = std::function<bool()>;
+
 struct Controller {
-  const std::function<bool()> checkRestartInput;
-  const std::function<bool()> checkSwapInput;
-  const std::function<bool()> checkLeftInput;
-  const std::function<bool()> checkRightInput;
-  const std::function<bool()> checkLeftDasInput;
-  const std::function<bool()> checkRightDasInput;
-  const std::function<bool()> checkClockwiseInput;
-  const std::function<bool()> checkCounterClockwiseInput;
-  const std::function<bool()> checkOneEightyInput;
-  const std::function<bool()> checkHardDropInput;
-  const std::function<bool()> checkSoftDropInput;
-  const std::function<bool()> checkUndoInput;
-  const std::function<bool()> checkPauseInput;
-  const std::function<bool()> checkQuitInput;
+  const Input checkRestartInput;
+  const Input checkSwapInput;
+  const Input checkLeftInput;
+  const Input checkRightInput;
+  const Input checkLeftDasInput;
+  const Input checkRightDasInput;
+  const Input checkClockwiseInput;
+  const Input checkCounterClockwiseInput;
+  const Input checkOneEightyInput;
+  const Input checkHardDropInput;
+  const Input checkSoftDropInput;
+  const Input checkUndoInput;
+  const Input checkPauseInput;
+  const Input checkQuitInput;
+
+  Controller() = delete;
+  Controller(
+    Input restartInput,
+    Input swapInput,
+    Input leftInput,
+    Input rightInput,
+    Input leftDasInput,
+    Input rightDasInput,
+    Input clockwiseInput,
+    Input counterClockwiseInput,
+    Input oneEightyInput,
+    Input hardDropInput,
+    Input softDropInput,
+    Input undoInput,
+    Input pauseInput,
+    Input quitInput
+  );
 };

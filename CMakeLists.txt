@@ -27,6 +27,7 @@ set(SOURCES
     ./src/Menu.cpp
     ./src/Playfield.cpp
     ./src/NextQueue.cpp
+    ./src/Controller.cpp
     ./src/Game.cpp
     ./src/Raytris.cpp
     ./src/main.cpp
