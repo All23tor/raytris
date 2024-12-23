@@ -1,3 +1,6 @@
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
+
 #include <functional>
 
 using Input = std::function<bool()>;
@@ -36,3 +39,5 @@ struct Controller {
     Input quitInput
   );
 };
+
+#endif

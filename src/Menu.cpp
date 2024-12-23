@@ -2,12 +2,12 @@
 #include "raylib.h"
 #include <format>
 
-Menu::Menu(): windowResolution{INITIAL_WIDTH, INITIAL_HEIGHT} {}
+Menu::Menu(): windowResolution{InitialWidth, InitialHeight} {}
 
 const std::pair<int, int> Menu::getResolution(Resolutions resolution) const {
   switch (resolution) {
   case Resolutions::Small:
-    return { INITIAL_WIDTH, INITIAL_HEIGHT };
+    return { InitialWidth, InitialHeight };
   case Resolutions::Medium:
     return { 960, 540 };
   case Resolutions::Big:

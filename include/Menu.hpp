@@ -7,8 +7,8 @@ enum class Resolutions { Small, Medium, Big, FullScreen };
 
 class Menu {
 public:
-  static constexpr int INITIAL_WIDTH = 640;
-  static constexpr int INITIAL_HEIGHT = 360;
+  static constexpr int InitialWidth = 640;
+  static constexpr int InitialHeight = 360;
 
 private:
   Resolutions resolution = Resolutions::Small;

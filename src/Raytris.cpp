@@ -4,7 +4,7 @@
 #include <raylib.h>
 
 Raytris::Raytris() {
-  InitWindow(Menu::INITIAL_WIDTH, Menu::INITIAL_HEIGHT, "RayTris");
+  InitWindow(Menu::InitialWidth, Menu::InitialHeight, "RayTris");
   SetTargetFPS(60);
 }
 

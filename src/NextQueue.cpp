@@ -4,7 +4,7 @@
 void NextQueue::pushNewBag() {
   using enum Tetromino;
   queue.insert(queue.begin(), { I, O, T, S, Z, J, L });
-  std::shuffle(queue.begin(), queue.begin() + SIZE_OF_BAG, generator);
+  std::shuffle(queue.begin(), queue.begin() + SizeOfBag, generator);
 }
 
 NextQueue::NextQueue() {
@@ -18,7 +18,7 @@ Tetromino NextQueue::getNextTetromino() {
 }
 
 void NextQueue::pushNewBagIfNeeded() {
-  if (queue.size() < SIZE_OF_BAG) {
+  if (queue.size() < SizeOfBag) {
     pushNewBag();
   }
 }
