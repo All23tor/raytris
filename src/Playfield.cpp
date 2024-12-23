@@ -1,11 +1,9 @@
-#include "raylib.h"
 #include "Playfield.hpp"
+#include <format>
 #include <algorithm>
 
-
-
-Playfield::Playfield() : fallingPiece(Tetromino::Empty, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION) {
-  std::array<Tetromino, WIDTH> emptyRow;
+Playfield::Playfield() : fallingPiece(Tetromino::Empty, InitialHorizontalPosition, InitialVerticalPosition) {
+  std::array<Tetromino, Width> emptyRow;
   emptyRow.fill(Tetromino::Empty);
   grid.fill(emptyRow);
 }
@@ -14,12 +12,16 @@ void Playfield::restart() {
   *this = Playfield();
 }
 
+bool Playfield::lost() const {
+  return hasLost;
+}
+
 bool Playfield::isValidPosition(const FallingPiece& piece) const {
   return std::all_of(piece.tetrominoMap.begin(), piece.tetrominoMap.end(),
     [&](const CoordinatePair& coordinates) {
     int i = coordinates.x + piece.horizontalPosition;
     int j = coordinates.y + piece.verticalPosition;
-    return i >= 0 && i < WIDTH && j >= 0 && j < HEIGHT && grid[j][i] == Tetromino::Empty;
+    return i >= 0 && i < Width && j >= 0 && j < Height && grid[j][i] == Tetromino::Empty;
   });
 }
 
@@ -91,14 +93,14 @@ SpinType Playfield::isSpin() const {
     [&](const CoordinatePair& coordinates) {
     int i = fallingPiece.horizontalPosition + coordinates.x;
     int j = fallingPiece.verticalPosition + coordinates.y;
-    return i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT || grid[j][i] != Tetromino::Empty;
+    return i < 0 || i >= Width || j < 0 || j >= Height || grid[j][i] != Tetromino::Empty;
   });
 
   int backCornerCount = std::count_if(backCorners.begin(), backCorners.end(),
     [&](const CoordinatePair& coordinates) {
     int i = fallingPiece.horizontalPosition + coordinates.x;
     int j = fallingPiece.verticalPosition + coordinates.y;
-    return i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT || grid[j][i] != Tetromino::Empty;
+    return i < 0 || i >= Width || j < 0 || j >= Height || grid[j][i] != Tetromino::Empty;
   });
 
   if (frontCornerCount + backCornerCount < 3) return SpinType::No;
@@ -114,7 +116,7 @@ void Playfield::solidify() {
     int j = pair.y + fallingPiece.verticalPosition;
     grid[j][i] = fallingPiece.tetromino;
 
-    if (j >= VISIBLE_HEIGHT)
+    if (j >= VisibleHeight)
       anyMinoSolidifedAboveVisibleHeight = true;
   }
 
@@ -149,7 +151,7 @@ bool Playfield::isAllClear() const {
 
 void Playfield::clearLines() {
   std::vector<std::size_t> rowsToClear;
-  for (std::size_t j = 0; j < HEIGHT && rowsToClear.size() != 4; ++j) {
+  for (std::size_t j = 0; j < Height && rowsToClear.size() != 4; ++j) {
     bool isRowFull = std::all_of(grid[j].begin(), grid[j].end(),
       [](auto mino) {return mino != Tetromino::Empty;}
     );
@@ -179,50 +181,50 @@ void Playfield::updateScore(std::size_t clearedLines, SpinType spinType) {
 
   if (spinType == SpinType::Proper) {
     if (clearedLines == 1) {
-      message = MessageType::SINGLE;
+      message = MessageType::Single;
       score += 800 * b2bFactor;
     } else if (clearedLines == 2) {
-      message = MessageType::DOUBLE;
+      message = MessageType::Double;
       score += 1200 * b2bFactor;
     } else if (clearedLines == 3) {
-      message = MessageType::TRIPLE;
+      message = MessageType::Triple;
       score += 1600 * b2bFactor;
     } else {
-      message = MessageType::EMPTY;
+      message = MessageType::Empty;
       score += 400 * b2bFactor;
     }
     message.spinType = SpinType::Proper;
   } else if (spinType == SpinType::Mini) {
     if (clearedLines == 1) {
-      message = MessageType::SINGLE;
+      message = MessageType::Single;
       score += 200 * b2bFactor;
     } else if (clearedLines == 2) {
-      message = MessageType::DOUBLE;
+      message = MessageType::Double;
       score += 400 * b2bFactor;
     } else {
-      message = MessageType::EMPTY;
+      message = MessageType::Empty;
       score += 100 * b2bFactor;
     }
     message.spinType = SpinType::Mini;
   } else {
     if (clearedLines == 1) {
-      message = MessageType::SINGLE;
+      message = MessageType::Single;
       score += 100 * b2bFactor;
     } else if (clearedLines == 2) {
-      message = MessageType::DOUBLE;
+      message = MessageType::Double;
       score += 300 * b2bFactor;
     } else if (clearedLines == 3) {
-      message = MessageType::TRIPLE;
+      message = MessageType::Triple;
       score += 500 * b2bFactor;
     } else if (clearedLines == 4) {
-      message = MessageType::TETRIS;
+      message = MessageType::Tetris;
       score += 800 * b2bFactor;
     }
   }
 
 
   if (isAllClear()) {
-    message = MessageType::ALLCLEAR;
+    message = MessageType::AllClear;
     score += 3500 * b2bFactor;
   }
 }
@@ -237,7 +239,7 @@ FallingPiece Playfield::getGhostPiece() const {
 
 void Playfield::swapTetromino() {
   Tetromino currentTetromino = fallingPiece.tetromino;
-  fallingPiece = FallingPiece(holdingPiece, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION);
+  fallingPiece = FallingPiece(holdingPiece, InitialHorizontalPosition, InitialVerticalPosition);
   holdingPiece = currentTetromino;
   canSwap = false;
   framesSinceLastFall = 0;
@@ -247,7 +249,7 @@ void Playfield::swapTetromino() {
 
 void Playfield::replaceNextPiece() {
   Tetromino newTetromino = nextQueue.getNextTetromino();
-  fallingPiece = FallingPiece(newTetromino, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION);
+  fallingPiece = FallingPiece(newTetromino, InitialHorizontalPosition, InitialVerticalPosition);
   framesSinceLastFall = 0;
   lockDelayFrames = 0;
   lockDelayMoves = 0;
@@ -281,7 +283,7 @@ void Playfield::handleShiftInput(const Controller& controller) {
     if (signedFramesPressed < 0)
       signedFramesPressed = 0;
     signedFramesPressed += 1;
-    while (signedFramesPressed > DAS) {
+    while (signedFramesPressed > Das) {
       if (!tryShifting(Shift::Left))
         break;
       else
@@ -291,7 +293,7 @@ void Playfield::handleShiftInput(const Controller& controller) {
     if (signedFramesPressed > 0)
       signedFramesPressed = 0;
     signedFramesPressed -= 1;
-    while (-signedFramesPressed > DAS) {
+    while (-signedFramesPressed > Das) {
       if (!tryShifting(Shift::Right))
         break;
       else
@@ -327,11 +329,11 @@ bool Playfield::handleDropInput(const Controller& controller) {
   bool isFallStep = false;
   if (controller.checkSoftDropInput()) {
     // Soft Drop
-    if (framesSinceLastFall >= SOFT_DROP_FRAMES) {
+    if (framesSinceLastFall >= SoftDropFrames) {
       framesSinceLastFall = 0;
       isFallStep = true;
     }
-  } else if (framesSinceLastFall >= GRAVITY_FRAMES) {
+  } else if (framesSinceLastFall >= GravityFrames) {
     // Gravity
     framesSinceLastFall = 0;
     isFallStep = true;
@@ -349,7 +351,7 @@ bool Playfield::handleDropInput(const Controller& controller) {
     return false;
   }
   // Is touching ground
-  if (lockDelayFrames > MAX_LOCK_DELAY_FRAMES || lockDelayMoves > MAX_LOCK_DELAY_RESETS) {
+  if (lockDelayFrames > MaxLockDelayFrames || lockDelayMoves > MaxLockDelayResets) {
     solidify();
     return true;
   }
@@ -365,4 +367,198 @@ bool Playfield::update(const Controller& controller) {
   handleShiftInput(controller);
   handleRotationInput(controller);
   return handleDropInput(controller);
+}
+
+namespace {
+  constexpr Color getTetrominoColor(Tetromino tetromino) {
+    switch (tetromino) {
+    case Tetromino::I:
+      return (Color) { 49, 199, 239, 255 };
+    case Tetromino::O:
+      return (Color) { 247, 211, 8, 255 };
+    case Tetromino::T:
+      return (Color) { 173, 77, 156, 255 };
+    case Tetromino::S:
+      return (Color) { 66, 182, 66, 255 };
+    case Tetromino::Z:
+      return (Color) { 239, 32, 41, 255 };
+    case Tetromino::J:
+      return (Color) { 90, 101, 173, 255 };
+    case Tetromino::L:
+      return (Color) { 239, 121, 33, 255 };
+    default:
+      return BLANK;
+    }
+  }
+
+  void DrawRectangleRecPretty(Rectangle rec, Color fill, float blockLength, Color outline = DrawingDetails::DefaultPrettyOutline) {
+    if (fill.a == 0)
+      return;
+
+    outline.a /= 8;
+    DrawRectangleRec(rec, fill);
+    DrawRectangle(rec.x + blockLength / 3, rec.y + blockLength / 3, rec.width / 3,
+      rec.height / 3, outline);
+    DrawRectangleLinesEx(rec, blockLength / 8, outline);
+  }
+
+  inline Rectangle getBlockRectangle(int i, int j, const DrawingDetails& drawingDetails) {
+    return { drawingDetails.position.x + i * drawingDetails.blockLength,
+            drawingDetails.position.y + (j - static_cast<int>(Playfield::VisibleHeight)) * drawingDetails.blockLength,
+            drawingDetails.blockLength, drawingDetails.blockLength };
+  }
+
+  void drawPiece(const TetrominoMap& map, Color color, int horizontalOffset, int verticalOffset, const DrawingDetails& drawingDetails) {
+  for (const CoordinatePair& coordinates : map) {
+    int i = coordinates.x + horizontalOffset;
+    int j = coordinates.y + verticalOffset;
+    DrawRectangleRecPretty(getBlockRectangle(i, j, drawingDetails), color, drawingDetails.blockLength);
+  }
+}
+};
+
+void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
+  Rectangle tetrion = Rectangle{
+      drawingDetails.position.x, drawingDetails.position.y,
+      drawingDetails.blockLength * Width, drawingDetails.blockLength * VisibleHeight };
+  DrawRectangleRec(tetrion, drawingDetails.TetrionBackgroundColor);
+  DrawRectangleLinesEx(tetrion, drawingDetails.blockLength / 10, drawingDetails.GridlineColor);
+
+  for (int i = 1; i < Width; ++i) {
+    Rectangle rec = getBlockRectangle(i, VisibleHeight, drawingDetails);
+    rec.x = std::floor(rec.x);
+    rec.y = std::floor(rec.y);
+    DrawLineEx({ rec.x, rec.y },
+      { rec.x, std::floor(rec.y + VisibleHeight * drawingDetails.blockLength) },
+      drawingDetails.blockLength / 10, drawingDetails.GridlineColor);
+  }
+
+  for (int j = 1; j < VisibleHeight; ++j) {
+    Rectangle rec = getBlockRectangle(0, j + VisibleHeight, drawingDetails);
+    rec.x = std::floor(rec.x);
+    rec.y = std::floor(rec.y);
+    DrawLineEx({ rec.x, rec.y },
+      { std::floor(rec.x + drawingDetails.blockLength * Width), rec.y },
+      drawingDetails.blockLength / 10, drawingDetails.GridlineColor);
+  }
+
+  for (int j = 0; j < Height; ++j) {
+    for (int i = 0; i < Width; ++i) {
+      DrawRectangleRecPretty(getBlockRectangle(i, j, drawingDetails), getTetrominoColor(grid[j][i]), drawingDetails.blockLength);
+    }
+  }
+}
+
+void Playfield::DrawPieces(const DrawingDetails& drawingDetails) const {
+  const FallingPiece ghostPiece = getGhostPiece();
+  drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition, drawingDetails);
+  drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
+    fallingPiece.horizontalPosition, fallingPiece.verticalPosition, drawingDetails);
+}
+
+void Playfield::DrawNextComingPieces(const DrawingDetails& drawingDetails) const {
+  Rectangle nextTextBlock = getBlockRectangle(Width + 1, VisibleHeight, drawingDetails);
+  Rectangle nextQueueBackground = getBlockRectangle(Width + 1, VisibleHeight + 2, drawingDetails);
+  nextQueueBackground.width = drawingDetails.blockLength * 6;
+  nextQueueBackground.height = drawingDetails.blockLength * (3 * (NextQueue::NextComingSize)+1);
+  DrawRectangleRec(nextQueueBackground, drawingDetails.PiecesBackGroundColor);
+  DrawRectangleLinesEx(nextQueueBackground, drawingDetails.blockLength / 4, drawingDetails.PieceBoxColor);
+  DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, drawingDetails.fontSize, drawingDetails.InfoTextColor);
+  for (int id = 0; id < NextQueue::NextComingSize; ++id) {
+    Tetromino currentTetromino = nextQueue[id];
+    drawPiece(initialTetrominoMap(currentTetromino), getTetrominoColor(currentTetromino),
+      Width + 3, 3 * (id + 1) + VisibleHeight + 1, drawingDetails);
+  }
+}
+
+void Playfield::DrawHoldPiece(const DrawingDetails& drawingDetails) const {
+  Rectangle holdTextBlock = getBlockRectangle(-7, VisibleHeight, drawingDetails);
+  DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, drawingDetails.fontSize, drawingDetails.InfoTextColor);
+  Rectangle holdPieceBackground = getBlockRectangle(-7, VisibleHeight + 2, drawingDetails);
+  holdPieceBackground.width = drawingDetails.blockLength * 6;
+  holdPieceBackground.height = drawingDetails.blockLength * 4;
+  DrawRectangleRec(holdPieceBackground, drawingDetails.PiecesBackGroundColor);
+  DrawRectangleLinesEx(holdPieceBackground, drawingDetails.blockLength / 4, drawingDetails.PieceBoxColor);
+
+  Color holdColor = canSwap ? getTetrominoColor(holdingPiece) : drawingDetails.UnavailableHoldPieceColor;
+  drawPiece(initialTetrominoMap(holdingPiece), holdColor, -5, 4 + VisibleHeight, drawingDetails);
+}
+
+void Playfield::DrawLineClearMessage(const DrawingDetails& drawingDetails) const {
+  if (message.timer <= 0) return;
+
+  Rectangle clearTextBlock = getBlockRectangle(drawingDetails.LeftBorder, Height - 4, drawingDetails);
+  const float colorScaleFactor = static_cast<float>(message.timer) / LineClearMessage::Duration;
+  std::string lineClearMessage;
+
+  Color textColor = BLANK;
+  unsigned char alpha = static_cast<unsigned char>(255 * colorScaleFactor);
+  switch (message.message) {
+  case MessageType::Single:
+    lineClearMessage = "SINGLE";
+    textColor = { 0, 0, 0, alpha };
+    break;
+  case MessageType::Double:
+    lineClearMessage = "DOUBLE";
+    textColor = { 235, 149, 52, alpha };
+    break;
+  case MessageType::Triple:
+    lineClearMessage = "TRIPLE";
+    textColor = { 88, 235, 52, alpha };
+    break;
+  case MessageType::Tetris:
+    lineClearMessage = "TETRIS";
+    textColor = { 52, 164, 236, alpha };
+    break;
+  case MessageType::AllClear:
+    lineClearMessage = "ALL\nCLEAR";
+    textColor = { 235, 52, 213, alpha };
+    break;
+  case MessageType::Empty:
+    lineClearMessage = "";
+  }
+  DrawText(lineClearMessage.c_str(), clearTextBlock.x, clearTextBlock.y, drawingDetails.fontSize, textColor);
+
+  if (message.spinType == SpinType::No) return;
+  Color tSpinTextColor = getTetrominoColor(Tetromino::T);
+  tSpinTextColor.a = alpha;
+  Rectangle tSpinTextBlock = getBlockRectangle(drawingDetails.LeftBorder, Height - 6, drawingDetails);
+  DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, drawingDetails.fontSize, tSpinTextColor);
+  if (message.spinType == SpinType::Mini) {
+    Rectangle miniTSpinTextBlock = getBlockRectangle(drawingDetails.LeftBorder, Height - 7, drawingDetails);
+    DrawText("MINI", miniTSpinTextBlock.x, miniTSpinTextBlock.y, drawingDetails.fontSizeSmall, tSpinTextColor);
+  }
+}
+
+void Playfield::DrawCombo(const DrawingDetails& drawingDetails) const {
+  if (combo < 2) return;
+  Rectangle comboTextBlock = getBlockRectangle(drawingDetails.LeftBorder, Height - 10, drawingDetails);
+  std::string comboText = std::format("{}", combo);
+  DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y, drawingDetails.fontSize, BLUE);
+  DrawText(comboText.c_str(), comboTextBlock.x + MeasureText("COMBO ", drawingDetails.fontSize), comboTextBlock.y, drawingDetails.fontSize, BLUE);
+}
+
+void Playfield::DrawBackToBack(const DrawingDetails& drawingDetails) const {
+  if (b2b < 2) return;
+  Rectangle b2bTextBlock = getBlockRectangle(drawingDetails.LeftBorder, Height - 12, drawingDetails);
+  std::string b2bText = std::format("{}", b2b - 1);
+  DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, drawingDetails.fontSize, BLUE);
+  DrawText(b2bText.c_str(), b2bTextBlock.x + MeasureText("B2B ", drawingDetails.fontSize), b2bTextBlock.y, drawingDetails.fontSize, BLUE);
+}
+
+void Playfield::DrawScore(const DrawingDetails& drawingDetails) const {
+  Rectangle scoreNumberBlock = getBlockRectangle(Width + 1, Height - 2, drawingDetails);
+  std::string scoreText = std::format("{:09}", score);
+  DrawText(scoreText.c_str(), scoreNumberBlock.x, scoreNumberBlock.y + drawingDetails.blockLength * 0.5, drawingDetails.fontSize, drawingDetails.InfoTextColor);
+}
+
+void Playfield::draw(const DrawingDetails& drawingDetails) const {
+  DrawTetrion(drawingDetails);
+  DrawPieces(drawingDetails);
+  DrawNextComingPieces(drawingDetails);
+  DrawHoldPiece(drawingDetails);
+  DrawLineClearMessage(drawingDetails);
+  DrawCombo(drawingDetails);
+  DrawBackToBack(drawingDetails);
+  DrawScore(drawingDetails);
 }

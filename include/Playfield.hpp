@@ -3,47 +3,46 @@
 
 #include "NextQueue.hpp"
 #include "Controller.hpp"
+#include "DrawingDetails.hpp"
 
 enum class MessageType : unsigned char {
-  SINGLE,
-  DOUBLE,
-  TRIPLE,
-  TETRIS,
-  ALLCLEAR,
-  EMPTY
+  Single,
+  Double,
+  Triple,
+  Tetris,
+  AllClear,
+  Empty
 };
 
 enum class SpinType { No, Proper, Mini };
 
 struct LineClearMessage {
-  static constexpr unsigned char DURATION = 180;
+  static constexpr unsigned char Duration = 180;
 
   MessageType message;
   unsigned char timer;
   SpinType spinType;
 
-  LineClearMessage() : message(MessageType::EMPTY), timer(0), spinType(SpinType::No) {}
-  LineClearMessage(MessageType type) : message(type), timer(DURATION), spinType(SpinType::No) {}
+  LineClearMessage() : message(MessageType::Empty), timer(0), spinType(SpinType::No) {}
+  LineClearMessage(MessageType type) : message(type), timer(Duration), spinType(SpinType::No) {}
 };
 
 class Playfield {
-  friend class Game;
-
 public:
-  static constexpr std::size_t WIDTH = 10;
-  static constexpr std::size_t HEIGHT = 40;
-  static constexpr std::size_t VISIBLE_HEIGHT = 20;
-  static constexpr std::size_t INITIAL_HORIZONTAL_POSITION = (WIDTH - 1) / 2;
-  static constexpr std::size_t INITIAL_VERTICAL_POSITION = VISIBLE_HEIGHT - 1;
-  static constexpr unsigned GRAVITY_FRAMES = 20;
-  static constexpr unsigned SOFT_DROP_FRAMES = 1;
-  static constexpr unsigned char MAX_LOCK_DELAY_FRAMES = 30;
-  static constexpr unsigned char MAX_LOCK_DELAY_RESETS = 15;
-  static constexpr unsigned char DAS = 7;
+  static constexpr std::size_t Width = 10;
+  static constexpr std::size_t Height = 40;
+  static constexpr std::size_t VisibleHeight = 20;
+  static constexpr std::size_t InitialHorizontalPosition = (Width - 1) / 2;
+  static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;
+  static constexpr unsigned GravityFrames = 20;
+  static constexpr unsigned SoftDropFrames = 1;
+  static constexpr unsigned char MaxLockDelayFrames = 30;
+  static constexpr unsigned char MaxLockDelayResets = 15;
+  static constexpr unsigned char Das = 7;
 
 private:
   // Game abstractions
-  std::array<std::array<Tetromino, WIDTH>, HEIGHT> grid;
+  std::array<std::array<Tetromino, Width>, Height> grid;
   FallingPiece fallingPiece;
   Tetromino holdingPiece = Tetromino::Empty;
   NextQueue nextQueue;
@@ -62,7 +61,9 @@ private:
 
 public:
   Playfield();
+  bool lost() const;
   bool update(const Controller&);
+  void draw(const DrawingDetails&) const;
   void restart();
 
 private:
@@ -84,6 +85,15 @@ private:
   void handleRotationInput(const Controller&);
   bool handleDropInput(const Controller&);
   FallingPiece getGhostPiece() const;
+
+  void DrawTetrion(const DrawingDetails&) const;
+  void DrawPieces(const DrawingDetails&) const;
+  void DrawNextComingPieces(const DrawingDetails&) const;
+  void DrawHoldPiece(const DrawingDetails&) const;
+  void DrawLineClearMessage(const DrawingDetails&) const;
+  void DrawCombo(const DrawingDetails&) const;
+  void DrawBackToBack(const DrawingDetails&) const;
+  void DrawScore(const DrawingDetails&) const;
 };
 
 #endif
