@@ -1,4 +1,4 @@
-#include "Game.hpp"
+#include "SinglePlayerGame.hpp"
 
 const Controller Game::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_R);},
@@ -17,33 +17,11 @@ const Controller Game::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
 };
 
-const Controller Game::KeyboardControls2{
-  []() -> bool {return IsKeyPressed(KEY_R);},
-  []() -> bool {return IsKeyPressed(KEY_LEFT_SHIFT);},
-  []() -> bool {return IsKeyPressed(KEY_A);},
-  []() -> bool {return IsKeyPressed(KEY_D);},
-  []() -> bool {return IsKeyDown(KEY_A);},
-  []() -> bool {return IsKeyDown(KEY_D);},
-  []() -> bool {return IsKeyPressed(KEY_RIGHT);},
-  []() -> bool {return IsKeyPressed(KEY_LEFT);},
-  []() -> bool {return IsKeyPressed(KEY_UP);},
-  []() -> bool {return IsKeyPressed(KEY_SPACE);},
-  []() -> bool {return IsKeyDown(KEY_DOWN);},
-  []() -> bool {return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z);},
-  []() -> bool {return IsKeyPressed(KEY_ENTER);},
-  []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
-};
-
-Game::Game() :
-  drawingDetails(
-    DrawingDetails::HeightScaleFactor * GetScreenHeight() / (Playfield::VisibleHeight),
-    {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f}
-  ),
-  controller(KeyboardControls) {
+SinglePlayerGame::SinglePlayerGame() {
   undoMoveStack.push(playfield);
 }
 
-void Game::update() {
+void SinglePlayerGame::update() {
   if (controller.checkUndoInput()) {
     if (!undoMoveStack.empty()) {
       playfield = undoMoveStack.top();
@@ -60,7 +38,7 @@ void Game::update() {
   if (playfield.update(controller)) undoMoveStack.push(playfield);
 }
 
-void Game::DrawPauseMenu() const {
+void SinglePlayerGame::DrawPauseMenu() const {
   if (!playfield.lost() && !paused) return;
 
   const float screenWidth = GetScreenWidth();
@@ -82,21 +60,8 @@ void Game::DrawPauseMenu() const {
     screenHeight / 2.0 + drawingDetails.fontSizeBig, drawingDetails.fontSize, drawingDetails.QuitColor);
 }
 
-void Game::draw() const {
+void SinglePlayerGame::draw() const {
   ClearBackground(DrawingDetails::BackgroundColor);
   playfield.draw(drawingDetails);
-  DrawPauseMenu();
-  
-}
-
-void Game::run() {
-  while (!controller.checkQuitInput() || !(paused || playfield.lost())) {
-    update();
-    BeginDrawing();
-    draw();
-    EndDrawing();
-  }
-
-  BeginDrawing();
-  EndDrawing();
+  DrawPauseMenu(); 
 }

@@ -1,28 +1,19 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef SINGLE_PLAYER_GAME_H
+#define SINGLE_PLAYER_GAME_H
 
-#include "Playfield.hpp"
+#include "Game.hpp"
 #include <stack>
 
-class Game {
-  const DrawingDetails drawingDetails;
-  Playfield playfield;
-  bool paused = false;
-  // Previous moves
+class SinglePlayerGame : public Game {
   std::stack<Playfield> undoMoveStack;
-  // Controller
-  const Controller controller;
-  const static Controller KeyboardControls;
-  const static Controller KeyboardControls2;
 
 private:
-  void update();
   void DrawPauseMenu() const;
-  void draw() const;
+  virtual void update() override;
+  virtual void draw() const override;
 
 public:
-  Game();
-  void run();
+  SinglePlayerGame();
 };
 
 #endif

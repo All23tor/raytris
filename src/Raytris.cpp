@@ -1,5 +1,5 @@
 #include "Raytris.hpp"
-#include "Game.hpp"
+#include "SinglePlayerGame.hpp"
 #include "TwoPlayerGame.hpp"
 #include "Menu.hpp"
 #include <raylib.h>
@@ -16,7 +16,9 @@ Raytris::~Raytris() {
 void Raytris::run() {
   Menu menu;
   for (Menu::ExitCode exitCode = menu.run(); exitCode != Menu::ExitCode::Exit; exitCode = menu.run()) {
-    if (exitCode == Menu::ExitCode::Game) {
+    if (exitCode == Menu::ExitCode::SinglePlayerGame) {
+      SinglePlayerGame().run();
+    } else if (exitCode == Menu::ExitCode::TwoPlayerGame) {
       TwoPlayerGame().run();
     }
   }

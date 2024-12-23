@@ -78,7 +78,7 @@ Menu::ExitCode Menu::run() {
     EndDrawing();
   }
 
-  ExitCode exitCode = IsKeyDown(KEY_ENTER) ? ExitCode::Game : ExitCode::Exit;
+  ExitCode exitCode = IsKeyDown(KEY_ENTER) ? ExitCode::SinglePlayerGame : ExitCode::Exit;
   BeginDrawing();
   EndDrawing();
 

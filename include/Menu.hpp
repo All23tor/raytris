@@ -20,7 +20,7 @@ private:
 
 public:
   Menu();
-  enum class ExitCode { Game, Exit };
+  enum class ExitCode { SinglePlayerGame, TwoPlayerGame, Exit };
   ExitCode run();
   const std::pair<int, int> getResolution(Resolutions resolution) const;
 };
