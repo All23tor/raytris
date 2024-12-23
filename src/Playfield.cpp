@@ -263,7 +263,6 @@ void Playfield::updateTimers() {
 }
 
 void Playfield::handleSpecialInput(const Controller& controller) {
-  if (controller.checkRestartInput()) restart();
   if (controller.checkSwapInput() && canSwap) {
     swapTetromino();
     wasLastMoveRotation = false;

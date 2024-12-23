@@ -25,6 +25,7 @@ struct DrawingDetails {
   const int fontSizeBig;
   const int fontSizeSmall;
 
+  DrawingDetails() = delete;
   DrawingDetails(float _blockLength, Vector2 _position);
 };
 

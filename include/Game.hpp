@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include "Playfield.hpp"
-#include <raylib.h>
 #include <stack>
 
 class Game {

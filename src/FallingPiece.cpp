@@ -1,5 +1,4 @@
 #include "FallingPiece.hpp"
-#include <raylib.h>
 
 FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position, char _vertical_position)
   : tetromino(_tetromino), orientation(Orientation::Up),

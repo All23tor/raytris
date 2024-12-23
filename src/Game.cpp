@@ -1,6 +1,4 @@
 #include "Game.hpp"
-#include "NextQueue.hpp"
-#include "Playfield.hpp"
 
 const Controller Game::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_R);},
@@ -53,6 +51,8 @@ void Game::update() {
       if (undoMoveStack.empty()) undoMoveStack.push(playfield);
       return;
     }
+  } else if (controller.checkRestartInput()) {
+    playfield.restart();
   }
 
   if (controller.checkPauseInput()) paused = !paused;
