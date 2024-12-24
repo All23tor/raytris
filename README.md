@@ -1,15 +1,21 @@
 # raytris
 
 ## Controls
+### Menu
+- Esc: Close raytris
+- Up/Down: Select game mode
+- F: Change resolution
+### Single player
 - Left/Right: Move falling piece left/right
 - Up/Z: Turn falling piece clockwise/counterclockwise
 - Down: Soft drop falling piece
 - Space: Hard drop falling piece
 - A: Turn falling piece 180 degrees
 - C: Swap falling piece with hold piece
-- Esc: (In Menu)Close raytris
 - Enter: (In Game)Pause game
 - R: Restart Game
+### Two players
+- TODO: Describe two players controls
 ## Depencencies
 You need to have a C++ 20 compiler and raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.
 ## Building
