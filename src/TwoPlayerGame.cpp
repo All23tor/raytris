@@ -19,18 +19,18 @@ const Controller TwoPlayerGame::FirstPlayerControls{
 
 const Controller TwoPlayerGame::SecondPlayerControls{
   []() -> bool {return IsKeyPressed(KEY_R);},
-  []() -> bool {return IsKeyPressed(KEY_RIGHT_SHIFT);},
-  []() -> bool {return IsKeyPressed(KEY_J);},
-  []() -> bool {return IsKeyPressed(KEY_L);},
-  []() -> bool {return IsKeyDown(KEY_J);},
-  []() -> bool {return IsKeyDown(KEY_L);},
-  []() -> bool {return IsKeyPressed(KEY_I);},
-  []() -> bool {return IsKeyPressed(KEY_U);},
-  []() -> bool {return IsKeyPressed(KEY_O);},
+  []() -> bool {return IsKeyPressed(KEY_M);},
+  []() -> bool {return IsKeyPressed(KEY_LEFT);},
+  []() -> bool {return IsKeyPressed(KEY_RIGHT);},
+  []() -> bool {return IsKeyDown(KEY_LEFT);},
+  []() -> bool {return IsKeyDown(KEY_RIGHT);},
+  []() -> bool {return IsKeyPressed(KEY_UP);},
+  []() -> bool {return IsKeyPressed(KEY_B);},
   []() -> bool {return IsKeyPressed(KEY_N);},
-  []() -> bool {return IsKeyDown(KEY_K);},
+  []() -> bool {return IsKeyPressed(KEY_SPACE);},
+  []() -> bool {return IsKeyDown(KEY_DOWN);},
   []() -> bool {return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z);},
-  []() -> bool {return IsKeyPressed(KEY_TAB);},
+  []() -> bool {return IsKeyPressed(KEY_ENTER);},
   []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
 };
 
