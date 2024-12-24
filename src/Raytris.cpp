@@ -15,11 +15,10 @@ Raytris::~Raytris() {
 
 void Raytris::run() {
   Menu menu;
-  for (Menu::ExitCode exitCode = menu.run(); exitCode != Menu::ExitCode::Exit; exitCode = menu.run()) {
-    if (exitCode == Menu::ExitCode::SinglePlayerGame) {
-      // SinglePlayerGame().run();
-      TwoPlayerGame().run();
-    } else if (exitCode == Menu::ExitCode::TwoPlayerGame) {
+  for (Menu::Option exitCode = menu.run(); exitCode != Menu::Option::Exit; exitCode = menu.run()) {
+    if (exitCode == Menu::Option::SinglePlayer) {
+      SinglePlayerGame().run();
+    } else if (exitCode == Menu::Option::TwoPlayers) {
       TwoPlayerGame().run();
     }
   }
