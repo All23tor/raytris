@@ -5,6 +5,7 @@
 #include <stack>
 
 class SinglePlayerGame : public Game {
+  const static Controller KeyboardControls;
   std::stack<Playfield> undoMoveStack;
 
 private:

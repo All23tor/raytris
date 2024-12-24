@@ -1,6 +1,6 @@
 #include "SinglePlayerGame.hpp"
 
-const Controller Game::KeyboardControls{
+const Controller SinglePlayerGame::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_R);},
   []() -> bool {return IsKeyPressed(KEY_C);},
   []() -> bool {return IsKeyPressed(KEY_LEFT);},
@@ -17,7 +17,8 @@ const Controller Game::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
 };
 
-SinglePlayerGame::SinglePlayerGame() {
+SinglePlayerGame::SinglePlayerGame():
+  Game(KeyboardControls) {
   undoMoveStack.push(playfield);
 }
 

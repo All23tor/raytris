@@ -4,8 +4,6 @@
 #include "Playfield.hpp"
 
 class Game {
-  const static Controller KeyboardControls;
-
 protected:
   const DrawingDetails drawingDetails;
   const Controller controller;
