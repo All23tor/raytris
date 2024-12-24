@@ -17,24 +17,14 @@ private:
   virtual void update() = 0;
 
 public:
-  Game() :
-    drawingDetails(
-      DrawingDetails::HeightScaleFactor * GetScreenHeight() / (Playfield::VisibleHeight),
-      {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f}
-    ),
-    controller(KeyboardControls) {}
+  Game();
+  explicit Game(const DrawingDetails&);
+  explicit Game(const Controller&);
+  explicit Game(const DrawingDetails&, const Controller&);
 
-  void run() {
-    while (!controller.checkQuitInput() || !(paused || playfield.lost())) {
-      update();
-      BeginDrawing();
-      draw();
-      EndDrawing();
-    }
+  virtual ~Game() = default;
 
-    BeginDrawing();
-    EndDrawing();
-  }
+  void run();
 };
 
 #endif

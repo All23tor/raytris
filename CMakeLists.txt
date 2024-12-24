@@ -29,6 +29,7 @@ set(SOURCES
     ./src/Playfield.cpp
     ./src/NextQueue.cpp
     ./src/Controller.cpp
+    ./src/Game.cpp
     ./src/SinglePlayerGame.cpp
     ./src/TwoPlayerGame.cpp
     ./src/Raytris.cpp

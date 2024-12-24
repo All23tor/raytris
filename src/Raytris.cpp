@@ -17,7 +17,8 @@ void Raytris::run() {
   Menu menu;
   for (Menu::ExitCode exitCode = menu.run(); exitCode != Menu::ExitCode::Exit; exitCode = menu.run()) {
     if (exitCode == Menu::ExitCode::SinglePlayerGame) {
-      SinglePlayerGame().run();
+      // SinglePlayerGame().run();
+      TwoPlayerGame().run();
     } else if (exitCode == Menu::ExitCode::TwoPlayerGame) {
       TwoPlayerGame().run();
     }

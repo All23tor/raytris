@@ -8,7 +8,8 @@ class TwoPlayerGame: public Game {
   Playfield playfield2;
   // Controller
   const Controller controller2;
-  const static Controller KeyboardControls2;
+  const static Controller FirstPlayerControls;
+  const static Controller SecondPlayerControls;
 
 private:
   void DrawPauseMenu() const;
