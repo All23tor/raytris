@@ -1,27 +1,27 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef GAME_HPP
+#define GAME_HPP
 
 #include "Playfield.hpp"
-#include <stack>
 
 class Game {
+protected:
   const DrawingDetails drawingDetails;
+  const Controller controller;
   Playfield playfield;
   bool paused = false;
-  // Previous moves
-  std::stack<Playfield> undoMoveStack;
-  // Controller
-  const Controller controller;
-  const static Controller KeyboardControls;
-  const static Controller KeyboardControls2;
 
 private:
-  void update();
-  void DrawPauseMenu() const;
-  void draw() const;
+  virtual void draw() const = 0;
+  virtual void update() = 0;
 
 public:
   Game();
+  explicit Game(const DrawingDetails&);
+  explicit Game(const Controller&);
+  explicit Game(const DrawingDetails&, const Controller&);
+
+  virtual ~Game() = default;
+
   void run();
 };
 

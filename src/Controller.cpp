@@ -16,18 +16,18 @@ Controller::Controller(
   Input pauseInput,
   Input quitInput
 ): 
-  checkRestartInput(std::move(restartInput)),
-  checkSwapInput(std::move(swapInput)),
-  checkLeftInput(std::move(leftInput)),
-  checkRightInput(std::move(rightInput)),
-  checkLeftDasInput(std::move(leftDasInput)),
-  checkRightDasInput(std::move(rightDasInput)),
-  checkClockwiseInput(std::move(clockwiseInput)),
-  checkCounterClockwiseInput(std::move(counterClockwiseInput)),
-  checkOneEightyInput(std::move(oneEightyInput)),
-  checkHardDropInput(std::move(hardDropInput)),
-  checkSoftDropInput(std::move(softDropInput)),
-  checkUndoInput(std::move(undoInput)),
-  checkPauseInput(std::move(pauseInput)),
-  checkQuitInput(std::move(quitInput))
+  checkRestartInput(restartInput),
+  checkSwapInput(swapInput),
+  checkLeftInput(leftInput),
+  checkRightInput(rightInput),
+  checkLeftDasInput(leftDasInput),
+  checkRightDasInput(rightDasInput),
+  checkClockwiseInput(clockwiseInput),
+  checkCounterClockwiseInput(counterClockwiseInput),
+  checkOneEightyInput(oneEightyInput),
+  checkHardDropInput(hardDropInput),
+  checkSoftDropInput(softDropInput),
+  checkUndoInput(undoInput),
+  checkPauseInput(pauseInput),
+  checkQuitInput(quitInput)
 {}
