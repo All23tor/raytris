@@ -3,24 +3,24 @@
 #include <format>
 #include <utility>
 
-const std::pair<int, int> Menu::getResolution(Resolution resolution) const {
-  switch (resolution) {
-  case Resolution::Small:
-    return { InitialWidth, InitialHeight };
-  case Resolution::Medium:
-    return { 960, 540 };
-  case Resolution::Big:
-    return { 1280, 720 };
-  case Resolution::FullScreen: {
-    int monitor = GetCurrentMonitor();
-    return { GetMonitorWidth(monitor), GetMonitorHeight(monitor) };
-  }
-  default:
-    return { 0, 0 };
-  }
-}
-
 namespace {
+  std::pair<int, int> getResolution(Resolution resolution) {
+    switch (resolution) {
+    case Resolution::Small:
+      return { Menu::InitialWidth, Menu::InitialHeight };
+    case Resolution::Medium:
+      return { 960, 540 };
+    case Resolution::Big:
+      return { 1280, 720 };
+    case Resolution::FullScreen: {
+      int monitor = GetCurrentMonitor();
+      return { GetMonitorWidth(monitor), GetMonitorHeight(monitor) };
+    }
+    default:
+      return { 0, 0 };
+    }
+  }
+
   Resolution nextResolution(Resolution res) {
     return static_cast<Resolution>((std::to_underlying(res) + 1) % (std::to_underlying(Resolution::FullScreen) + 1));
   }
