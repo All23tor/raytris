@@ -38,13 +38,15 @@ bool Playfield::tryShifting(Shift shift) {
   return false;
 }
 
-static OffsetTable calculateOffsetDifferences(const OffsetTable& startOffsets, const OffsetTable& endOffsets) {
-  OffsetTable result;
-  std::transform(startOffsets.begin(), startOffsets.end(), endOffsets.begin(), result.begin(),
-    [](const CoordinatePair& p1, const CoordinatePair& p2) -> CoordinatePair {
-    return { static_cast<signed char>(p1.x - p2.x), static_cast<signed char>(p1.y - p2.y) };
-  });
-  return result;
+namespace {
+  OffsetTable calculateOffsetDifferences(const OffsetTable& startOffsets, const OffsetTable& endOffsets) {
+    OffsetTable result;
+    std::transform(startOffsets.begin(), startOffsets.end(), endOffsets.begin(), result.begin(),
+      [](const CoordinatePair& p1, const CoordinatePair& p2) -> CoordinatePair {
+      return { static_cast<signed char>(p1.x - p2.x), static_cast<signed char>(p1.y - p2.y) };
+    });
+    return result;
+  }
 }
 
 bool Playfield::tryRotating(RotationType rotationType) {

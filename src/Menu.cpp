@@ -20,9 +20,11 @@ const std::pair<int, int> Menu::getResolution(Resolution resolution) const {
   }
 }
 
-static Resolution nextResolution(Resolution res) {
-  return static_cast<Resolution>((std::to_underlying(res) + 1) % (std::to_underlying(Resolution::FullScreen) + 1));
-}
+namespace {
+  Resolution nextResolution(Resolution res) {
+    return static_cast<Resolution>((std::to_underlying(res) + 1) % (std::to_underlying(Resolution::FullScreen) + 1));
+  }
+};
 
 void Menu::resizeScreen() {
   resolution = nextResolution(resolution);
