@@ -3,6 +3,16 @@
 #include <format>
 #include <utility>
 
+namespace {
+  std::string_view optionToString(Menu::Option option) {
+    switch (option) {
+      case Menu::Option::SinglePlayer: return "Single Player";
+      case Menu::Option::TwoPlayers: return "Two Players";
+    }
+    return "";
+  }
+}
+
 const std::pair<int, int> Menu::getResolution(Resolution resolution) const {
   switch (resolution) {
   case Resolution::Small:
@@ -49,7 +59,7 @@ void Menu::draw() const {
     (windowWidth - MeasureText("RAYTRIS", fontSize * 2)) / 2.0,
     windowHeight / 2.0 - 3 * fontSize, fontSize * 2, RED);
   std::string gameMode = "Mode: ";
-  gameMode += (selectedOption == Option::SinglePlayer) ? "Single Player" : "Two Players";
+  gameMode += optionToString(selectedOption);
   DrawText(gameMode.c_str(), (windowWidth - MeasureText(gameMode.c_str(), fontSize)) / 2.0,
     windowHeight / 2.0 - 1 * fontSize, fontSize, DARKBLUE);
   std::string resolution = std::format("{} x {}", windowWidth, windowHeight);
