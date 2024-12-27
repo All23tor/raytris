@@ -23,7 +23,6 @@ private:
 public:
   Menu() = default;
   Option run();
-  const std::pair<int, int> getResolution(Resolution resolution) const;
 };
 
 #endif
