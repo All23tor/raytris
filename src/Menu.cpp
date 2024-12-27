@@ -11,7 +11,7 @@ namespace {
     }
     return "";
   }
-  
+
   std::pair<int, int> getResolution(Resolution resolution) {
     switch (resolution) {
     case Resolution::Small:
