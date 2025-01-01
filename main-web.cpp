@@ -1,4 +1,3 @@
-#if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
 #include "SinglePlayerGame.hpp"
 
@@ -20,18 +19,11 @@ namespace RaylibWeb {
     EndDrawing();
   }
 }
-#else
-#include "Raytris.hpp"
-#endif
 
 
-int main(void) {
-#if defined(PLATFORM_WEB)
+int main() {
   InitWindow(RaylibWeb::windowWidth, RaylibWeb::windowHeight, "Raytris");
   emscripten_set_main_loop(RaylibWeb::UpdateDrawFrame, 0, 1);
   CloseWindow();
-#else
-  Raytris().run();
-#endif
 }
 
