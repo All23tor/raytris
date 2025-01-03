@@ -15,7 +15,11 @@ Raytris::~Raytris() {
 
 void Raytris::run() {
   Menu menu;
-  for (Menu::Option selectedOption = menu.run(); selectedOption != Menu::Option::Exit; selectedOption = menu.run()) {
+  for (
+    Menu::Option selectedOption = menu.runAndGetSelectedOption();
+    selectedOption != Menu::Option::Exit;
+    selectedOption = menu.runAndGetSelectedOption()) 
+  {
     if (selectedOption == Menu::Option::SinglePlayer) {
       SinglePlayerGame().run();
     } else if (selectedOption == Menu::Option::TwoPlayers) {

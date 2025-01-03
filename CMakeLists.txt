@@ -24,6 +24,7 @@ endif()
 
 set(COMMON_SOURCES
     ./src/FallingPiece.cpp
+    ./src/Runnable.cpp
     ./src/Menu.cpp
     ./src/DrawingDetails.cpp
     ./src/Playfield.cpp

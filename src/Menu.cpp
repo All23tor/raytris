@@ -84,17 +84,15 @@ void Menu::update() {
   }
 }
 
-Menu::Option Menu::run() {
-  while (!IsKeyPressed(KEY_ENTER) && !IsKeyPressed(KEY_ESCAPE)) {
-    update();
-    BeginDrawing();
-    draw();
-    EndDrawing();
-  }
+bool Menu::shouldStopRunning() const {
+  return !IsKeyPressed(KEY_ENTER) && !IsKeyPressed(KEY_ESCAPE);
+}
 
-  Option chosenOption = IsKeyDown(KEY_ENTER) ? selectedOption : Option::Exit;
-  BeginDrawing();
-  EndDrawing();
+Menu::Option Menu::getSelectedOption() const {
+  return IsKeyDown(KEY_ENTER) ? selectedOption : Option::Exit;
+}
 
-  return chosenOption;
+Menu::Option Menu::runAndGetSelectedOption() {
+  run();
+  return getSelectedOption();
 }
