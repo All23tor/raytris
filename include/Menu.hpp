@@ -23,7 +23,7 @@ private:
 
 public:
   Menu() = default;
-  virtual bool shouldStopRunning() const override;
+  virtual bool shouldStopRunning() const final;
   Option getSelectedOption() const;
   Option runAndGetSelectedOption();
 };

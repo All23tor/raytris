@@ -6,5 +6,6 @@ void Runnable::run() {
     BeginDrawing();
     draw();
     EndDrawing();
-  } while (update(), shouldStopRunning());
+    update();
+  } while (shouldStopRunning());
 }

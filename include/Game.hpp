@@ -11,12 +11,8 @@ protected:
   Playfield playfield;
   bool paused = false;
 
-private:
-  virtual bool shouldStopRunning() const override {
-    return !controller.checkQuitInput() || !(paused || playfield.lost());
-  }
-
 public:
+  virtual bool shouldStopRunning() const final;
   explicit Game(const DrawingDetails&);
   explicit Game(const Controller&);
   explicit Game(const DrawingDetails&, const Controller&);
