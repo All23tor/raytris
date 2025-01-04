@@ -4,27 +4,23 @@
 #include <variant>
 
 namespace RaylibWeb {
-  constexpr int windowWidth = 800, windowHeight = 450;
-
   namespace {
-    std::variant<Menu, SinglePlayerGame> raytris = Menu();
+    Menu menu;
+    std::variant<Menu*, SinglePlayerGame> raytris = &menu;
 
     auto handleWhereToGo = [](auto&& runnable) -> void {
       using T = std::decay_t<decltype(runnable)>;
-      if constexpr (std::is_same_v<T, Menu>) {
-        switch (runnable.getSelectedOption()) {
+      if constexpr (std::is_same_v<T, Menu*>) {
+        switch (runnable->getSelectedOption()) {
         case Menu::Option::Exit: return;
         case Menu::Option::SinglePlayer: {
-          raytris.emplace<SinglePlayerGame>(DrawingDetails{
-            DrawingDetails::HeightScaleFactor * windowHeight / (Playfield::VisibleHeight),
-            { windowWidth / 2.0f, windowHeight / 2.0f }
-            });
+          raytris.emplace<SinglePlayerGame>();
           return;
         }
         case Menu::Option::TwoPlayers: return;
         }
       } else if constexpr (std::is_same_v<T, SinglePlayerGame>) {
-        raytris.emplace<Menu>();
+        raytris.emplace<Menu*>(&menu);
       } else {
         static_assert(false, "non-exhaustive visitor!");
       }
@@ -47,7 +43,7 @@ namespace RaylibWeb {
 
 
 int main() {
-  InitWindow(RaylibWeb::windowWidth, RaylibWeb::windowHeight, "Raytris");
+  InitWindow(Menu::InitialWidth, Menu::InitialWidth, "Raytris");
   emscripten_set_main_loop(RaylibWeb::UpdateDrawFrame, 0, 1);
   CloseWindow();
 }
