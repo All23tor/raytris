@@ -8,6 +8,7 @@ namespace {
     switch (option) {
       case Menu::Option::SinglePlayer: return "Single Player";
       case Menu::Option::TwoPlayers: return "Two Players";
+      case Menu::Option::Exit: return "Exit";
     }
     return "";
   }
@@ -80,7 +81,7 @@ void Menu::update() {
     selectedOption = static_cast<Option>((std::to_underlying(selectedOption) + 1) % std::to_underlying(Option::Exit));
   }
   if (IsKeyPressed(KEY_DOWN)) {
-    selectedOption = static_cast<Option>((std::to_underlying(selectedOption) - 1) % std::to_underlying(Option::Exit));
+    selectedOption = static_cast<Option>((std::to_underlying(selectedOption) - 1 + std::to_underlying(Option::Exit)) % std::to_underlying(Option::Exit));
   }
 }
 
