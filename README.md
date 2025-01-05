@@ -18,9 +18,19 @@
 ### Two players
 - TODO: Describe two players controls
 ## Depencencies
-You need to have a C++ 23 compiler and raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.
+You need to have a C++ 23 compiler, CMake and raylib installed. The cmake script will try to install it for you, but you still need to have raylib's dependencies installed.
+If you are building for Web you will also need emscripten.
 ## Building
+# Building for Desktop
 1. Clone the repo with `git clone https://github.com/All23tor/raytris/` and `cd raytris` to it
-2. `mkdir build && cd build` to make build directory
-3. `cmake .. && make` to build
-5. `./raytris` to run :D
+2. `cmake -S . -B build` to configure build directory
+3. `cmake --build build` to build
+5. `cd build && ./raytris` to run :D
+
+# Building for Web
+Before building make sure you have the emscripten binaries in your path.
+1. Clone the repo with `git clone https://github.com/All23tor/raytris/` and `cd raytris` to it
+2. `emcmake cmake -S . -B build-web -DPLATFORM=Web` to configure build directory
+3. `cmake --build ` to build
+5. `cd build-web && emrun raytris.html` to run :D
+

@@ -8,6 +8,7 @@ namespace {
     switch (option) {
       case Menu::Option::SinglePlayer: return "Single Player";
       case Menu::Option::TwoPlayers: return "Two Players";
+      case Menu::Option::Exit: return "Exit";
     }
     return "";
   }
@@ -80,21 +81,19 @@ void Menu::update() {
     selectedOption = static_cast<Option>((std::to_underlying(selectedOption) + 1) % std::to_underlying(Option::Exit));
   }
   if (IsKeyPressed(KEY_DOWN)) {
-    selectedOption = static_cast<Option>((std::to_underlying(selectedOption) - 1) % std::to_underlying(Option::Exit));
+    selectedOption = static_cast<Option>((std::to_underlying(selectedOption) - 1 + std::to_underlying(Option::Exit)) % std::to_underlying(Option::Exit));
   }
 }
 
-Menu::Option Menu::run() {
-  while (!IsKeyPressed(KEY_ENTER) && !IsKeyPressed(KEY_ESCAPE)) {
-    update();
-    BeginDrawing();
-    draw();
-    EndDrawing();
-  }
+bool Menu::shouldStopRunning() const {
+  return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE);
+}
 
-  Option chosenOption = IsKeyDown(KEY_ENTER) ? selectedOption : Option::Exit;
-  BeginDrawing();
-  EndDrawing();
+Menu::Option Menu::getSelectedOption() const {
+  return IsKeyDown(KEY_ENTER) ? selectedOption : Option::Exit;
+}
 
-  return chosenOption;
+Menu::Option Menu::runAndGetSelectedOption() {
+  run();
+  return getSelectedOption();
 }

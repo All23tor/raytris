@@ -10,11 +10,12 @@ class SinglePlayerGame : public Game {
 
 private:
   void DrawPauseMenu() const;
-  virtual void update() override;
-  virtual void draw() const override;
 
 public:
   SinglePlayerGame();
+  explicit SinglePlayerGame(const DrawingDetails&);
+  virtual void update() override;
+  virtual void draw() const override;
 };
 
 #endif

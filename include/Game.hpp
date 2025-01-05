@@ -1,28 +1,23 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include "Runnable.hpp"
 #include "Playfield.hpp"
 
-class Game {
+class Game : public Runnable {
 protected:
   const DrawingDetails drawingDetails;
   const Controller controller;
   Playfield playfield;
   bool paused = false;
 
-private:
-  virtual void draw() const = 0;
-  virtual void update() = 0;
-
 public:
-  Game();
+  virtual bool shouldStopRunning() const final;
   explicit Game(const DrawingDetails&);
   explicit Game(const Controller&);
   explicit Game(const DrawingDetails&, const Controller&);
 
   virtual ~Game() = default;
-
-  void run();
 };
 
 #endif

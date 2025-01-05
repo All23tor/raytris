@@ -22,6 +22,11 @@ SinglePlayerGame::SinglePlayerGame():
   undoMoveStack.push(playfield);
 }
 
+SinglePlayerGame::SinglePlayerGame(const DrawingDetails& drawingDetails) :
+  Game(drawingDetails, KeyboardControls) {
+  undoMoveStack.push(playfield);
+}
+
 void SinglePlayerGame::update() {
   if (controller.checkUndoInput()) {
     if (!undoMoveStack.empty()) {
