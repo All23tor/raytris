@@ -12,5 +12,5 @@ Game::Game(const DrawingDetails& _drawingDetails, const Controller& _controller)
   controller(_controller) {}
 
 bool Game::shouldStopRunning() const {
-  return !controller.checkQuitInput() || !(paused || playfield.lost());
+  return controller.checkQuitInput() && (paused || playfield.lost());
 }

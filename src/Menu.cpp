@@ -86,7 +86,7 @@ void Menu::update() {
 }
 
 bool Menu::shouldStopRunning() const {
-  return !IsKeyPressed(KEY_ENTER) && !IsKeyPressed(KEY_ESCAPE);
+  return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE);
 }
 
 Menu::Option Menu::getSelectedOption() const {
