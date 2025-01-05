@@ -34,7 +34,7 @@ namespace RaylibWeb {
   void UpdateDrawFrame() {
     std::visit(&Updateable::update, raytris);
 
-    if (!std::visit(&Runnable::shouldStopRunning, raytris)) {
+    if (std::visit(&Runnable::shouldStopRunning, raytris)) {
       std::visit(handleWhereToGo, raytris);
     }
 
@@ -47,7 +47,7 @@ namespace RaylibWeb {
 
 
 int main() {
-  InitWindow(Menu::InitialWidth, Menu::InitialWidth, "Raytris");
+  InitWindow(Menu::InitialWidth, Menu::InitialHeight, "Raytris");
   emscripten_set_main_loop(RaylibWeb::UpdateDrawFrame, 0, 1);
   CloseWindow();
 }
