@@ -31,6 +31,6 @@ If you are building for Web you will also need emscripten.
 Before building make sure you have the emscripten binaries in your path.
 1. Clone the repo with `git clone https://github.com/All23tor/raytris/` and `cd raytris` to it
 2. `emcmake cmake -S . -B build-web -DPLATFORM=Web` to configure build directory
-3. `cmake --build ` to build
+3. `cmake --build build-web` to build
 5. `cd build-web && emrun raytris.html` to run :D
 
