@@ -72,7 +72,6 @@ private:
   bool tryRotating(RotationType);
   SpinType isSpin() const;
   void solidify();
-  void clearRows(const std::vector<std::size_t>&);
   void updateScore(std::size_t, SpinType);
   bool isAllClear() const;
   void clearLines();

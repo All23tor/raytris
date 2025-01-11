@@ -136,13 +136,6 @@ void Playfield::solidify() {
   hasLost = !anyMinoSolidifedAboveVisibleHeight || !canSpawnPiece;
 }
 
-void Playfield::clearRows(const std::vector<std::size_t>& rowsToClear) {
-  for (std::size_t rowIndex : rowsToClear) {
-    std::copy_backward(grid.begin(), grid.begin() + rowIndex, grid.begin() + rowIndex + 1);
-    grid[0].fill(Tetromino::Empty);
-  }
-}
-
 bool Playfield::isAllClear() const {
   for (const auto& row : grid)
     for (const auto& mino : row)
@@ -162,7 +155,10 @@ void Playfield::clearLines() {
   }
 
   SpinType spinType = (fallingPiece.tetromino == Tetromino::T) ? isSpin() : SpinType::No;
-  clearRows(rowsToClear);
+  for (std::size_t rowIndex : rowsToClear) {
+    std::copy_backward(grid.begin(), grid.begin() + rowIndex, grid.begin() + rowIndex + 1);
+    grid[0].fill(Tetromino::Empty);
+  }
   updateScore(rowsToClear.size(), spinType);
 }
 
