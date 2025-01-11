@@ -22,33 +22,23 @@ if (NOT raylib_FOUND)
   endif()
 endif()
 
-set(COMMON_SOURCES
-    ./src/FallingPiece.cpp
-    ./src/Runnable.cpp
-    ./src/Menu.cpp
-    ./src/DrawingDetails.cpp
-    ./src/Playfield.cpp
-    ./src/NextQueue.cpp
-    ./src/Controller.cpp
-    ./src/Game.cpp
-    ./src/SinglePlayerGame.cpp
-    ./src/TwoPlayerGame.cpp
-    ./src/Raytris.cpp
-)
-
-set(DESKTOP_SOURCES
+set(SOURCES
+  ./src/FallingPiece.cpp
+  ./src/Runnable.cpp
+  ./src/Menu.cpp
+  ./src/DrawingDetails.cpp
+  ./src/Playfield.cpp
+  ./src/NextQueue.cpp
+  ./src/Controller.cpp
+  ./src/Game.cpp
+  ./src/SinglePlayerGame.cpp
+  ./src/TwoPlayerGame.cpp
+  ./src/Raytris.cpp
   ./main.cpp
 )
 
-set(WEB_SOURCES
-  ./main-web.cpp
-)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-if (${PLATFORM} STREQUAL "Web")
-  add_executable(${PROJECT_NAME} ${COMMON_SOURCES} ${WEB_SOURCES})
-else()
-  add_executable(${PROJECT_NAME} ${COMMON_SOURCES} ${DESKTOP_SOURCES})
-endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE "include")
 target_link_libraries(${PROJECT_NAME} raylib)

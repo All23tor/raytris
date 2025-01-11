@@ -1,8 +1,9 @@
 #include "Raytris.hpp"
-#include "SinglePlayerGame.hpp"
-#include "TwoPlayerGame.hpp"
-#include "Menu.hpp"
+#include <functional>
 #include <raylib.h>
+#if defined(PLATFORM_WEB)
+#include <emscripten/emscripten.h>
+#endif
 
 Raytris::Raytris() {
   InitWindow(Menu::InitialWidth, Menu::InitialHeight, "RayTris");
@@ -13,17 +14,47 @@ Raytris::~Raytris() {
   CloseWindow();
 }
 
-void Raytris::run() {
-  Menu menu;
-  for (
-    Menu::Option selectedOption = menu.runAndGetSelectedOption();
-    selectedOption != Menu::Option::Exit;
-    selectedOption = menu.runAndGetSelectedOption()) 
-  {
-    if (selectedOption == Menu::Option::SinglePlayer) {
-      SinglePlayerGame().run();
-    } else if (selectedOption == Menu::Option::TwoPlayers) {
-      TwoPlayerGame().run();
+void Raytris::handleWhereToGo(auto&& runnable) {
+  using T = std::decay_t<decltype(runnable)>;
+  if constexpr (std::is_same_v<T, Menu*>) {
+    switch (runnable->getSelectedOption()) {
+    case Menu::Option::Exit:
+      shouldStopRunning = true;
+      break;
+    case Menu::Option::SinglePlayer:
+      raytris.emplace<SinglePlayerGame>();
+      break;
+    case Menu::Option::TwoPlayers:
+      raytris.emplace<TwoPlayerGame>();
+      break;
     }
+  } else {
+    raytris.emplace<Menu*>(&menu);
   }
+}
+
+void Raytris::updateDrawFrame() {
+  std::visit(&Updateable::update, raytris);
+
+  if (std::visit(&Runnable::shouldStopRunning, raytris)) {
+    std::visit([&](auto& runnable) {this->handleWhereToGo(runnable);}, raytris);
+  }
+
+  BeginDrawing();
+  ClearBackground(DrawingDetails::BackgroundColor);
+  std::visit(&Drawable::draw, raytris);
+  EndDrawing();
+}
+
+void Raytris::run() {
+#if defined(PLATFORM_WEB)
+  emscripten_set_main_loop_arg(
+    [](void* p) -> void {((Raytris*)p)->updateDrawFrame();},
+    (void*)this, 0, 1
+  );
+#else
+  while (!shouldStopRunning) {
+    updateDrawFrame();
+  }
+#endif
 }
