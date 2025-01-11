@@ -7,7 +7,6 @@
 
 Raytris::Raytris() {
   InitWindow(Menu::InitialWidth, Menu::InitialHeight, "RayTris");
-  SetTargetFPS(60);
 }
 
 Raytris::~Raytris() {
@@ -50,9 +49,10 @@ void Raytris::run() {
 #if defined(PLATFORM_WEB)
   emscripten_set_main_loop_arg(
     [](void* p) -> void {((Raytris*)p)->updateDrawFrame();},
-    (void*)this, 0, 1
+    (void*)this, 0, true
   );
 #else
+  SetTargetFPS(60);
   while (!shouldStopRunning) {
     updateDrawFrame();
   }
