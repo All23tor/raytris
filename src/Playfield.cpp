@@ -1,5 +1,6 @@
 #include "Playfield.hpp"
 #include <format>
+#include <vector>
 #include <cmath>
 #include <algorithm>
 
