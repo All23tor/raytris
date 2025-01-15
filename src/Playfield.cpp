@@ -1,6 +1,5 @@
 #include "Playfield.hpp"
 #include <format>
-#include <vector>
 #include <cmath>
 #include <algorithm>
 
@@ -147,21 +146,26 @@ bool Playfield::isAllClear() const {
 }
 
 void Playfield::clearLines() {
-  std::vector<std::size_t> rowsToClear;
-  for (std::size_t j = 0; j < Height && rowsToClear.size() != 4; ++j) {
+  std::array<std::size_t, 4> rowsToClear;
+  std::size_t numberRowsToClear = 0;
+  for (std::size_t j = 0; j < Height && numberRowsToClear != 4; ++j) {
     bool isRowFull = std::all_of(grid[j].begin(), grid[j].end(),
       [](auto mino) {return mino != Tetromino::Empty;}
     );
 
-    if (isRowFull) rowsToClear.push_back(j);
+    if (isRowFull) {
+      rowsToClear[numberRowsToClear] = j;
+      numberRowsToClear++;
+    }
   }
 
   SpinType spinType = (fallingPiece.tetromino == Tetromino::T) ? isSpin() : SpinType::No;
-  for (std::size_t rowIndex : rowsToClear) {
+  for (std::size_t index = 0; index < numberRowsToClear; index++) {
+    std::size_t rowIndex = rowsToClear[index];
     std::copy_backward(grid.begin(), grid.begin() + rowIndex, grid.begin() + rowIndex + 1);
     grid[0].fill(Tetromino::Empty);
   }
-  updateScore(rowsToClear.size(), spinType);
+  updateScore(numberRowsToClear, spinType);
 }
 
 void Playfield::updateScore(std::size_t clearedLines, SpinType spinType) {
