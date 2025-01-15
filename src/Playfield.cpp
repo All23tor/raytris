@@ -1,5 +1,6 @@
 #include "Playfield.hpp"
 #include <format>
+#include <cmath>
 #include <algorithm>
 
 Playfield::Playfield() : fallingPiece(Tetromino::Empty, InitialHorizontalPosition, InitialVerticalPosition) {

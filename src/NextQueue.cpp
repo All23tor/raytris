@@ -1,5 +1,10 @@
 #include "NextQueue.hpp"
 #include <algorithm>
+#include <random>
+
+namespace {
+  std::mt19937 generator = std::mt19937((std::random_device())());
+};
 
 void NextQueue::pushNewBag() {
   using enum Tetromino;

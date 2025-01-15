@@ -2,17 +2,15 @@
 #define NEXT_QUEUE_H
 
 #include "FallingPiece.hpp"
-#include <random>
+#include <vector>
 
 class NextQueue {
 public:
-  static inline std::mt19937 generator = std::mt19937((std::random_device())());
   static constexpr std::size_t NextComingSize = 5;
   static constexpr std::size_t SizeOfBag = 7;
 
 private:
   std::vector<Tetromino> queue;
-
   void pushNewBag();
 
 public:
