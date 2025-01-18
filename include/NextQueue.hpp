@@ -15,6 +15,7 @@ private:
   void pushNewBag();
 
 public:
+  NextQueue();
   Tetromino getNextTetromino();
   void pushNewBagIfNeeded();
   const Tetromino &operator[](std::size_t index) const;

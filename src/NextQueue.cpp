@@ -7,6 +7,10 @@ namespace {
   std::mt19937 generator = std::mt19937((std::random_device())());
 };
 
+NextQueue::NextQueue() {
+  std::shuffle(queue.begin(), queue.begin() + SizeOfBag, generator);
+}
+
 void NextQueue::pushNewBag() {
   using enum Tetromino;
   std::array<Tetromino, SizeOfBag> newBag =  { I, O, T, S, Z, J, L }; 
