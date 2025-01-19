@@ -1,4 +1,6 @@
 #include "SinglePlayerGame.hpp"
+#include "Playfield.hpp"
+#include <fstream>
 
 const Controller SinglePlayerGame::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_R);},
@@ -26,6 +28,11 @@ SinglePlayerGame::SinglePlayerGame(const DrawingDetails& drawingDetails) :
   Game(drawingDetails, KeyboardControls) {
   undoMoveStack.push(playfield);
 }
+
+void SinglePlayerGame::saveGame() const {
+  std::ofstream out("save");
+  out << playfield; 
+} 
 
 void SinglePlayerGame::update() {
   if (controller.checkUndoInput()) {

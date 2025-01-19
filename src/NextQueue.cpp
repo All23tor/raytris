@@ -40,3 +40,11 @@ void NextQueue::pushNewBagIfNeeded() {
 const Tetromino& NextQueue::operator[](std::size_t index) const {
   return queue[queueSize - 1 - index];
 }
+
+
+std::ostream& operator<<(std::ostream& out, const NextQueue& nq) {
+  for (const auto& tetromino: nq.queue) {
+    out << static_cast<int>(tetromino) << ' ';
+  }
+  return out << '\n' << nq.queueSize << '\n';
+}

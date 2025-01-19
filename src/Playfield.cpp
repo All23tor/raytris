@@ -13,6 +13,53 @@ void Playfield::restart() {
   *this = Playfield();
 }
 
+namespace {
+  std::ostream& operator<<(std::ostream& out, const std::array<std::array<Tetromino, Playfield::Width>, Playfield::Height>& grid) {
+    for (const auto& row: grid) {
+      for (const auto& mino: row) {
+        out << static_cast<int>(mino) << ' ';
+      }
+      out << '\n';
+    }
+    return out;
+  }
+
+  std::ostream& operator<<(std::ostream& out, const FallingPiece& fp) {
+    out << static_cast<int>(fp.tetromino) << ' ' << static_cast<int>(fp.orientation) << '\n';
+    out << static_cast<int>(fp.horizontalPosition) << ' ' << static_cast<int>(fp.verticalPosition) << '\n';
+    for (const auto& coord: fp.tetrominoMap) {
+      out << static_cast<int>(coord.x) << ' ' << static_cast<int>(coord.y) << '\n';
+    }
+    return out;
+  }
+
+  std::ostream& operator<<(std::ostream& out, const Tetromino& tetromino) {
+    return out << static_cast<int>(tetromino) << '\n'; 
+  }
+
+  std::ostream& operator<<(std::ostream& out, const LineClearMessage& message) {
+    return out << static_cast<int>(message.message) << static_cast<int>(message.timer) << static_cast<int>(message.spinType) << '\n';
+  }
+}
+
+std::ostream& operator<<(std::ostream& out, const Playfield& p) {
+  out << p.grid << p.fallingPiece << '\n';
+  out << p.holdingPiece << '\n';
+  out << p.nextQueue << '\n'; 
+  out << static_cast<int>(p.canSwap) << '\n';
+  out << static_cast<int>(p.framesSinceLastFall) << '\n';
+  out << static_cast<int>(p.lockDelayFrames) << '\n';
+  out << static_cast<int>(p.lockDelayMoves) << '\n';
+  out << static_cast<int>(p.signedFramesPressed) << '\n';
+  out << static_cast<int>(p.combo ) << '\n';
+  out << static_cast<int>(p.hasLost ) << '\n';
+  out << static_cast<int>(p.score ) << '\n';
+  out << static_cast<int>(p.b2b) << '\n';
+  out << static_cast<int>(p.wasLastMoveRotation) << '\n';
+  out << p.message << '\n';
+  return out;
+}
+
 bool Playfield::lost() const {
   return hasLost;
 }

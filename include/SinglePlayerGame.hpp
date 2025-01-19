@@ -13,6 +13,7 @@ private:
 
 public:
   SinglePlayerGame();
+  void saveGame() const;
   explicit SinglePlayerGame(const DrawingDetails&);
   virtual void update() override;
   virtual void draw() const override;

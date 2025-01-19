@@ -4,6 +4,7 @@
 #include "NextQueue.hpp"
 #include "Controller.hpp"
 #include "DrawingDetails.hpp"
+#include <ostream>
 
 enum class MessageType : unsigned char {
   Single,
@@ -65,6 +66,7 @@ public:
   bool update(const Controller&);
   void draw(const DrawingDetails&) const;
   void restart();
+  friend std::ostream& operator<<(std::ostream&, const Playfield&);
 
 private:
   bool isValidPosition(const FallingPiece&) const;
