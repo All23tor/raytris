@@ -48,3 +48,12 @@ std::ostream& operator<<(std::ostream& out, const NextQueue& nq) {
   }
   return out << '\n' << nq.queueSize << '\n';
 }
+
+std::istream& operator>>(std::istream& in, NextQueue& nq) {
+  for (auto& tetromino: nq.queue) {
+    int input_tetromino;
+    in >> input_tetromino;
+    tetromino = static_cast<Tetromino>(input_tetromino);
+  }
+  return in >> nq.queueSize;
+}

@@ -32,6 +32,12 @@ SinglePlayerGame::SinglePlayerGame(const DrawingDetails& drawingDetails) :
 void SinglePlayerGame::saveGame() const {
   std::ofstream out("save");
   out << playfield; 
+}
+
+void SinglePlayerGame::loadGame() { 
+  if (std::ifstream in("save"); in.good()) {
+    in >> playfield; 
+  }
 } 
 
 void SinglePlayerGame::update() {

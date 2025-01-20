@@ -1,4 +1,5 @@
 #include "Playfield.hpp"
+#include "FallingPiece.hpp"
 #include <format>
 #include <cmath>
 #include <algorithm>
@@ -24,6 +25,17 @@ namespace {
     return out;
   }
 
+  std::istream& operator>>(std::istream& in, std::array<std::array<Tetromino, Playfield::Width>, Playfield::Height>& grid) {
+    for (auto& row: grid) {
+      for (auto& mino: row) {
+        int input_mino;
+        in >> input_mino;
+        mino = static_cast<Tetromino>(input_mino);
+      }
+    }
+    return in;
+  }
+
   std::ostream& operator<<(std::ostream& out, const FallingPiece& fp) {
     out << static_cast<int>(fp.tetromino) << ' ' << static_cast<int>(fp.orientation) << '\n';
     out << static_cast<int>(fp.horizontalPosition) << ' ' << static_cast<int>(fp.verticalPosition) << '\n';
@@ -33,31 +45,84 @@ namespace {
     return out;
   }
 
+  std::istream& operator>>(std::istream& in, FallingPiece& fp) {
+    int input_tetromino, input_orientation, input_horizontal, input_vertical;
+    in >> input_tetromino >> input_orientation;
+    in >> input_horizontal >> input_vertical;
+    fp.tetromino = static_cast<Tetromino>(input_tetromino);
+    fp.orientation = static_cast<Orientation>(input_orientation);
+    fp.horizontalPosition = input_horizontal;
+    fp.verticalPosition = input_vertical;
+
+    for (auto& coord: fp.tetrominoMap) {
+      int input_coord_x, input_coord_y;
+      in >> input_coord_x >> input_coord_y;
+      coord = {static_cast<char>(input_coord_x), static_cast<char>(input_coord_y)}; 
+    }
+    return in;
+  }
+
   std::ostream& operator<<(std::ostream& out, const Tetromino& tetromino) {
     return out << static_cast<int>(tetromino) << '\n'; 
+  }
+
+  std::istream& operator>>(std::istream& in, Tetromino& tetromino) {
+    int input_tetromino;
+    in >> input_tetromino;
+    tetromino = static_cast<Tetromino>(input_tetromino);
+    return in;
   }
 
   std::ostream& operator<<(std::ostream& out, const LineClearMessage& message) {
     return out << static_cast<int>(message.message) << static_cast<int>(message.timer) << static_cast<int>(message.spinType) << '\n';
   }
+  
+  std::istream& operator>>(std::istream& in, LineClearMessage& message) {
+    int input_message, input_timer, input_spin_type;
+    in >> input_message >> input_timer >> input_spin_type;
+    message.message = static_cast<MessageType>(input_message);
+    message.timer = input_timer;
+    message.spinType = static_cast<SpinType>(input_spin_type);
+    return in;  
+  }
 }
 
 std::ostream& operator<<(std::ostream& out, const Playfield& p) {
-  out << p.grid << p.fallingPiece << '\n';
+  out << p.grid << '\n';
+  out << p.fallingPiece << '\n';
   out << p.holdingPiece << '\n';
   out << p.nextQueue << '\n'; 
-  out << static_cast<int>(p.canSwap) << '\n';
-  out << static_cast<int>(p.framesSinceLastFall) << '\n';
-  out << static_cast<int>(p.lockDelayFrames) << '\n';
-  out << static_cast<int>(p.lockDelayMoves) << '\n';
-  out << static_cast<int>(p.signedFramesPressed) << '\n';
-  out << static_cast<int>(p.combo ) << '\n';
-  out << static_cast<int>(p.hasLost ) << '\n';
-  out << static_cast<int>(p.score ) << '\n';
-  out << static_cast<int>(p.b2b) << '\n';
-  out << static_cast<int>(p.wasLastMoveRotation) << '\n';
+  out << p.canSwap << '\n';
+  out << p.framesSinceLastFall << '\n';
+  out << p.lockDelayFrames << '\n';
+  out << p.lockDelayMoves << '\n';
+  out << p.signedFramesPressed << '\n';
+  out << p.combo << '\n';
+  out << p.hasLost << '\n';
+  out << p.score << '\n';
+  out << p.b2b << '\n';
+  out << p.wasLastMoveRotation << '\n';
   out << p.message << '\n';
   return out;
+}
+
+std::istream& operator>>(std::istream& in, Playfield& p) {
+  in >> p.grid;
+  in >> p.fallingPiece;
+  in >> p.holdingPiece;
+  in >> p.nextQueue;
+  in >> p.canSwap;
+  in >> p.framesSinceLastFall;
+  in >> p.lockDelayFrames;
+  in >> p.lockDelayMoves;
+  in >> p.signedFramesPressed;
+  in >> p.combo;
+  in >> p.hasLost;
+  in >> p.score;
+  in >> p.b2b;
+  in >> p.wasLastMoveRotation;
+  in >> p.message;
+  return in;
 }
 
 bool Playfield::lost() const {

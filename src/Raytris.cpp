@@ -21,11 +21,15 @@ void Raytris::handleWhereToGo(auto&& runnable) {
       break;
     case Menu::Option::SinglePlayer:
       raytris.emplace<SinglePlayerGame>();
+      std::get<SinglePlayerGame>(raytris).loadGame();
       break;
     case Menu::Option::TwoPlayers:
       raytris.emplace<TwoPlayerGame>();
       break;
     }
+  } else if constexpr (std::is_same_v<T, SinglePlayerGame>) {
+    runnable.saveGame();
+    raytris.emplace<Menu*>(&menu);
   } else {
     raytris.emplace<Menu*>(&menu);
   }

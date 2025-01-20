@@ -4,7 +4,7 @@
 #include "NextQueue.hpp"
 #include "Controller.hpp"
 #include "DrawingDetails.hpp"
-#include <ostream>
+#include <iostream>
 
 enum class MessageType : unsigned char {
   Single,
@@ -49,14 +49,14 @@ private:
   NextQueue nextQueue;
   // State
   bool canSwap = true;
-  unsigned char framesSinceLastFall = 0;
-  unsigned char lockDelayFrames = 0;
-  unsigned char lockDelayMoves = 0;
+  unsigned int framesSinceLastFall = 0;
+  unsigned int lockDelayFrames = 0;
+  unsigned int lockDelayMoves = 0;
   int signedFramesPressed = 0;
-  unsigned char combo = 0;
+  unsigned int combo = 0;
   bool hasLost = false;
   unsigned long score = 0;
-  unsigned char b2b = 0;
+  unsigned int b2b = 0;
   bool wasLastMoveRotation = false;
   LineClearMessage message;
 
@@ -67,6 +67,7 @@ public:
   void draw(const DrawingDetails&) const;
   void restart();
   friend std::ostream& operator<<(std::ostream&, const Playfield&);
+  friend std::istream& operator>>(std::istream&, Playfield&);
 
 private:
   bool isValidPosition(const FallingPiece&) const;

@@ -2,7 +2,7 @@
 #define NEXT_QUEUE_H
 
 #include "FallingPiece.hpp"
-#include <ostream>
+#include <iostream>
 
 class NextQueue {
 public:
@@ -21,6 +21,7 @@ public:
   void pushNewBagIfNeeded();
   const Tetromino &operator[](std::size_t index) const;
   friend std::ostream& operator<<(std::ostream&, const NextQueue&);
+  friend std::istream& operator>>(std::istream&, NextQueue&);
 };
 
 #endif
