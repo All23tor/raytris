@@ -30,14 +30,17 @@ SinglePlayerGame::SinglePlayerGame(const DrawingDetails& drawingDetails) :
 }
 
 void SinglePlayerGame::saveGame() const {
-  std::ofstream out("save");
+  std::ofstream out("save.raytris");
   out << playfield; 
 }
 
 void SinglePlayerGame::loadGame() { 
-  if (std::ifstream in("save"); in.good()) {
+  if (std::ifstream in("save.raytris"); in.good()) {
     in >> playfield; 
   }
+  while(!undoMoveStack.empty())
+    undoMoveStack.pop();
+  undoMoveStack.push(playfield);
 } 
 
 void SinglePlayerGame::update() {
