@@ -1,6 +1,7 @@
 #ifndef PLAYFIELD_H
 #define PLAYFIELD_H
 
+#include "HandlingSettings.hpp"
 #include "NextQueue.hpp"
 #include "Controller.hpp"
 #include "DrawingDetails.hpp"
@@ -34,12 +35,8 @@ public:
   static constexpr std::size_t Height = 40;
   static constexpr std::size_t VisibleHeight = 20;
   static constexpr std::size_t InitialHorizontalPosition = (Width - 1) / 2;
-  static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;
-  static constexpr unsigned GravityFrames = 20;
-  static constexpr unsigned SoftDropFrames = 1;
-  static constexpr unsigned char MaxLockDelayFrames = 30;
-  static constexpr unsigned char MaxLockDelayResets = 15;
-  static constexpr unsigned char Das = 7;
+  static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;  
+  static constexpr HandlingSettings settings{20, 1, 30, 15, 7};
 
 private:
   // Game abstractions

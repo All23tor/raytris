@@ -10,7 +10,7 @@ class Menu : public Runnable {
 public:
   static constexpr int InitialWidth = 640;
   static constexpr int InitialHeight = 360;
-  enum class Option { SinglePlayer, TwoPlayers, Exit };
+  enum class Option { SinglePlayer, TwoPlayers, Handling, Exit };
 
 private:
   Resolution resolution = Resolution::Small;

@@ -400,7 +400,7 @@ void Playfield::handleShiftInput(const Controller& controller) {
     if (signedFramesPressed < 0)
       signedFramesPressed = 0;
     signedFramesPressed += 1;
-    while (signedFramesPressed > Das) {
+    while (signedFramesPressed > settings.das) {
       if (!tryShifting(Shift::Left))
         break;
       else
@@ -410,7 +410,7 @@ void Playfield::handleShiftInput(const Controller& controller) {
     if (signedFramesPressed > 0)
       signedFramesPressed = 0;
     signedFramesPressed -= 1;
-    while (-signedFramesPressed > Das) {
+    while (-signedFramesPressed > settings.das) {
       if (!tryShifting(Shift::Right))
         break;
       else
@@ -446,11 +446,11 @@ bool Playfield::handleDropInput(const Controller& controller) {
   bool isFallStep = false;
   if (controller.checkSoftDropInput()) {
     // Soft Drop
-    if (framesSinceLastFall >= SoftDropFrames) {
+    if (framesSinceLastFall >= settings.softDropFrames) {
       framesSinceLastFall = 0;
       isFallStep = true;
     }
-  } else if (framesSinceLastFall >= GravityFrames) {
+  } else if (framesSinceLastFall >= settings.gravityFrames) {
     // Gravity
     framesSinceLastFall = 0;
     isFallStep = true;
@@ -468,7 +468,7 @@ bool Playfield::handleDropInput(const Controller& controller) {
     return false;
   }
   // Is touching ground
-  if (lockDelayFrames > MaxLockDelayFrames || lockDelayMoves > MaxLockDelayResets) {
+  if (lockDelayFrames > settings.maxLockDelayFrames || lockDelayMoves > settings.maxLockDelayResets) {
     solidify();
     return true;
   }
