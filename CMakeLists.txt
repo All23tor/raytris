@@ -28,6 +28,7 @@ set(SOURCES
   ./src/Menu.cpp
   ./src/DrawingDetails.cpp
   ./src/HandlingSettings.cpp
+  ./src/SettingsMenu.cpp
   ./src/Playfield.cpp
   ./src/NextQueue.cpp
   ./src/Controller.cpp

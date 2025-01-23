@@ -5,7 +5,11 @@
 #endif
 
 Raytris::Raytris() {
-  InitWindow(Menu::InitialWidth, Menu::InitialHeight, "RayTris");
+  Resolution initialResolution = SettingsMenu::getResolution();
+  auto [windowWidth, windowHeight] = resolutionPair(initialResolution);
+  InitWindow(windowWidth, windowHeight, "RayTris");
+  if (initialResolution == Resolution::FullScreen)
+    ToggleFullscreen();
 }
 
 Raytris::~Raytris() {
@@ -14,8 +18,8 @@ Raytris::~Raytris() {
 
 void Raytris::handleWhereToGo(auto&& runnable) {
   using T = std::decay_t<decltype(runnable)>;
-  if constexpr (std::is_same_v<T, Menu*>) {
-    switch (runnable->getSelectedOption()) {
+  if constexpr (std::is_same_v<T, Menu>) {
+    switch (runnable.getSelectedOption()) {
     case Menu::Option::Exit:
       shouldStopRunning = true;
       break;
@@ -26,12 +30,15 @@ void Raytris::handleWhereToGo(auto&& runnable) {
     case Menu::Option::TwoPlayers:
       raytris.emplace<TwoPlayerGame>();
       break;
+    case Menu::Option::Handling:
+      raytris.emplace<SettingsMenu>();
+      break;
     }
   } else if constexpr (std::is_same_v<T, SinglePlayerGame>) {
     runnable.saveGame();
-    raytris.emplace<Menu*>(&menu);
+    raytris.emplace<Menu>();
   } else {
-    raytris.emplace<Menu*>(&menu);
+    raytris.emplace<Menu>();
   }
 }
 
