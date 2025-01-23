@@ -55,13 +55,17 @@ void SinglePlayerGame::update() {
     playfield.restart();
   }
 
-  if (controller.checkPauseInput()) paused = !paused;
-  if (paused) return;
-  if (playfield.update(controller)) undoMoveStack.push(playfield);
+  if (controller.checkPauseInput())
+    paused = !paused;
+  if (paused) 
+    return;
+  if (playfield.update(controller))
+    undoMoveStack.push(playfield);
 }
 
 void SinglePlayerGame::DrawPauseMenu() const {
-  if (!playfield.lost() && !paused) return;
+  if (!playfield.lost() && !paused)
+    return;
 
   const float screenWidth = GetScreenWidth();
   const float screenHeight = GetScreenHeight();

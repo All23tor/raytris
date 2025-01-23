@@ -11,7 +11,9 @@ Playfield::Playfield() : fallingPiece(Tetromino::Empty, InitialHorizontalPositio
 }
 
 void Playfield::restart() {
+  auto lastScore = this->score;
   *this = Playfield();
+  this->score = lastScore;
 }
 
 namespace {
