@@ -16,8 +16,8 @@ public:
   void saveGame() const;
   void loadGame();
   explicit SinglePlayerGame(const DrawingDetails&);
-  virtual void update() override;
-  virtual void draw() const override;
+  virtual void update() override final;
+  virtual void draw() const override final;
 };
 
 #endif

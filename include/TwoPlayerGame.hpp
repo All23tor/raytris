@@ -13,8 +13,8 @@ class TwoPlayerGame: public Game {
 
 private:
   void DrawPauseMenu() const;
-  virtual void update() override;
-  virtual void draw() const override;
+  virtual void update() override final;
+  virtual void draw() const override final;
 
 public:
   TwoPlayerGame();
