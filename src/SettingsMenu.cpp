@@ -7,11 +7,14 @@
 HandlingSettings SettingsMenu::handlingSettings;
 Resolution SettingsMenu::resolution = []{
   std::ifstream in("settings.raytris");
+  if (!in.good()) {
+    handlingSettings = {20, 1, 30, 15, 7};
+    return Resolution::Small;
+  }
   int input_resolution;
   in >> input_resolution;
   in >> handlingSettings;
-  resolution = static_cast<Resolution>(input_resolution);
-  return resolution;
+  return static_cast<Resolution>(input_resolution);
 }();
 
 

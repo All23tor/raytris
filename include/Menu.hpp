@@ -5,7 +5,7 @@
 
 class Menu : public Runnable {
 public:
-  enum class Option { SinglePlayer, TwoPlayers, Handling, Exit };
+  enum class Option { SinglePlayer, TwoPlayers, Settings, Exit };
 
 private:
   Option selectedOption = Option::SinglePlayer;

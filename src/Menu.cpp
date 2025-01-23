@@ -9,7 +9,7 @@ namespace {
     switch (option) {
       case Menu::Option::SinglePlayer: return "Single Player";
       case Menu::Option::TwoPlayers: return "Two Players";
-      case Menu::Option::Handling: return "Handling";
+      case Menu::Option::Settings: return "Settings";
       case Menu::Option::Exit: return "Exit";
     }
     return "";

@@ -1,7 +1,7 @@
 #ifndef PLAYFIELD_H
 #define PLAYFIELD_H
 
-#include "HandlingSettings.hpp"
+#include "SettingsMenu.hpp"
 #include "NextQueue.hpp"
 #include "Controller.hpp"
 #include "DrawingDetails.hpp"
@@ -35,8 +35,8 @@ public:
   static constexpr std::size_t Height = 40;
   static constexpr std::size_t VisibleHeight = 20;
   static constexpr std::size_t InitialHorizontalPosition = (Width - 1) / 2;
-  static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;  
-  static constexpr HandlingSettings settings{20, 1, 30, 15, 7};
+  static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;
+  static inline const HandlingSettings& settings = SettingsMenu::getHandlingSettings();
 
 private:
   // Game abstractions

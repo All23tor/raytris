@@ -30,7 +30,7 @@ void Raytris::handleWhereToGo(auto&& runnable) {
     case Menu::Option::TwoPlayers:
       raytris.emplace<TwoPlayerGame>();
       break;
-    case Menu::Option::Handling:
+    case Menu::Option::Settings:
       raytris.emplace<SettingsMenu>();
       break;
     }

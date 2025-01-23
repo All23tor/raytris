@@ -1,3 +1,6 @@
+#ifndef SETTINGS_MENU_HPP
+#define SETTINGS_MENU_HPP
+
 #include "Runnable.hpp"
 #include "HandlingSettings.hpp"
 #include <utility>
@@ -19,3 +22,5 @@ class SettingsMenu : public Runnable {
   static Resolution getResolution();
   static const HandlingSettings& getHandlingSettings();
 };
+
+#endif
