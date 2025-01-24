@@ -43,16 +43,15 @@ void Raytris::handleWhereToGo(auto&& runnable) {
 }
 
 void Raytris::updateDrawFrame() {
-  std::visit(&Updateable::update, raytris);
-
-  if (std::visit(&Runnable::shouldStopRunning, raytris)) {
-    std::visit([&](auto& runnable) {this->handleWhereToGo(runnable);}, raytris);
-  }
-
-  BeginDrawing();
-  ClearBackground(DrawingDetails::BackgroundColor);
-  std::visit(&Drawable::draw, raytris);
-  EndDrawing();
+  std::visit([this](auto&& app){
+    app.update();
+    if (app.shouldStopRunning())
+      handleWhereToGo(app);
+    BeginDrawing();
+    ClearBackground(DrawingDetails::BackgroundColor);
+    app.draw();
+    EndDrawing();
+  }, raytris);
 }
 
 void Raytris::run() {

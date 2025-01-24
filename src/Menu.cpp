@@ -50,8 +50,3 @@ bool Menu::shouldStopRunning() const {
 Menu::Option Menu::getSelectedOption() const {
   return IsKeyDown(KEY_ENTER) ? selectedOption : Option::Exit;
 }
-
-Menu::Option Menu::runAndGetSelectedOption() {
-  run();
-  return getSelectedOption();
-}

@@ -1,22 +1,18 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "Runnable.hpp"
-
-class Menu : public Runnable {
+class Menu {
 public:
   enum class Option { SinglePlayer, TwoPlayers, Settings, Exit };
 
 private:
   Option selectedOption = Option::SinglePlayer;
-  virtual void draw() const override;
-  virtual void update() override;
 
 public:
-  Menu() = default;
-  virtual bool shouldStopRunning() const final;
+  void draw() const;
+  void update();
+  bool shouldStopRunning() const;
   Option getSelectedOption() const;
-  Option runAndGetSelectedOption();
 };
 
 #endif

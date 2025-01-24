@@ -1,10 +1,9 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include "Runnable.hpp"
 #include "Playfield.hpp"
 
-class Game : public Runnable {
+class Game {
 protected:
   const DrawingDetails drawingDetails;
   const Controller controller;
@@ -12,12 +11,10 @@ protected:
   bool paused = false;
 
 public:
-  virtual bool shouldStopRunning() const override final;
+  bool shouldStopRunning() const;
   explicit Game(const DrawingDetails&);
   explicit Game(const Controller&);
   explicit Game(const DrawingDetails&, const Controller&);
-
-  virtual ~Game() = default;
 };
 
 #endif
