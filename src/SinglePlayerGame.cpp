@@ -1,8 +1,10 @@
 #include "SinglePlayerGame.hpp"
+#include "DrawingDetails.hpp"
+#include "HandlingSettings.hpp"
 #include "Playfield.hpp"
 #include <fstream>
 
-const Controller SinglePlayerGame::KeyboardControls{
+const Controller SinglePlayerGame::keyboardControls{
   []() -> bool {return IsKeyPressed(KEY_R);},
   []() -> bool {return IsKeyPressed(KEY_C);},
   []() -> bool {return IsKeyPressed(KEY_LEFT);},
@@ -19,75 +21,36 @@ const Controller SinglePlayerGame::KeyboardControls{
   []() -> bool {return IsKeyPressed(KEY_ESCAPE);},
 };
 
-SinglePlayerGame::SinglePlayerGame():
-  Game(KeyboardControls) {
-  undoMoveStack.push(playfield);
+SinglePlayerGame::SinglePlayerGame(const HandlingSettings& _settings):
+  game({DrawingDetails::HeightScaleFactor * GetScreenHeight() / Playfield::VisibleHeight,
+      {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f}}, keyboardControls, _settings) {
+  if (std::ifstream in("save.raytris"); in.good())
+    in >> game.playfield; 
+  undoMoveStack.push(game.playfield);
 }
 
-SinglePlayerGame::SinglePlayerGame(const DrawingDetails& drawingDetails) :
-  Game(drawingDetails, KeyboardControls) {
-  undoMoveStack.push(playfield);
-}
-
-void SinglePlayerGame::saveGame() const {
+SinglePlayerGame::~SinglePlayerGame() { 
   std::ofstream out("save.raytris");
-  out << playfield; 
+  out << game.playfield; 
 }
-
-void SinglePlayerGame::loadGame() { 
-  if (std::ifstream in("save.raytris"); in.good()) {
-    in >> playfield; 
-  }
-  while(!undoMoveStack.empty())
-    undoMoveStack.pop();
-  undoMoveStack.push(playfield);
-} 
 
 void SinglePlayerGame::update() {
-  if (controller.checkUndoInput()) {
+  if (game.controller.checkUndoInput()) {
     if (!undoMoveStack.empty()) {
-      playfield = undoMoveStack.top();
+      game.playfield = undoMoveStack.top();
       undoMoveStack.pop();
-      if (undoMoveStack.empty()) undoMoveStack.push(playfield);
+      if (undoMoveStack.empty()) undoMoveStack.push(game.playfield);
       return;
     }
-  } else if (controller.checkRestartInput()) {
-    playfield.restart();
-  }
-
-  if (controller.checkPauseInput())
-    paused = !paused;
-  if (paused) 
-    return;
-  if (playfield.update(controller))
-    undoMoveStack.push(playfield);
-}
-
-void SinglePlayerGame::DrawPauseMenu() const {
-  if (!playfield.lost() && !paused)
-    return;
-
-  const float screenWidth = GetScreenWidth();
-  const float screenHeight = GetScreenHeight();
-  DrawRectangle(0, 0, screenWidth, screenHeight, DrawingDetails::DarkenColor);
-
-  if (playfield.lost()) {
-    DrawText("YOU LOST",
-      (screenWidth - MeasureText("YOU LOST", drawingDetails.fontSizeBig)) / 2.0,
-      screenHeight / 2.0, drawingDetails.fontSizeBig, drawingDetails.YouLostColor);
-
-  } else if (paused) {
-    DrawText("GAME PAUSED",
-      (screenWidth - MeasureText("GAME PAUSED", drawingDetails.fontSizeBig)) / 2.0,
-      screenHeight / 2.0, drawingDetails.fontSizeBig, drawingDetails.GamePausedColor);
-  }
-  DrawText("Press Esc to quit",
-    (screenWidth - MeasureText("Press Enter to quit", drawingDetails.fontSize)) / 2.0,
-    screenHeight / 2.0 + drawingDetails.fontSizeBig, drawingDetails.fontSize, drawingDetails.QuitColor);
+  } 
+  if (game.update())
+    undoMoveStack.push(game.playfield);
 }
 
 void SinglePlayerGame::draw() const {
-  ClearBackground(DrawingDetails::BackgroundColor);
-  playfield.draw(drawingDetails);
-  DrawPauseMenu(); 
+  game.draw();
+}
+
+bool SinglePlayerGame::shouldStopRunning() const {
+  return game.controller.checkQuitInput() && (game.paused || game.playfield.lost());
 }

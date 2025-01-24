@@ -2,12 +2,12 @@
 #define TWO_PLAYER_GAME_H
 
 #include "Game.hpp"
+#include "HandlingSettings.hpp"
 
-class TwoPlayerGame: public Game {
-  const DrawingDetails drawingDetails2;
-  Playfield playfield2;
-  // Controller
-  const Controller controller2;
+class TwoPlayerGame {
+  Game game1;
+  Game game2;
+
   const static Controller FirstPlayerControls;
   const static Controller SecondPlayerControls;
 
@@ -15,9 +15,10 @@ private:
   void DrawPauseMenu() const;
 
 public:
-  TwoPlayerGame();
+  TwoPlayerGame(const HandlingSettings&, const HandlingSettings&);
   void update();
   void draw() const;
+  bool shouldStopRunning() const;
 };
 
 #endif

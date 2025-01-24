@@ -1,7 +1,7 @@
 #ifndef PLAYFIELD_H
 #define PLAYFIELD_H
 
-#include "SettingsMenu.hpp"
+#include "HandlingSettings.hpp"
 #include "NextQueue.hpp"
 #include "Controller.hpp"
 #include "DrawingDetails.hpp"
@@ -36,7 +36,6 @@ public:
   static constexpr std::size_t VisibleHeight = 20;
   static constexpr std::size_t InitialHorizontalPosition = (Width - 1) / 2;
   static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;
-  static inline const HandlingSettings& settings = SettingsMenu::getHandlingSettings();
 
 private:
   // Game abstractions
@@ -60,7 +59,7 @@ private:
 public:
   Playfield();
   bool lost() const;
-  bool update(const Controller&);
+  bool update(const Controller&, const HandlingSettings&);
   void draw(const DrawingDetails&) const;
   void restart();
   friend std::ostream& operator<<(std::ostream&, const Playfield&);
@@ -80,9 +79,9 @@ private:
   void replaceNextPiece();
   void updateTimers();
   void handleSpecialInput(const Controller&);
-  void handleShiftInput(const Controller&);
+  void handleShiftInput(const Controller&, const HandlingSettings&);
   void handleRotationInput(const Controller&);
-  bool handleDropInput(const Controller&);
+  bool handleDropInput(const Controller&, const HandlingSettings&);
   FallingPiece getGhostPiece() const;
 
   void DrawTetrion(const DrawingDetails&) const;

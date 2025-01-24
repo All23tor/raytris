@@ -1,5 +1,6 @@
 #include "Playfield.hpp"
 #include "FallingPiece.hpp"
+#include "HandlingSettings.hpp"
 #include <format>
 #include <cmath>
 #include <algorithm>
@@ -387,7 +388,7 @@ void Playfield::handleSpecialInput(const Controller& controller) {
   }
 }
 
-void Playfield::handleShiftInput(const Controller& controller) {
+void Playfield::handleShiftInput(const Controller& controller, const HandlingSettings& settings) {
   if (controller.checkLeftInput()) {
     if (tryShifting(Shift::Left))
       wasLastMoveRotation = false;
@@ -434,7 +435,7 @@ void Playfield::handleRotationInput(const Controller& controller) {
   }
 }
 
-bool Playfield::handleDropInput(const Controller& controller) {
+bool Playfield::handleDropInput(const Controller& controller, const HandlingSettings& settings) {
   if (controller.checkHardDropInput()) {
     // Hard Drop
     if (isValidPosition(fallingPiece.fallen())) wasLastMoveRotation = false;
@@ -475,15 +476,15 @@ bool Playfield::handleDropInput(const Controller& controller) {
   return false;
 }
 
-bool Playfield::update(const Controller& controller) {
+bool Playfield::update(const Controller& controller, const HandlingSettings& settings) {
   if (hasLost) return false;
   handleSpecialInput(controller);
   updateTimers();
   nextQueue.pushNewBagIfNeeded();
   if (fallingPiece.tetromino == Tetromino::Empty) replaceNextPiece();
-  handleShiftInput(controller);
+  handleShiftInput(controller, settings);
   handleRotationInput(controller);
-  return handleDropInput(controller);
+  return handleDropInput(controller, settings);
 }
 
 namespace {

@@ -4,20 +4,17 @@
 #include "Game.hpp"
 #include <stack>
 
-class SinglePlayerGame : public Game {
-  const static Controller KeyboardControls;
+class SinglePlayerGame {
+  const static Controller keyboardControls;
+  Game game;
   std::stack<Playfield> undoMoveStack;
 
-private:
-  void DrawPauseMenu() const;
-
 public:
-  SinglePlayerGame();
-  void saveGame() const;
-  void loadGame();
-  explicit SinglePlayerGame(const DrawingDetails&);
+  SinglePlayerGame(const HandlingSettings&);
+  ~SinglePlayerGame();
   void update();
   void draw() const;
+  bool shouldStopRunning() const;
 };
 
 #endif

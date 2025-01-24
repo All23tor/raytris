@@ -1,4 +1,5 @@
 #include "Raytris.hpp"
+#include "SettingsMenu.hpp"
 #include <raylib.h>
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
@@ -24,19 +25,15 @@ void Raytris::handleWhereToGo(auto&& runnable) {
       shouldStopRunning = true;
       break;
     case Menu::Option::SinglePlayer:
-      raytris.emplace<SinglePlayerGame>();
-      std::get<SinglePlayerGame>(raytris).loadGame();
+      raytris.emplace<SinglePlayerGame>(SettingsMenu::getHandlingSettings());
       break;
     case Menu::Option::TwoPlayers:
-      raytris.emplace<TwoPlayerGame>();
+      raytris.emplace<TwoPlayerGame>(SettingsMenu::getHandlingSettings(), SettingsMenu::getHandlingSettings());
       break;
     case Menu::Option::Settings:
       raytris.emplace<SettingsMenu>();
       break;
     }
-  } else if constexpr (std::is_same_v<T, SinglePlayerGame>) {
-    runnable.saveGame();
-    raytris.emplace<Menu>();
   } else {
     raytris.emplace<Menu>();
   }

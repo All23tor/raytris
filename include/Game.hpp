@@ -3,18 +3,17 @@
 
 #include "Playfield.hpp"
 
-class Game {
-protected:
+struct Game {
+  Playfield playfield;
   const DrawingDetails drawingDetails;
   const Controller controller;
-  Playfield playfield;
+  const HandlingSettings settings;
   bool paused = false;
 
-public:
-  bool shouldStopRunning() const;
-  explicit Game(const DrawingDetails&);
-  explicit Game(const Controller&);
-  explicit Game(const DrawingDetails&, const Controller&);
+  void DrawPauseMenu() const; 
+  Game(const DrawingDetails&, const Controller&, const HandlingSettings&);
+  void draw() const;
+  bool update();
 };
 
 #endif
