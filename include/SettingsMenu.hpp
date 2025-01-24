@@ -11,8 +11,10 @@ std::pair<int, int> resolutionPair(Resolution resolution);
 class SettingsMenu : public Runnable {
   static Resolution resolution;
   static HandlingSettings handlingSettings; 
-  
-  void resizeScreen();
+  int option = 0;
+
+  void resizeScreenHigher();
+  void resizeScreenLower();
   virtual void draw() const override final;
   virtual void update() override final;
   virtual bool shouldStopRunning() const override final;
