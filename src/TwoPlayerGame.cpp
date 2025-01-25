@@ -49,6 +49,7 @@ TwoPlayerGame::TwoPlayerGame(const HandlingSettings& _settings1, const HandlingS
 void TwoPlayerGame::update() {
   game1.update();
   game2.update();
+  game2.paused = game1.paused;
 }
 
 void TwoPlayerGame::draw() const {
@@ -57,7 +58,5 @@ void TwoPlayerGame::draw() const {
 }
 
 bool TwoPlayerGame::shouldStopRunning() const {
-  bool stop1 = game1.controller.checkQuitInput() && (game1.paused || game1.playfield.lost());
-  bool stop2 = game2.controller.checkQuitInput() && (game2.paused || game2.playfield.lost());
-  return stop1 || stop2;
+  return game1.controller.checkQuitInput() && (game1.paused || game1.playfield.lost());
 }
