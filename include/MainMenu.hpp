@@ -1,7 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-class Menu {
+class MainMenu {
 public:
   enum class Option { SinglePlayer, TwoPlayers, Settings, Exit };
 

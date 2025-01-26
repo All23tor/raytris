@@ -1,14 +1,14 @@
 #ifndef RAYTRIS_H
 #define RAYTRIS_H
 
-#include "Menu.hpp"
+#include "MainMenu.hpp"
 #include "SinglePlayerGame.hpp"
 #include "TwoPlayerGame.hpp"
 #include "SettingsMenu.hpp"
 #include <variant>
 
 class Raytris {
-  std::variant<Menu, SinglePlayerGame, TwoPlayerGame, SettingsMenu> raytris;
+  std::variant<MainMenu, SinglePlayerGame, TwoPlayerGame, SettingsMenu> raytris;
   bool shouldStopRunning = false;
 
   void handleWhereToGo(auto&&);

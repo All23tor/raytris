@@ -19,23 +19,23 @@ Raytris::~Raytris() {
 
 void Raytris::handleWhereToGo(auto&& runnable) {
   using T = std::decay_t<decltype(runnable)>;
-  if constexpr (std::is_same_v<T, Menu>) {
+  if constexpr (std::is_same_v<T, MainMenu>) {
     switch (runnable.getSelectedOption()) {
-    case Menu::Option::Exit:
+    case MainMenu::Option::Exit:
       shouldStopRunning = true;
       break;
-    case Menu::Option::SinglePlayer:
+    case MainMenu::Option::SinglePlayer:
       raytris.emplace<SinglePlayerGame>(SettingsMenu::getHandlingSettings());
       break;
-    case Menu::Option::TwoPlayers:
+    case MainMenu::Option::TwoPlayers:
       raytris.emplace<TwoPlayerGame>(SettingsMenu::getHandlingSettings(), SettingsMenu::getHandlingSettings());
       break;
-    case Menu::Option::Settings:
+    case MainMenu::Option::Settings:
       raytris.emplace<SettingsMenu>();
       break;
     }
   } else {
-    raytris.emplace<Menu>();
+    raytris.emplace<MainMenu>();
   }
 }
 
