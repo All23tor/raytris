@@ -78,47 +78,52 @@ bool SettingsMenu::shouldStopRunning() const  {
 
 void SettingsMenu::draw() const {
   const auto [windowWidth, windowHeight] = resolutionPair(resolution);
-  const float fontSize = windowHeight / 10.0;
+  const float fontSizeBig = windowHeight / 5.0;
+  const float fontSize = windowHeight / 15.0;
 
   ClearBackground(LIGHTGRAY);
   DrawText("SETTINGS",
-    (windowWidth - MeasureText("SETTINGS", fontSize * 2)) / 2.0,
-    windowHeight / 2.0 - 3 * fontSize, fontSize * 2, RED);
+    (windowWidth - MeasureText("SETTINGS", fontSizeBig)) / 2.0,
+    windowHeight / 2.0 - 3 * fontSize, fontSizeBig, RED);
 
-  std::string resolution = std::format("{} x {}", windowWidth, windowHeight);
-  DrawText(resolution.c_str(),
-    (windowWidth - MeasureText(resolution.c_str(), fontSize)) / 2.0,
-    windowHeight / 2.0 - 1 * fontSize, fontSize, option == 0 ? BLUE : BLACK);
-
-  std::string das = std::format("DAS: {}", handlingSettings.das);
-  DrawText(das.c_str(),
-    (windowWidth - MeasureText(das.c_str(), fontSize)) / 2.0,
-    windowHeight / 2.0 + 0 * fontSize, fontSize, option == 1 ? BLUE : BLACK);
+  using option = std::pair<std::string, std::string>;
+  option resolution = {"Resolution", std::format("{} x {}", windowWidth, windowHeight)};
+  option das = {"Delayed Auto Shift", std::format("{}", handlingSettings.das)};
+  option softDropFrames = {"Soft Drop Frames", std::format("{}", handlingSettings.softDropFrames)};
   
-  std::string softDropFrames = std::format("Soft Drop Frames: {}", handlingSettings.softDropFrames);
-  DrawText(softDropFrames.c_str(),
-    (windowWidth - MeasureText(softDropFrames.c_str(), fontSize)) / 2.0,
-    windowHeight / 2.0 + 1 * fontSize, fontSize, option == 2 ? BLUE : BLACK); 
+  std::array options = {resolution, das, softDropFrames};
+  for (std::size_t idx = 0; idx < options.size(); idx++) {
+    DrawText(
+      options[idx].first.c_str(), 
+      windowWidth / 6.0, windowHeight / 2.0 + idx * fontSize, 
+      fontSize, selectedOption == idx ? BLUE : BLACK
+    );
+    DrawText(
+      options[idx].second.c_str(), 
+      windowWidth * 2 / 3.0, windowHeight / 2.0 + idx * fontSize, 
+      fontSize, selectedOption == idx ? BLUE : BLACK
+    );
+  }
 }
 
 void SettingsMenu::update() {
   if (IsKeyPressed(KEY_UP))
-    option = (option + 2) % 3;
+    selectedOption = (selectedOption + 2) % 3;
   if (IsKeyPressed(KEY_DOWN))
-    option = (option + 1) % 3;
+    selectedOption = (selectedOption + 1) % 3;
 
 
-  if (option == 0) {
+  if (selectedOption == 0) {
     if (IsKeyPressed(KEY_RIGHT))
       resizeScreenHigher();
     if (IsKeyPressed(KEY_LEFT))
       resizeScreenLower();
-  } else if (option == 1) { 
+  } else if (selectedOption == 1) { 
     if (IsKeyPressed(KEY_LEFT) && handlingSettings.das > 0)
       handlingSettings.das -= 1;
     if (IsKeyPressed(KEY_RIGHT) && handlingSettings.das < 20)
       handlingSettings.das += 1;
-  } else if (option == 2) { 
+  } else if (selectedOption == 2) { 
     if (IsKeyPressed(KEY_LEFT) && handlingSettings.softDropFrames > 0)
       handlingSettings.softDropFrames -= 1;
     if (IsKeyPressed(KEY_RIGHT) && handlingSettings.softDropFrames < 20)
