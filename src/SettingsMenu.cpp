@@ -78,13 +78,13 @@ bool SettingsMenu::shouldStopRunning() const  {
 
 void SettingsMenu::draw() const {
   const auto [windowWidth, windowHeight] = resolutionPair(resolution);
-  const float fontSizeBig = windowHeight / 5.0;
-  const float fontSize = windowHeight / 15.0;
+  const float fontSizeBig = windowHeight / 4.0;
+  const float fontSize = windowHeight / 12.0;
 
   ClearBackground(LIGHTGRAY);
   DrawText("SETTINGS",
     (windowWidth - MeasureText("SETTINGS", fontSizeBig)) / 2.0,
-    windowHeight / 2.0 - 3 * fontSize, fontSizeBig, RED);
+    windowHeight / 2.0 - fontSize - fontSizeBig, fontSizeBig, RED);
 
   using option = std::pair<std::string, std::string>;
   option resolution = {"Resolution", std::format("{} x {}", windowWidth, windowHeight)};
@@ -93,14 +93,15 @@ void SettingsMenu::draw() const {
   
   std::array options = {resolution, das, softDropFrames};
   for (std::size_t idx = 0; idx < options.size(); idx++) {
+    const auto [option, value] = options[idx];
     DrawText(
-      options[idx].first.c_str(), 
-      windowWidth / 6.0, windowHeight / 2.0 + idx * fontSize, 
+      option.c_str(), 
+      windowWidth / 8.0f, windowHeight / 2.0f + idx * fontSize, 
       fontSize, selectedOption == idx ? BLUE : BLACK
     );
     DrawText(
-      options[idx].second.c_str(), 
-      windowWidth * 2 / 3.0, windowHeight / 2.0 + idx * fontSize, 
+      value.c_str(), 
+      windowWidth / 1.5f, windowHeight / 2.0f + idx * fontSize, 
       fontSize, selectedOption == idx ? BLUE : BLACK
     );
   }

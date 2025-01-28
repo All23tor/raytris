@@ -1,6 +1,5 @@
 #include "MainMenu.hpp"
 #include "raylib.h"
-#include <string>
 #include <utility>
 #include <array>
 
@@ -16,30 +15,16 @@ namespace {
   }
 };
 
-namespace {
-  struct Button {
-    Rectangle rec;
-    bool isClicked() {
-      Vector2 mousePosition = GetMousePosition();
-      return CheckCollisionPointRec(mousePosition, rec);
-    }
-
-    void draw() const {
-      
-    }
-  };
-};
-
 void MainMenu::draw() const {
   const int windowWidth = GetScreenWidth();
   const int windowHeight = GetScreenHeight();
-  const float fontSize = windowHeight / 12.0;
-  const float fontSizeBig = windowHeight / 5.0;
+  const float fontSize = windowHeight / 10.0f;
+  const float fontSizeBig = windowHeight / 4.0f;
 
   ClearBackground(LIGHTGRAY);
   DrawText("RAYTRIS",
-    (windowWidth - MeasureText("RAYTRIS", fontSizeBig)) / 2.0,
-    windowHeight / 2.0 - fontSizeBig - fontSize, fontSizeBig, RED);
+    (windowWidth - MeasureText("RAYTRIS", fontSizeBig)) / 2.0f,
+    windowHeight / 2.0f - fontSizeBig - fontSize, fontSizeBig, RED);
   
   constexpr auto options = [](){
     std::array<Option, std::to_underlying(Option::Exit)> res;
@@ -48,12 +33,13 @@ void MainMenu::draw() const {
     }
     return res;
   }();
+
+  const float boxWidth = 8.0f * fontSize;
+  const float separation = 1.5f * fontSize;
+  const float boxHeight = 1.3f * fontSize;
   for (int i = 0; i < options.size(); i++) {
     const auto s = optionToString(options[i]);
     const bool isSelected = options[i] == selectedOption;
-    const float boxWidth = 8.0f * fontSize;
-    const float separation = 1.5 * fontSize;
-    const float boxHeight = 1.3f * fontSize;
     const Rectangle box = {(windowWidth - boxWidth) / 2.0f, (windowHeight - boxHeight + fontSize) / 2.0f + i * separation, boxWidth, boxHeight};
     DrawRectangleRec(box, isSelected ? SKYBLUE : GRAY);
     DrawRectangleLinesEx(box, fontSize / 10.0, isSelected ? BLUE : BLACK);
