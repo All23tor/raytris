@@ -1,7 +1,7 @@
 # raytris
 ![Screenshot from 2024-12-23 22-28-01](https://github.com/user-attachments/assets/c8f5f527-d528-462e-b32c-dd5fe730cced)
 ## Controls
-![Screenshot from 2024-12-23 22-28-08](https://github.com/user-attachments/assets/49f18a06-2340-44ba-91c8-a7c03f36b1dc)
+![Screenshot from 2025-01-25 19-41-58](https://github.com/user-attachments/assets/ca135453-44c3-4366-9b8d-aca5f83c6481)
 ### Menu
 - Esc: Close raytris
 - Up/Down: Select game mode
