@@ -509,28 +509,34 @@ namespace {
     }
   }
 
-  void DrawRectangleRecPretty(Rectangle rec, Color fill, float blockLength, Color outline = DrawingDetails::DefaultPrettyOutline) {
-    if (fill.a == 0)
-      return;
-
-    outline.a /= 8;
-    DrawRectangleRec(rec, fill);
-    DrawRectangle(rec.x + blockLength / 3, rec.y + blockLength / 3, rec.width / 3,
-      rec.height / 3, outline);
-    DrawRectangleLinesEx(rec, blockLength / 8, outline);
-  }
-
   inline Rectangle getBlockRectangle(int i, int j, const DrawingDetails& drawingDetails) {
     return { drawingDetails.position.x + i * drawingDetails.blockLength,
             drawingDetails.position.y + (j - static_cast<int>(Playfield::VisibleHeight)) * drawingDetails.blockLength,
             drawingDetails.blockLength, drawingDetails.blockLength };
   }
 
+  void drawBlockPretty(int i, int j, const DrawingDetails& details, Color fill) {
+    if (fill.a == 0)
+      return;
+
+    constexpr Color outline = [](){
+      Color outline = DrawingDetails::DefaultPrettyOutline;
+      outline.a /= 8;
+      return outline;
+    }();
+
+    Rectangle rec = getBlockRectangle(i, j, details);
+    DrawRectangleRec(rec, fill);
+    DrawRectangle(rec.x + details.blockLength / 3, rec.y + details.blockLength / 3, rec.width / 3,
+      rec.height / 3, outline);
+    DrawRectangleLinesEx(rec, details.blockLength / 8, outline);
+  }
+
   void drawPiece(const TetrominoMap& map, Color color, int horizontalOffset, int verticalOffset, const DrawingDetails& drawingDetails) {
   for (const CoordinatePair& coordinates : map) {
     int i = coordinates.x + horizontalOffset;
     int j = coordinates.y + verticalOffset;
-    DrawRectangleRecPretty(getBlockRectangle(i, j, drawingDetails), color, drawingDetails.blockLength);
+    drawBlockPretty(i, j, drawingDetails, color);
   }
 }
 };
@@ -562,7 +568,7 @@ void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
 
   for (int j = 0; j < Height; ++j) {
     for (int i = 0; i < Width; ++i) {
-      DrawRectangleRecPretty(getBlockRectangle(i, j, drawingDetails), getTetrominoColor(grid[j][i]), drawingDetails.blockLength);
+      drawBlockPretty(i, j, drawingDetails, getTetrominoColor(grid[j][i]));
     }
   }
 }
