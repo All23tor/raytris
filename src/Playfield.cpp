@@ -1,6 +1,8 @@
 #include "Playfield.hpp"
+#include "DrawingDetails.hpp"
 #include "FallingPiece.hpp"
 #include "HandlingSettings.hpp"
+#include "raylib.h"
 #include <format>
 #include <cmath>
 #include <algorithm>
@@ -519,26 +521,35 @@ namespace {
     if (fill.a == 0)
       return;
 
-    constexpr Color outline = [](){
-      Color outline = DrawingDetails::DefaultPrettyOutline;
-      outline.a /= 8;
-      return outline;
-    }();
-
     Rectangle rec = getBlockRectangle(i, j, details);
     DrawRectangleRec(rec, fill);
     DrawRectangle(rec.x + details.blockLength / 3, rec.y + details.blockLength / 3, rec.width / 3,
-      rec.height / 3, outline);
-    DrawRectangleLinesEx(rec, details.blockLength / 8, outline);
+      rec.height / 3, DrawingDetails::DefaultPrettyOutline);
+    DrawRectangleLinesEx(rec, details.blockLength / 8, DrawingDetails::DefaultPrettyOutline);
+  }
+
+  void drawBlockDanger(int i, int j, const DrawingDetails& details) { 
+    Rectangle rec = getBlockRectangle(i, j, details);
+    DrawRectangleLinesEx(rec, details.blockLength / 8, RED);
+  DrawLineEx({rec.x + rec.width * 0.25f, rec.y + rec.height * 0.25f}, {rec.x + rec.width * 0.75f, rec.y + rec.height * 0.75f}, details.blockLength * 0.1f, RED);
+    DrawLineEx({rec.x + rec.width * 0.75f, rec.y + rec.height * 0.25f}, {rec.x + rec.width * 0.25f, rec.y + rec.height * 0.75f}, details.blockLength * 0.1f, RED);
   }
 
   void drawPiece(const TetrominoMap& map, Color color, int horizontalOffset, int verticalOffset, const DrawingDetails& drawingDetails) {
-  for (const CoordinatePair& coordinates : map) {
-    int i = coordinates.x + horizontalOffset;
-    int j = coordinates.y + verticalOffset;
-    drawBlockPretty(i, j, drawingDetails, color);
+    for (const CoordinatePair& coordinates : map) {
+      int i = coordinates.x + horizontalOffset;
+      int j = coordinates.y + verticalOffset;
+      drawBlockPretty(i, j, drawingDetails, color);
+    }
   }
-}
+
+  void drawPieceDanger(const FallingPiece& piece, const DrawingDetails& details) {
+    for (const CoordinatePair& coordinates : piece.tetrominoMap) {
+      int i = coordinates.x + piece.horizontalPosition;
+      int j = coordinates.y + piece.verticalPosition;
+      drawBlockDanger(i, j, details);
+    }
+  }
 };
 
 void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
@@ -576,8 +587,10 @@ void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
 void Playfield::DrawPieces(const DrawingDetails& drawingDetails) const {
   const FallingPiece ghostPiece = getGhostPiece();
   drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition, drawingDetails);
-  drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino),
-    fallingPiece.horizontalPosition, fallingPiece.verticalPosition, drawingDetails);
+  drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino), fallingPiece.horizontalPosition, fallingPiece.verticalPosition, drawingDetails);
+  if (/*inDanger()*/ true) {
+    drawPieceDanger({nextQueue[0], InitialHorizontalPosition, InitialVerticalPosition}, drawingDetails);
+  }
 }
 
 void Playfield::DrawNextComingPieces(const DrawingDetails& drawingDetails) const {

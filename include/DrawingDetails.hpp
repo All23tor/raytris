@@ -5,7 +5,7 @@
 
 struct DrawingDetails {
   static constexpr float HeightScaleFactor = 0.80;
-  static constexpr Color DefaultPrettyOutline = BLACK;
+  static constexpr Color DefaultPrettyOutline = {0, 0, 0, 255 / 8};
   static constexpr Color TetrionBackgroundColor = BLACK;
   static constexpr Color GridlineColor = DARKGRAY;
   static constexpr Color UnavailableHoldPieceColor = DARKGRAY;
