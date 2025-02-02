@@ -74,6 +74,7 @@ private:
   void updateScore(std::size_t, SpinType);
   bool isAllClear() const;
   void clearLines();
+  bool isInDanger() const;
 
   void swapTetromino();
   void replaceNextPiece();

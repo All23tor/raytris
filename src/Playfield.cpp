@@ -3,9 +3,8 @@
 #include "FallingPiece.hpp"
 #include "HandlingSettings.hpp"
 #include "raylib.h"
-#include <format>
+#include <ranges>
 #include <cmath>
-#include <algorithm>
 
 Playfield::Playfield() : fallingPiece(Tetromino::Empty, InitialHorizontalPosition, InitialVerticalPosition) {
   std::array<Tetromino, Width> emptyRow;
@@ -530,9 +529,9 @@ namespace {
 
   void drawBlockDanger(int i, int j, const DrawingDetails& details) { 
     Rectangle rec = getBlockRectangle(i, j, details);
-    DrawRectangleLinesEx(rec, details.blockLength / 8, RED);
+    DrawRectangleLinesEx(rec, details.blockLength / 8, {255, 0, 0, 150});
   DrawLineEx({rec.x + rec.width * 0.25f, rec.y + rec.height * 0.25f}, {rec.x + rec.width * 0.75f, rec.y + rec.height * 0.75f}, details.blockLength * 0.1f, RED);
-    DrawLineEx({rec.x + rec.width * 0.75f, rec.y + rec.height * 0.25f}, {rec.x + rec.width * 0.25f, rec.y + rec.height * 0.75f}, details.blockLength * 0.1f, RED);
+    DrawLineEx({rec.x + rec.width * 0.75f, rec.y + rec.height * 0.25f}, {rec.x + rec.width * 0.25f, rec.y + rec.height * 0.75f}, details.blockLength * 0.1f, {255, 0, 0, 150});
   }
 
   void drawPiece(const TetrominoMap& map, Color color, int horizontalOffset, int verticalOffset, const DrawingDetails& drawingDetails) {
@@ -584,11 +583,23 @@ void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
   }
 }
 
+bool Playfield::isInDanger() const {
+  using namespace std::views;
+  constexpr auto dangerousBlocks = 
+    cartesian_product(iota(Width / 2 - 2, Width / 2 + 2), iota(InitialVerticalPosition, InitialVerticalPosition + 5)) | 
+    transform([](const auto& tuple) {
+      return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
+    });
+  return std::any_of(dangerousBlocks.begin(), dangerousBlocks.end(), [this](const auto& pair) -> bool {
+    return grid[pair.second][pair.first] != Tetromino::Empty;
+  });
+}
+
 void Playfield::DrawPieces(const DrawingDetails& drawingDetails) const {
   const FallingPiece ghostPiece = getGhostPiece();
   drawPiece(ghostPiece.tetrominoMap, GRAY, ghostPiece.horizontalPosition, ghostPiece.verticalPosition, drawingDetails);
   drawPiece(fallingPiece.tetrominoMap, getTetrominoColor(fallingPiece.tetromino), fallingPiece.horizontalPosition, fallingPiece.verticalPosition, drawingDetails);
-  if (/*inDanger()*/ true) {
+  if (isInDanger()) {
     drawPieceDanger({nextQueue[0], InitialHorizontalPosition, InitialVerticalPosition}, drawingDetails);
   }
 }
