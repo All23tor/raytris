@@ -9,7 +9,7 @@ std::pair<int, int> resolutionPair(Resolution resolution);
 
 class SettingsMenu {
   static Resolution resolution;
-  static HandlingSettings handlingSettings; 
+  static inline HandlingSettings handlingSettings = {20, 1, 30, 15, 7}; 
   int selectedOption = 0;
 
   void resizeScreenHigher();

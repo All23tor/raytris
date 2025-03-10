@@ -5,11 +5,9 @@
 #include <format>
 #include <utility>
 
-HandlingSettings SettingsMenu::handlingSettings;
 Resolution SettingsMenu::resolution = []{
   std::ifstream in("settings.raytris");
   if (!in.good()) {
-    handlingSettings = {20, 1, 30, 15, 7};
     return Resolution::Small;
   }
   int input_resolution;
