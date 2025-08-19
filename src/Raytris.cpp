@@ -28,7 +28,8 @@ void Raytris::handleWhereToGo(auto&& runnable) {
       raytris.emplace<SinglePlayerGame>(SettingsMenu::getHandlingSettings());
       break;
     case MainMenu::Option::TwoPlayers:
-      raytris.emplace<TwoPlayerGame>(SettingsMenu::getHandlingSettings(), SettingsMenu::getHandlingSettings());
+      raytris.emplace<TwoPlayerGame>(SettingsMenu::getHandlingSettings(),
+                                     SettingsMenu::getHandlingSettings());
       break;
     case MainMenu::Option::Settings:
       raytris.emplace<SettingsMenu>();
@@ -40,23 +41,24 @@ void Raytris::handleWhereToGo(auto&& runnable) {
 }
 
 void Raytris::updateDrawFrame() {
-  std::visit([this](auto&& app){
-    app.update();
-    if (app.shouldStopRunning())
-      handleWhereToGo(app);
-    BeginDrawing();
-    ClearBackground(DrawingDetails::BackgroundColor);
-    app.draw();
-    EndDrawing();
-  }, raytris);
+  std::visit(
+    [this](auto&& app) {
+      app.update();
+      if (app.shouldStopRunning())
+        handleWhereToGo(app);
+      BeginDrawing();
+      ClearBackground(DrawingDetails::BackgroundColor);
+      app.draw();
+      EndDrawing();
+    },
+    raytris);
 }
 
 void Raytris::run() {
 #if defined(PLATFORM_WEB)
   emscripten_set_main_loop_arg(
-    [](void* p) -> void {((Raytris*)p)->updateDrawFrame();},
-    (void*)this, 0, true
-  );
+    [](void* p) -> void { ((Raytris*)p)->updateDrawFrame(); }, (void*)this, 0,
+    true);
 #else
   SetTargetFPS(60);
   while (!shouldStopRunning) {

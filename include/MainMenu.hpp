@@ -3,7 +3,12 @@
 
 class MainMenu {
 public:
-  enum class Option { SinglePlayer, TwoPlayers, Settings, Exit };
+  enum class Option {
+    SinglePlayer,
+    TwoPlayers,
+    Settings,
+    Exit
+  };
 
 private:
   Option selectedOption = Option::SinglePlayer;

@@ -2,9 +2,9 @@
 #define RAYTRIS_H
 
 #include "MainMenu.hpp"
+#include "SettingsMenu.hpp"
 #include "SinglePlayerGame.hpp"
 #include "TwoPlayerGame.hpp"
-#include "SettingsMenu.hpp"
 #include <variant>
 
 class Raytris {
@@ -13,6 +13,7 @@ class Raytris {
 
   void handleWhereToGo(auto&&);
   void updateDrawFrame();
+
 public:
   Raytris();
   ~Raytris();

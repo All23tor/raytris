@@ -1,10 +1,10 @@
 #ifndef PLAYFIELD_H
 #define PLAYFIELD_H
 
-#include "HandlingSettings.hpp"
-#include "NextQueue.hpp"
 #include "Controller.hpp"
 #include "DrawingDetails.hpp"
+#include "HandlingSettings.hpp"
+#include "NextQueue.hpp"
 #include <iostream>
 
 enum class MessageType : unsigned char {
@@ -16,7 +16,11 @@ enum class MessageType : unsigned char {
   Empty
 };
 
-enum class SpinType { No, Proper, Mini };
+enum class SpinType {
+  No,
+  Proper,
+  Mini
+};
 
 struct LineClearMessage {
   static constexpr unsigned char Duration = 180;
@@ -25,8 +29,14 @@ struct LineClearMessage {
   unsigned char timer;
   SpinType spinType;
 
-  LineClearMessage() : message(MessageType::Empty), timer(0), spinType(SpinType::No) {}
-  LineClearMessage(MessageType type) : message(type), timer(Duration), spinType(SpinType::No) {}
+  LineClearMessage() :
+    message(MessageType::Empty),
+    timer(0),
+    spinType(SpinType::No) {}
+  LineClearMessage(MessageType type) :
+    message(type),
+    timer(Duration),
+    spinType(SpinType::No) {}
 };
 
 class Playfield {

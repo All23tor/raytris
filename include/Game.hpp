@@ -10,7 +10,7 @@ struct Game {
   const HandlingSettings settings;
   bool paused = false;
 
-  void DrawPauseMenu() const; 
+  void DrawPauseMenu() const;
   Game(const DrawingDetails&, const Controller&, const HandlingSettings&);
   void draw() const;
   bool update();

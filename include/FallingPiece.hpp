@@ -3,18 +3,41 @@
 
 #include <array>
 
-enum class Tetromino : unsigned char { I, O, T, Z, S, J, L, Empty };
-enum class Orientation : unsigned char { Up, Right, Down, Left };
-enum class Shift : unsigned char { Left, Right };
-enum class RotationType : unsigned char { Clockwise, CounterClockwise, OneEighty };
+enum class Tetromino : unsigned char {
+  I,
+  O,
+  T,
+  Z,
+  S,
+  J,
+  L,
+  Empty
+};
+enum class Orientation : unsigned char {
+  Up,
+  Right,
+  Down,
+  Left
+};
+enum class Shift : unsigned char {
+  Left,
+  Right
+};
+enum class RotationType : unsigned char {
+  Clockwise,
+  CounterClockwise,
+  OneEighty
+};
 
 struct CoordinatePair {
   signed char x : 4;
   signed char y : 4;
 };
 
-using OffsetTable = std::array<CoordinatePair, 5>; // 5 offsets to try
-using TetrominoMap = std::array<CoordinatePair, 4>; // 4 minos per Tetromino in a 5x5 matrix
+// 5 offsets to try
+using OffsetTable = std::array<CoordinatePair, 5>;
+// 4 minos per Tetromino in a 5x5 matrix
+using TetrominoMap = std::array<CoordinatePair, 4>;
 
 TetrominoMap initialTetrominoMap(const Tetromino);
 

@@ -1,7 +1,10 @@
 #include "FallingPiece.hpp"
+#include <utility>
 
-FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position, char _vertical_position)
-  : tetromino(_tetromino), orientation(Orientation::Up),
+FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position,
+                           char _vertical_position) :
+  tetromino(_tetromino),
+  orientation(Orientation::Up),
   horizontalPosition(_horizontal_position),
   verticalPosition(_vertical_position),
   tetrominoMap(initialTetrominoMap(tetromino)) {}
@@ -9,21 +12,21 @@ FallingPiece::FallingPiece(Tetromino _tetromino, char _horizontal_position, char
 TetrominoMap initialTetrominoMap(Tetromino tetromino) {
   switch (tetromino) {
   case Tetromino::I:
-    return (TetrominoMap) { { { -1, 0 }, { 0, 0 }, { 1, 0 }, { 2, 0 } } };
+    return (TetrominoMap){{{-1, 0}, {0, 0}, {1, 0}, {2, 0}}};
   case Tetromino::O:
-    return (TetrominoMap) { { { 0, -1 }, { 1, -1 }, { 0, 0 }, { 1, 0 } } };
+    return (TetrominoMap){{{0, -1}, {1, -1}, {0, 0}, {1, 0}}};
   case Tetromino::T:
-    return (TetrominoMap) { { { 0, -1 }, { -1, 0 }, { 0, 0 }, { 1, 0 } } };
+    return (TetrominoMap){{{0, -1}, {-1, 0}, {0, 0}, {1, 0}}};
   case Tetromino::S:
-    return (TetrominoMap) { { { 0, -1 }, { 1, -1 }, { -1, 0 }, { 0, 0 } } };
+    return (TetrominoMap){{{0, -1}, {1, -1}, {-1, 0}, {0, 0}}};
   case Tetromino::Z:
-    return (TetrominoMap) { { { -1, -1 }, { 0, -1 }, { 0, 0 }, { 1, 0 } } };
+    return (TetrominoMap){{{-1, -1}, {0, -1}, {0, 0}, {1, 0}}};
   case Tetromino::J:
-    return (TetrominoMap) { { { -1, -1 }, { -1, 0 }, { 0, 0 }, { 1, 0 } } };
+    return (TetrominoMap){{{-1, -1}, {-1, 0}, {0, 0}, {1, 0}}};
   case Tetromino::L:
-    return (TetrominoMap) { { { 1, -1 }, { -1, 0 }, { 0, 0 }, { 1, 0 } } };
+    return (TetrominoMap){{{1, -1}, {-1, 0}, {0, 0}, {1, 0}}};
   default:
-    return (TetrominoMap) { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } };
+    return (TetrominoMap){{{0, 0}, {0, 0}, {0, 0}, {0, 0}}};
   }
 }
 
@@ -43,22 +46,21 @@ FallingPiece& FallingPiece::shift(Shift shift) {
 }
 
 FallingPiece& FallingPiece::rotate(RotationType rotationType) {
-  for (CoordinatePair& pcp : tetrominoMap) {
-    if (rotationType == RotationType::Clockwise) {
-      pcp = { static_cast<signed char>(-pcp.y), pcp.x };
-    } else if (rotationType == RotationType::CounterClockwise) {
-      pcp = { pcp.y, static_cast<signed char>(-pcp.x) };
-    } else if (rotationType == RotationType::OneEighty) {
-      pcp = { static_cast<signed char>(-pcp.x), static_cast<signed char>(-pcp.y) };
-    }
-  }
+  for (CoordinatePair& pcp : tetrominoMap)
+    if (rotationType == RotationType::Clockwise)
+      pcp = {static_cast<signed char>(-pcp.y), pcp.x};
+    else if (rotationType == RotationType::CounterClockwise)
+      pcp = {pcp.y, static_cast<signed char>(-pcp.x)};
+    else if (rotationType == RotationType::OneEighty)
+      pcp = {static_cast<signed char>(-pcp.x),
+             static_cast<signed char>(-pcp.y)};
 
-  int rotationSteps =
-    (rotationType == RotationType::Clockwise) ? 1
-    : (rotationType == RotationType::CounterClockwise) ? -1
-    : (rotationType == RotationType::OneEighty) ? 2
-    : 0;
-  orientation = static_cast<Orientation>((static_cast<unsigned char>(orientation) + rotationSteps + 4) % 4);
+  int rotationSteps = (rotationType == RotationType::Clockwise)          ? 1
+                      : (rotationType == RotationType::CounterClockwise) ? 3
+                      : (rotationType == RotationType::OneEighty)        ? 2
+                                                                         : 0;
+  orientation = static_cast<Orientation>(
+    (std::to_underlying(orientation) + rotationSteps) % 4);
 
   return *this;
 }
@@ -69,7 +71,6 @@ FallingPiece& FallingPiece::translate(CoordinatePair translation) {
 
   return *this;
 }
-
 
 FallingPiece FallingPiece::fallen() const {
   FallingPiece newPiece = *this;
@@ -100,35 +101,35 @@ OffsetTable getOffsetTable(const FallingPiece& fallingPiece) {
   case Tetromino::I:
     switch (fallingPiece.orientation) {
     case Orientation::Up:
-      return (OffsetTable) { { { 0, 0 }, { -1, 0 }, { 2, 0 }, { -1, 0 }, { 2, 0 } } };
+      return (OffsetTable){{{0, 0}, {-1, 0}, {2, 0}, {-1, 0}, {2, 0}}};
     case Orientation::Right:
-      return (OffsetTable) { { { -1, 0 }, { 0, 0 }, { 0, 0 }, { 0, -1 }, { 0, 2 } } };
+      return (OffsetTable){{{-1, 0}, {0, 0}, {0, 0}, {0, -1}, {0, 2}}};
     case Orientation::Down:
-      return (OffsetTable) { { { -1, -1 }, { 1, -1 }, { -2, -1 }, { 1, 0 }, { -2, 0 } } };
+      return (OffsetTable){{{-1, -1}, {1, -1}, {-2, -1}, {1, 0}, {-2, 0}}};
     case Orientation::Left:
-      return (OffsetTable) { { { 0, -1 }, { 0, -1 }, { 0, -1 }, { 0, 1 }, { 0, -2 } } };
+      return (OffsetTable){{{0, -1}, {0, -1}, {0, -1}, {0, 1}, {0, -2}}};
     }
   case Tetromino::O:
     switch (fallingPiece.orientation) {
     case Orientation::Up:
-      return (OffsetTable) { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } };
+      return (OffsetTable){{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
     case Orientation::Right:
-      return (OffsetTable) { { { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 } } };
+      return (OffsetTable){{{0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}}};
     case Orientation::Down:
-      return (OffsetTable) { { { -1, 1 }, { -1, 1 }, { -1, 1 }, { -1, 1 }, { -1, 1 } } };
+      return (OffsetTable){{{-1, 1}, {-1, 1}, {-1, 1}, {-1, 1}, {-1, 1}}};
     case Orientation::Left:
-      return (OffsetTable) { { { -1, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 }, { -1, 0 } } };
+      return (OffsetTable){{{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}}};
     }
   default:
     switch (fallingPiece.orientation) {
     case Orientation::Up:
-      return (OffsetTable) { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } };
+      return (OffsetTable){{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
     case Orientation::Right:
-      return (OffsetTable) { { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, -2 }, { 1, -2 } } };
+      return (OffsetTable){{{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}}};
     case Orientation::Down:
-      return (OffsetTable) { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } };
+      return (OffsetTable){{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
     case Orientation::Left:
-      return (OffsetTable) { { { 0, 0 }, { -1, 0 }, { -1, 1 }, { 0, -2 }, { -1, -2 } } };
+      return (OffsetTable){{{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}};
     }
   }
   return {};

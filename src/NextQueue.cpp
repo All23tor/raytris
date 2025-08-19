@@ -4,7 +4,7 @@
 #include <random>
 
 namespace {
-  std::mt19937 generator = std::mt19937((std::random_device())());
+std::mt19937 generator = std::mt19937((std::random_device())());
 };
 
 NextQueue::NextQueue() {
@@ -13,7 +13,7 @@ NextQueue::NextQueue() {
 
 void NextQueue::pushNewBag() {
   using enum Tetromino;
-  std::array<Tetromino, SizeOfBag> newBag =  { I, O, T, S, Z, J, L }; 
+  std::array<Tetromino, SizeOfBag> newBag = {I, O, T, S, Z, J, L};
   std::shuffle(newBag.begin(), newBag.end(), generator);
   for (std::size_t index = queueSize; index >= 1; index--) {
     queue[index + SizeOfBag - 1] = queue[index - 1];
@@ -41,16 +41,15 @@ const Tetromino& NextQueue::operator[](std::size_t index) const {
   return queue[queueSize - 1 - index];
 }
 
-
 std::ostream& operator<<(std::ostream& out, const NextQueue& nq) {
-  for (const auto& tetromino: nq.queue) {
+  for (const auto& tetromino : nq.queue) {
     out << static_cast<int>(tetromino) << ' ';
   }
   return out << '\n' << nq.queueSize << '\n';
 }
 
 std::istream& operator>>(std::istream& in, NextQueue& nq) {
-  for (auto& tetromino: nq.queue) {
+  for (auto& tetromino : nq.queue) {
     int input_tetromino;
     in >> input_tetromino;
     tetromino = static_cast<Tetromino>(input_tetromino);
