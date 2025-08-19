@@ -1,9 +1,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-using Input = bool(*)();
-
 struct Controller {
+  using Input = bool (*)();
   const Input checkRestartInput;
   const Input checkSwapInput;
   const Input checkLeftInput;
@@ -18,24 +17,6 @@ struct Controller {
   const Input checkUndoInput;
   const Input checkPauseInput;
   const Input checkQuitInput;
-
-  Controller() = delete;
-  Controller(
-    Input restartInput,
-    Input swapInput,
-    Input leftInput,
-    Input rightInput,
-    Input leftDasInput,
-    Input rightDasInput,
-    Input clockwiseInput,
-    Input counterClockwiseInput,
-    Input oneEightyInput,
-    Input hardDropInput,
-    Input softDropInput,
-    Input undoInput,
-    Input pauseInput,
-    Input quitInput
-  );
 };
 
 #endif
