@@ -7,7 +7,10 @@ Game::Game(const DrawingDetails& _drawingDetails, const Controller& _controller,
   controller(_controller),
   settings(_settings) {}
 
-void Game::DrawPauseMenu() const {
+void Game::draw() const {
+  playfield.draw(drawingDetails);
+
+  // Pause Menu
   if (!playfield.lost() && !paused)
     return;
 
@@ -36,11 +39,6 @@ void Game::DrawPauseMenu() const {
              2.0,
            screenHeight / 2.0 + drawingDetails.fontSizeBig,
            drawingDetails.fontSize, drawingDetails.QuitColor);
-}
-
-void Game::draw() const {
-  playfield.draw(drawingDetails);
-  DrawPauseMenu();
 }
 
 bool Game::update() {
