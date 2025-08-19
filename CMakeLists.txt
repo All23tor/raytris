@@ -26,7 +26,6 @@ set(SOURCES
   ./src/FallingPiece.cpp
   ./src/MainMenu.cpp
   ./src/DrawingDetails.cpp
-  ./src/HandlingSettings.cpp
   ./src/SettingsMenu.cpp
   ./src/Playfield.cpp
   ./src/NextQueue.cpp
