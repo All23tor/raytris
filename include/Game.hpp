@@ -4,10 +4,10 @@
 #include "Playfield.hpp"
 
 struct Game {
-  Playfield playfield;
   const DrawingDetails drawingDetails;
   const Controller controller;
   const HandlingSettings settings;
+  Playfield playfield;
   bool paused = false;
 
   Game(const DrawingDetails&, const Controller&, const HandlingSettings&);

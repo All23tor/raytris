@@ -2,7 +2,6 @@
 #define TWO_PLAYER_GAME_H
 
 #include "Game.hpp"
-#include "HandlingSettings.hpp"
 
 class TwoPlayerGame {
   Game game1;
