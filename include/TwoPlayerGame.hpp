@@ -8,8 +8,6 @@ class TwoPlayerGame {
   Game game1;
   Game game2;
 
-  void DrawPauseMenu() const;
-
 public:
   TwoPlayerGame(const HandlingSettings&, const HandlingSettings&);
   void update();
