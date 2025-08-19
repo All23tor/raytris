@@ -25,7 +25,6 @@ endif()
 set(SOURCES
   ./src/FallingPiece.cpp
   ./src/MainMenu.cpp
-  ./src/DrawingDetails.cpp
   ./src/SettingsMenu.cpp
   ./src/Playfield.cpp
   ./src/NextQueue.cpp

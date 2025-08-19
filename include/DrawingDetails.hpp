@@ -15,7 +15,7 @@ struct DrawingDetails {
   static constexpr Color YouLostColor = RED;
   static constexpr Color GamePausedColor = BLUE;
   static constexpr Color QuitColor = WHITE;
-  static constexpr Color DarkenColor = { 0, 0, 0, 100 };
+  static constexpr Color DarkenColor = {0, 0, 0, 100};
   static constexpr Color BackgroundColor = LIGHTGRAY;
   static constexpr int LeftBorder = -10;
 
@@ -25,8 +25,12 @@ struct DrawingDetails {
   const int fontSizeBig;
   const int fontSizeSmall;
 
-  DrawingDetails() = delete;
-  DrawingDetails(float _blockLength, Vector2 _position);
+  DrawingDetails(float _blockLength, Vector2 _position) :
+    blockLength(_blockLength),
+    fontSize(blockLength * 2),
+    fontSizeBig(blockLength * 5),
+    fontSizeSmall(blockLength),
+    position{_position} {}
 };
 
 #endif

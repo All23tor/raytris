@@ -4,11 +4,34 @@
 #include "Playfield.hpp"
 #include <fstream>
 
+static constexpr auto makeDrawingDetails = []() -> DrawingDetails {
+  float blockLength = DrawingDetails::HeightScaleFactor * GetScreenHeight() /
+                      Playfield::VisibleHeight;
+  Vector2 position{
+    (GetScreenWidth() - blockLength * Playfield::Width) / 2.0f,
+    (GetScreenHeight() - blockLength * Playfield::VisibleHeight) / 2.0f};
+  return {blockLength, position};
+};
+
+static constexpr Controller KeyboardControls{
+  []() -> bool { return IsKeyPressed(KEY_R); },
+  []() -> bool { return IsKeyPressed(KEY_C); },
+  []() -> bool { return IsKeyPressed(KEY_LEFT); },
+  []() -> bool { return IsKeyPressed(KEY_RIGHT); },
+  []() -> bool { return IsKeyDown(KEY_LEFT); },
+  []() -> bool { return IsKeyDown(KEY_RIGHT); },
+  []() -> bool { return IsKeyPressed(KEY_UP); },
+  []() -> bool { return IsKeyPressed(KEY_Z); },
+  []() -> bool { return IsKeyPressed(KEY_A); },
+  []() -> bool { return IsKeyPressed(KEY_SPACE); },
+  []() -> bool { return IsKeyDown(KEY_DOWN); },
+  []() -> bool { return IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Z); },
+  []() -> bool { return IsKeyPressed(KEY_ENTER); },
+  []() -> bool { return IsKeyPressed(KEY_ESCAPE); },
+};
+
 SinglePlayerGame::SinglePlayerGame(const HandlingSettings& _settings) :
-    game({DrawingDetails::HeightScaleFactor * GetScreenHeight() /
-            Playfield::VisibleHeight,
-          {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f}},
-         keyboardControls, _settings) {
+  game(makeDrawingDetails(), KeyboardControls, _settings) {
   if (std::ifstream in("save.raytris"); in.good())
     in >> game.playfield;
   undoMoveStack.push(game.playfield);
