@@ -1,7 +1,7 @@
 #include "TwoPlayerGame.hpp"
 #include "HandlingSettings.hpp"
 
-static constexpr auto makeDrawingDetails1 = []() -> DrawingDetails {
+static DrawingDetails makeDrawingDetails1() {
   float blockLength{DrawingDetails::HeightScaleFactor * 0.75f *
                     GetScreenHeight() / Playfield::VisibleHeight};
   Vector2 position{
@@ -10,7 +10,7 @@ static constexpr auto makeDrawingDetails1 = []() -> DrawingDetails {
   return {blockLength, position};
 };
 
-static constexpr auto makeDrawingDetails2 = []() -> DrawingDetails {
+static DrawingDetails makeDrawingDetails2() {
   float blockLength{DrawingDetails::HeightScaleFactor * 0.75f *
                     GetScreenHeight() / Playfield::VisibleHeight};
   Vector2 position{

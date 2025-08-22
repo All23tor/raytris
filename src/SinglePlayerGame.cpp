@@ -4,7 +4,7 @@
 #include "Playfield.hpp"
 #include <fstream>
 
-static constexpr auto makeDrawingDetails = []() -> DrawingDetails {
+static DrawingDetails makeDrawingDetails() {
   float blockLength = DrawingDetails::HeightScaleFactor * GetScreenHeight() /
                       Playfield::VisibleHeight;
   Vector2 position{
