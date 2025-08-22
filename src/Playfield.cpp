@@ -185,9 +185,9 @@ OffsetTable calculateOffsetDifferences(const OffsetTable& startOffsets,
 } // namespace
 
 bool Playfield::tryRotating(RotationType rotationType) {
-  const OffsetTable startOffsetValues = getOffsetTable(fallingPiece);
+  const OffsetTable& startOffsetValues = getOffsetTable(fallingPiece);
   const FallingPiece rotatedPiece = fallingPiece.rotated(rotationType);
-  const OffsetTable endOffsetValues = getOffsetTable(rotatedPiece);
+  const OffsetTable& endOffsetValues = getOffsetTable(rotatedPiece);
   const OffsetTable trueOffsets =
     calculateOffsetDifferences(startOffsetValues, endOffsetValues);
 

@@ -96,41 +96,28 @@ FallingPiece FallingPiece::translated(CoordinatePair translation) const {
   return newPiece;
 }
 
-OffsetTable getOffsetTable(const FallingPiece& fallingPiece) {
-  switch (fallingPiece.tetromino) {
-  case Tetromino::I:
-    switch (fallingPiece.orientation) {
-    case Orientation::Up:
-      return (OffsetTable){{{0, 0}, {-1, 0}, {2, 0}, {-1, 0}, {2, 0}}};
-    case Orientation::Right:
-      return (OffsetTable){{{-1, 0}, {0, 0}, {0, 0}, {0, -1}, {0, 2}}};
-    case Orientation::Down:
-      return (OffsetTable){{{-1, -1}, {1, -1}, {-2, -1}, {1, 0}, {-2, 0}}};
-    case Orientation::Left:
-      return (OffsetTable){{{0, -1}, {0, -1}, {0, -1}, {0, 1}, {0, -2}}};
-    }
-  case Tetromino::O:
-    switch (fallingPiece.orientation) {
-    case Orientation::Up:
-      return (OffsetTable){{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
-    case Orientation::Right:
-      return (OffsetTable){{{0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}}};
-    case Orientation::Down:
-      return (OffsetTable){{{-1, 1}, {-1, 1}, {-1, 1}, {-1, 1}, {-1, 1}}};
-    case Orientation::Left:
-      return (OffsetTable){{{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}}};
-    }
-  default:
-    switch (fallingPiece.orientation) {
-    case Orientation::Up:
-      return (OffsetTable){{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
-    case Orientation::Right:
-      return (OffsetTable){{{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}}};
-    case Orientation::Down:
-      return (OffsetTable){{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
-    case Orientation::Left:
-      return (OffsetTable){{{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}};
-    }
-  }
-  return {};
+const OffsetTable& getOffsetTable(const FallingPiece& piece) {
+  static constexpr OffsetTable I_TABLE[4] = {
+    {{{0, 0}, {-1, 0}, {2, 0}, {-1, 0}, {2, 0}}},
+    {{{-1, 0}, {0, 0}, {0, 0}, {0, -1}, {0, 2}}},
+    {{{-1, -1}, {1, -1}, {-2, -1}, {1, 0}, {-2, 0}}},
+    {{{0, -1}, {0, -1}, {0, -1}, {0, 1}, {0, -2}}},
+  };
+  static constexpr OffsetTable O_TABLE[4] = {
+    {{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+    {{{0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}}},
+    {{{-1, 1}, {-1, 1}, {-1, 1}, {-1, 1}, {-1, 1}}},
+    {{{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}}},
+  };
+  static constexpr OffsetTable DEFAULT_TABLE[4]{
+    {{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+    {{{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}}},
+    {{{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}},
+    {{{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}},
+  };
+
+  const auto& offset_table = piece.tetromino == Tetromino::I   ? I_TABLE
+                             : piece.tetromino == Tetromino::O ? O_TABLE
+                                                               : DEFAULT_TABLE;
+  return offset_table[std::to_underlying(piece.orientation)];
 }

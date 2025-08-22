@@ -59,6 +59,6 @@ struct FallingPiece {
   FallingPiece translated(CoordinatePair translation) const;
 };
 
-OffsetTable getOffsetTable(const FallingPiece&);
+const OffsetTable& getOffsetTable(const FallingPiece&);
 
 #endif
