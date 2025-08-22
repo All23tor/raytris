@@ -47,7 +47,7 @@ void Raytris::updateDrawFrame() {
       if (app.shouldStopRunning())
         handleWhereToGo(app);
       BeginDrawing();
-      ClearBackground(DrawingDetails::BackgroundColor);
+      ClearBackground(DrawingDetails::BACKGROUND_COLOR);
       app.draw();
       EndDrawing();
     },

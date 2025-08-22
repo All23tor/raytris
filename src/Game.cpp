@@ -16,14 +16,14 @@ void Game::draw() const {
 
   const float screenWidth = GetScreenWidth();
   const float screenHeight = GetScreenHeight();
-  DrawRectangle(0, 0, screenWidth, screenHeight, DrawingDetails::DarkenColor);
+  DrawRectangle(0, 0, screenWidth, screenHeight, DrawingDetails::DARKEN_COLOR);
 
   if (playfield.lost()) {
     DrawText(
       "YOU LOST",
       (screenWidth - MeasureText("YOU LOST", drawingDetails.fontSizeBig)) / 2.0,
       screenHeight / 2.0, drawingDetails.fontSizeBig,
-      drawingDetails.YouLostColor);
+      drawingDetails.YOU_LOST_COLOR);
 
   } else if (paused) {
     DrawText(
@@ -31,20 +31,19 @@ void Game::draw() const {
       (screenWidth - MeasureText("GAME PAUSED", drawingDetails.fontSizeBig)) /
         2.0,
       screenHeight / 2.0, drawingDetails.fontSizeBig,
-      drawingDetails.GamePausedColor);
+      drawingDetails.GAME_PAUSED_COLOR);
   }
   DrawText("Press Esc to quit",
            (screenWidth -
             MeasureText("Press Enter to quit", drawingDetails.fontSize)) /
              2.0,
            screenHeight / 2.0 + drawingDetails.fontSizeBig,
-           drawingDetails.fontSize, drawingDetails.QuitColor);
+           drawingDetails.fontSize, drawingDetails.QUIT_COLOR);
 }
 
 bool Game::update() {
-  if (controller.checkRestartInput()) {
+  if (controller.checkRestartInput())
     playfield.restart();
-  }
 
   if (controller.checkPauseInput())
     paused = !paused;

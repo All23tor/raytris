@@ -23,7 +23,7 @@ enum class SpinType {
 };
 
 struct LineClearMessage {
-  static constexpr unsigned char Duration = 180;
+  static constexpr unsigned char DURATION = 180;
 
   MessageType message;
   unsigned char timer;
@@ -35,21 +35,19 @@ struct LineClearMessage {
     spinType(SpinType::No) {}
   LineClearMessage(MessageType type) :
     message(type),
-    timer(Duration),
+    timer(DURATION),
     spinType(SpinType::No) {}
 };
 
 class Playfield {
 public:
-  static constexpr std::size_t Width = 10;
-  static constexpr std::size_t Height = 40;
-  static constexpr std::size_t VisibleHeight = 20;
-  static constexpr std::size_t InitialHorizontalPosition = (Width - 1) / 2;
-  static constexpr std::size_t InitialVerticalPosition = VisibleHeight - 1;
+  static constexpr std::size_t WIDTH = 10;
+  static constexpr std::size_t HEIGHT = 40;
+  static constexpr std::size_t VISIBLE_HEIGHT = 20;
 
 private:
   // Game abstractions
-  std::array<std::array<Tetromino, Width>, Height> grid;
+  std::array<std::array<Tetromino, WIDTH>, HEIGHT> grid;
   FallingPiece fallingPiece;
   Tetromino holdingPiece = Tetromino::Empty;
   NextQueue nextQueue;

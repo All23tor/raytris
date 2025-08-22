@@ -3,38 +3,32 @@
 #include <algorithm>
 #include <random>
 
-namespace {
-std::mt19937 generator = std::mt19937((std::random_device())());
-};
+static std::mt19937 generator = std::mt19937((std::random_device())());
 
 NextQueue::NextQueue() {
-  std::shuffle(queue.begin(), queue.begin() + SizeOfBag, generator);
+  std::shuffle(queue.begin(), queue.begin() + SIZE_OF_BAG, generator);
 }
 
 void NextQueue::pushNewBag() {
   using enum Tetromino;
-  std::array<Tetromino, SizeOfBag> newBag = {I, O, T, S, Z, J, L};
+  std::array<Tetromino, SIZE_OF_BAG> newBag = {I, O, T, S, Z, J, L};
   std::shuffle(newBag.begin(), newBag.end(), generator);
-  for (std::size_t index = queueSize; index >= 1; index--) {
-    queue[index + SizeOfBag - 1] = queue[index - 1];
-  }
-  for (std::size_t index = 0; index < SizeOfBag; index++) {
+  for (std::size_t index = queueSize; index >= 1; index--)
+    queue[index + SIZE_OF_BAG - 1] = queue[index - 1];
+
+  for (std::size_t index = 0; index < SIZE_OF_BAG; index++)
     queue[index] = newBag[index];
-  }
-  queueSize += SizeOfBag;
+
+  queueSize += SIZE_OF_BAG;
 }
 
 Tetromino NextQueue::getNextTetromino() {
-  queueSize--;
-  return queue[queueSize];
+  return queue[--queueSize];
 }
 
 void NextQueue::pushNewBagIfNeeded() {
-  if (queueSize > NextComingSize) {
-    return;
-  }
-
-  pushNewBag();
+  if (queueSize <= NEXT_COMING_SIZE)
+    pushNewBag();
 }
 
 const Tetromino& NextQueue::operator[](std::size_t index) const {

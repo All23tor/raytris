@@ -25,6 +25,7 @@ std::istream& operator>>(std::istream& i, HandlingSettings& settings) {
 }
 } // namespace
 
+// TODO: Change this initialization aberration
 Resolution SettingsMenu::resolution = [] {
   std::ifstream in("settings.raytris");
   if (!in.good())

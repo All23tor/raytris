@@ -30,7 +30,7 @@ void MainMenu::draw() const {
            (windowWidth - MeasureText("RAYTRIS", fontSizeBig)) / 2.0f,
            windowHeight / 2.0f - fontSizeBig - fontSize, fontSizeBig, RED);
 
-  static constexpr auto options = []() {
+  static constexpr auto OPTIONS = []() {
     std::array<Option, std::to_underlying(Option::Exit)> res;
     for (int i = 0; i < res.size(); i++) {
       res[i] = static_cast<Option>(i);
@@ -41,9 +41,9 @@ void MainMenu::draw() const {
   const float boxWidth = 8.0f * fontSize;
   const float separation = 1.5f * fontSize;
   const float boxHeight = 1.3f * fontSize;
-  for (int i = 0; i < options.size(); i++) {
-    const auto s = optionToString(options[i]);
-    const bool isSelected = options[i] == selectedOption;
+  for (int i = 0; i < OPTIONS.size(); i++) {
+    const auto s = optionToString(OPTIONS[i]);
+    const bool isSelected = OPTIONS[i] == selectedOption;
     const Rectangle box = {(windowWidth - boxWidth) / 2.0f,
                            (windowHeight - boxHeight + fontSize) / 2.0f +
                              i * separation,

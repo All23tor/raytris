@@ -5,15 +5,15 @@
 #include <fstream>
 
 static DrawingDetails makeDrawingDetails() {
-  float blockLength = DrawingDetails::HeightScaleFactor * GetScreenHeight() /
-                      Playfield::VisibleHeight;
+  float blockLength = DrawingDetails::HEIGHT_SCALE_FACTOR * GetScreenHeight() /
+                      Playfield::VISIBLE_HEIGHT;
   Vector2 position{
-    (GetScreenWidth() - blockLength * Playfield::Width) / 2.0f,
-    (GetScreenHeight() - blockLength * Playfield::VisibleHeight) / 2.0f};
+    (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2.0f,
+    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2.0f};
   return {blockLength, position};
 };
 
-static constexpr Controller KeyboardControls{
+static constexpr Controller KEYBOARD_CONTROLS{
   []() -> bool { return IsKeyPressed(KEY_R); },
   []() -> bool { return IsKeyPressed(KEY_C); },
   []() -> bool { return IsKeyPressed(KEY_LEFT); },
@@ -30,8 +30,8 @@ static constexpr Controller KeyboardControls{
   []() -> bool { return IsKeyPressed(KEY_ESCAPE); },
 };
 
-SinglePlayerGame::SinglePlayerGame(const HandlingSettings& _settings) :
-  game(makeDrawingDetails(), KeyboardControls, _settings) {
+SinglePlayerGame::SinglePlayerGame(const HandlingSettings& settings) :
+  game(makeDrawingDetails(), KEYBOARD_CONTROLS, settings) {
   if (std::ifstream in("save.raytris"); in.good())
     in >> game.playfield;
   undoMoveStack.push(game.playfield);

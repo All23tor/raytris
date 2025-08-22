@@ -4,20 +4,20 @@
 #include "raylib.h"
 
 struct DrawingDetails {
-  static constexpr float HeightScaleFactor = 0.80;
-  static constexpr Color DefaultPrettyOutline = {0, 0, 0, 255 / 8};
-  static constexpr Color TetrionBackgroundColor = BLACK;
-  static constexpr Color GridlineColor = DARKGRAY;
-  static constexpr Color UnavailableHoldPieceColor = DARKGRAY;
-  static constexpr Color PiecesBackGroundColor = GRAY;
-  static constexpr Color InfoTextColor = BLACK;
-  static constexpr Color PieceBoxColor = BLACK;
-  static constexpr Color YouLostColor = RED;
-  static constexpr Color GamePausedColor = BLUE;
-  static constexpr Color QuitColor = WHITE;
-  static constexpr Color DarkenColor = {0, 0, 0, 100};
-  static constexpr Color BackgroundColor = LIGHTGRAY;
-  static constexpr int LeftBorder = -10;
+  static constexpr float HEIGHT_SCALE_FACTOR = 0.80;
+  static constexpr Color DEFAULT_PRETTY_OUTLINE = {0, 0, 0, 255 / 8};
+  static constexpr Color TETRION_BACKGROUND_COLOR = BLACK;
+  static constexpr Color GRINDLINE_COLOR = DARKGRAY;
+  static constexpr Color UNAVAILABLE_HOLD_PIECE_COLOR = DARKGRAY;
+  static constexpr Color PIECES_BACKGROUND_COLOR = GRAY;
+  static constexpr Color INFO_TEXT_COLOR = BLACK;
+  static constexpr Color PIECE_BOX_COLOR = BLACK;
+  static constexpr Color YOU_LOST_COLOR = RED;
+  static constexpr Color GAME_PAUSED_COLOR = BLUE;
+  static constexpr Color QUIT_COLOR = WHITE;
+  static constexpr Color DARKEN_COLOR = {0, 0, 0, 100};
+  static constexpr Color BACKGROUND_COLOR = LIGHTGRAY;
+  static constexpr int LEFT_BORDER = -10;
 
   const float blockLength;
   const Vector2 position;

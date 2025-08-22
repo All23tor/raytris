@@ -6,10 +6,15 @@
 #include <cmath>
 #include <ranges>
 
+static constexpr std::size_t TETROMINO_INITIAL_HORIZONTAL_POSITION =
+  (Playfield::WIDTH - 1) / 2;
+static constexpr std::size_t TETROMINO_INTIIAL_VERTIVAL_POSITION =
+  Playfield::VISIBLE_HEIGHT - 1;
+
 Playfield::Playfield() :
-  fallingPiece(Tetromino::Empty, InitialHorizontalPosition,
-               InitialVerticalPosition) {
-  std::array<Tetromino, Width> emptyRow;
+  fallingPiece(Tetromino::Empty, TETROMINO_INITIAL_HORIZONTAL_POSITION,
+               TETROMINO_INTIIAL_VERTIVAL_POSITION) {
+  std::array<Tetromino, WIDTH> emptyRow;
   emptyRow.fill(Tetromino::Empty);
   grid.fill(emptyRow);
 }
@@ -23,8 +28,8 @@ void Playfield::restart() {
 namespace {
 std::ostream&
 operator<<(std::ostream& out,
-           const std::array<std::array<Tetromino, Playfield::Width>,
-                            Playfield::Height>& grid) {
+           const std::array<std::array<Tetromino, Playfield::WIDTH>,
+                            Playfield::HEIGHT>& grid) {
   for (const auto& row : grid) {
     for (const auto& mino : row) {
       out << static_cast<int>(mino) << ' ';
@@ -35,8 +40,8 @@ operator<<(std::ostream& out,
 }
 
 std::istream& operator>>(std::istream& in,
-                         std::array<std::array<Tetromino, Playfield::Width>,
-                                    Playfield::Height>& grid) {
+                         std::array<std::array<Tetromino, Playfield::WIDTH>,
+                                    Playfield::HEIGHT>& grid) {
   for (auto& row : grid) {
     for (auto& mino : row) {
       int input_mino;
@@ -151,7 +156,7 @@ bool Playfield::isValidPosition(const FallingPiece& piece) const {
                      [&](const CoordinatePair& coordinates) {
                        int i = coordinates.x + piece.horizontalPosition;
                        int j = coordinates.y + piece.verticalPosition;
-                       return i >= 0 && i < Width && j >= 0 && j < Height &&
+                       return i >= 0 && i < WIDTH && j >= 0 && j < HEIGHT &&
                               grid[j][i] == Tetromino::Empty;
                      });
 }
@@ -233,7 +238,7 @@ SpinType Playfield::isSpin() const {
                   [&](const CoordinatePair& coordinates) {
                     int i = fallingPiece.horizontalPosition + coordinates.x;
                     int j = fallingPiece.verticalPosition + coordinates.y;
-                    return i < 0 || i >= Width || j < 0 || j >= Height ||
+                    return i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT ||
                            grid[j][i] != Tetromino::Empty;
                   });
 
@@ -242,7 +247,7 @@ SpinType Playfield::isSpin() const {
                   [&](const CoordinatePair& coordinates) {
                     int i = fallingPiece.horizontalPosition + coordinates.x;
                     int j = fallingPiece.verticalPosition + coordinates.y;
-                    return i < 0 || i >= Width || j < 0 || j >= Height ||
+                    return i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT ||
                            grid[j][i] != Tetromino::Empty;
                   });
 
@@ -261,7 +266,7 @@ void Playfield::solidify() {
     int j = pair.y + fallingPiece.verticalPosition;
     grid[j][i] = fallingPiece.tetromino;
 
-    if (j >= VisibleHeight)
+    if (j >= VISIBLE_HEIGHT)
       anyMinoSolidifedAboveVisibleHeight = true;
   }
 
@@ -291,7 +296,7 @@ bool Playfield::isAllClear() const {
 void Playfield::clearLines() {
   std::array<std::size_t, 4> rowsToClear;
   std::size_t numberRowsToClear = 0;
-  for (std::size_t j = 0; j < Height && numberRowsToClear != 4; ++j) {
+  for (std::size_t j = 0; j < HEIGHT && numberRowsToClear != 4; ++j) {
     bool isRowFull = std::all_of(grid[j].begin(), grid[j].end(), [](auto mino) {
       return mino != Tetromino::Empty;
     });
@@ -387,8 +392,9 @@ FallingPiece Playfield::getGhostPiece() const {
 
 void Playfield::swapTetromino() {
   Tetromino currentTetromino = fallingPiece.tetromino;
-  fallingPiece = FallingPiece(holdingPiece, InitialHorizontalPosition,
-                              InitialVerticalPosition);
+  fallingPiece =
+    FallingPiece(holdingPiece, TETROMINO_INITIAL_HORIZONTAL_POSITION,
+                 TETROMINO_INTIIAL_VERTIVAL_POSITION);
   holdingPiece = currentTetromino;
   canSwap = false;
   framesSinceLastFall = 0;
@@ -398,8 +404,9 @@ void Playfield::swapTetromino() {
 
 void Playfield::replaceNextPiece() {
   Tetromino newTetromino = nextQueue.getNextTetromino();
-  fallingPiece = FallingPiece(newTetromino, InitialHorizontalPosition,
-                              InitialVerticalPosition);
+  fallingPiece =
+    FallingPiece(newTetromino, TETROMINO_INITIAL_HORIZONTAL_POSITION,
+                 TETROMINO_INTIIAL_VERTIVAL_POSITION);
   framesSinceLastFall = 0;
   lockDelayFrames = 0;
   lockDelayMoves = 0;
@@ -551,7 +558,7 @@ inline Rectangle getBlockRectangle(int i, int j,
                                    const DrawingDetails& drawingDetails) {
   return {drawingDetails.position.x + i * drawingDetails.blockLength,
           drawingDetails.position.y +
-            (j - static_cast<int>(Playfield::VisibleHeight)) *
+            (j - static_cast<int>(Playfield::VISIBLE_HEIGHT)) *
               drawingDetails.blockLength,
           drawingDetails.blockLength, drawingDetails.blockLength};
 }
@@ -564,9 +571,9 @@ void drawBlockPretty(int i, int j, const DrawingDetails& details, Color fill) {
   DrawRectangleRec(rec, fill);
   DrawRectangle(rec.x + details.blockLength / 3,
                 rec.y + details.blockLength / 3, rec.width / 3, rec.height / 3,
-                DrawingDetails::DefaultPrettyOutline);
+                DrawingDetails::DEFAULT_PRETTY_OUTLINE);
   DrawRectangleLinesEx(rec, details.blockLength / 8,
-                       DrawingDetails::DefaultPrettyOutline);
+                       DrawingDetails::DEFAULT_PRETTY_OUTLINE);
 }
 
 void drawBlockDanger(int i, int j, const DrawingDetails& details) {
@@ -601,33 +608,33 @@ void drawPieceDanger(const FallingPiece& piece, const DrawingDetails& details) {
 void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
   Rectangle tetrion =
     Rectangle{drawingDetails.position.x, drawingDetails.position.y,
-              drawingDetails.blockLength * Width,
-              drawingDetails.blockLength * VisibleHeight};
-  DrawRectangleRec(tetrion, drawingDetails.TetrionBackgroundColor);
+              drawingDetails.blockLength * WIDTH,
+              drawingDetails.blockLength * VISIBLE_HEIGHT};
+  DrawRectangleRec(tetrion, drawingDetails.TETRION_BACKGROUND_COLOR);
   DrawRectangleLinesEx(tetrion, drawingDetails.blockLength / 10,
-                       drawingDetails.GridlineColor);
+                       drawingDetails.GRINDLINE_COLOR);
 
-  for (int i = 1; i < Width; ++i) {
-    Rectangle rec = getBlockRectangle(i, VisibleHeight, drawingDetails);
+  for (int i = 1; i < WIDTH; ++i) {
+    Rectangle rec = getBlockRectangle(i, VISIBLE_HEIGHT, drawingDetails);
     rec.x = std::floor(rec.x);
     rec.y = std::floor(rec.y);
     DrawLineEx(
       {rec.x, rec.y},
-      {rec.x, std::floor(rec.y + VisibleHeight * drawingDetails.blockLength)},
-      drawingDetails.blockLength / 10, drawingDetails.GridlineColor);
+      {rec.x, std::floor(rec.y + VISIBLE_HEIGHT * drawingDetails.blockLength)},
+      drawingDetails.blockLength / 10, drawingDetails.GRINDLINE_COLOR);
   }
 
-  for (int j = 1; j < VisibleHeight; ++j) {
-    Rectangle rec = getBlockRectangle(0, j + VisibleHeight, drawingDetails);
+  for (int j = 1; j < VISIBLE_HEIGHT; ++j) {
+    Rectangle rec = getBlockRectangle(0, j + VISIBLE_HEIGHT, drawingDetails);
     rec.x = std::floor(rec.x);
     rec.y = std::floor(rec.y);
     DrawLineEx({rec.x, rec.y},
-               {std::floor(rec.x + drawingDetails.blockLength * Width), rec.y},
-               drawingDetails.blockLength / 10, drawingDetails.GridlineColor);
+               {std::floor(rec.x + drawingDetails.blockLength * WIDTH), rec.y},
+               drawingDetails.blockLength / 10, drawingDetails.GRINDLINE_COLOR);
   }
 
-  for (int j = 0; j < Height; ++j) {
-    for (int i = 0; i < Width; ++i) {
+  for (int j = 0; j < HEIGHT; ++j) {
+    for (int i = 0; i < WIDTH; ++i) {
       drawBlockPretty(i, j, drawingDetails, getTetrominoColor(grid[j][i]));
     }
   }
@@ -636,9 +643,9 @@ void Playfield::DrawTetrion(const DrawingDetails& drawingDetails) const {
 bool Playfield::isInDanger() const {
   using namespace std::views;
   constexpr auto dangerousBlocks =
-    cartesian_product(
-      iota(Width / 2 - 2, Width / 2 + 2),
-      iota(InitialVerticalPosition, InitialVerticalPosition + 5)) |
+    cartesian_product(iota(WIDTH / 2 - 2, WIDTH / 2 + 2),
+                      iota(TETROMINO_INTIIAL_VERTIVAL_POSITION,
+                           TETROMINO_INTIIAL_VERTIVAL_POSITION + 5)) |
     transform([](const auto& tuple) {
       return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
     });
@@ -657,51 +664,51 @@ void Playfield::DrawPieces(const DrawingDetails& drawingDetails) const {
             fallingPiece.horizontalPosition, fallingPiece.verticalPosition,
             drawingDetails);
   if (isInDanger()) {
-    drawPieceDanger(
-      {nextQueue[0], InitialHorizontalPosition, InitialVerticalPosition},
-      drawingDetails);
+    drawPieceDanger({nextQueue[0], TETROMINO_INITIAL_HORIZONTAL_POSITION,
+                     TETROMINO_INTIIAL_VERTIVAL_POSITION},
+                    drawingDetails);
   }
 }
 
 void Playfield::DrawNextComingPieces(
   const DrawingDetails& drawingDetails) const {
   Rectangle nextTextBlock =
-    getBlockRectangle(Width + 1, VisibleHeight, drawingDetails);
+    getBlockRectangle(WIDTH + 1, VISIBLE_HEIGHT, drawingDetails);
   Rectangle nextQueueBackground =
-    getBlockRectangle(Width + 1, VisibleHeight + 2, drawingDetails);
+    getBlockRectangle(WIDTH + 1, VISIBLE_HEIGHT + 2, drawingDetails);
   nextQueueBackground.width = drawingDetails.blockLength * 6;
   nextQueueBackground.height =
-    drawingDetails.blockLength * (3 * (NextQueue::NextComingSize) + 1);
-  DrawRectangleRec(nextQueueBackground, drawingDetails.PiecesBackGroundColor);
+    drawingDetails.blockLength * (3 * (NextQueue::NEXT_COMING_SIZE) + 1);
+  DrawRectangleRec(nextQueueBackground, drawingDetails.PIECES_BACKGROUND_COLOR);
   DrawRectangleLinesEx(nextQueueBackground, drawingDetails.blockLength / 4,
-                       drawingDetails.PieceBoxColor);
+                       drawingDetails.PIECE_BOX_COLOR);
   DrawText("NEXT", nextTextBlock.x, nextTextBlock.y, drawingDetails.fontSize,
-           drawingDetails.InfoTextColor);
-  for (int id = 0; id < NextQueue::NextComingSize; ++id) {
+           drawingDetails.INFO_TEXT_COLOR);
+  for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
     Tetromino currentTetromino = nextQueue[id];
     drawPiece(initialTetrominoMap(currentTetromino),
-              getTetrominoColor(currentTetromino), Width + 3,
-              3 * (id + 1) + VisibleHeight + 1, drawingDetails);
+              getTetrominoColor(currentTetromino), WIDTH + 3,
+              3 * (id + 1) + VISIBLE_HEIGHT + 1, drawingDetails);
   }
 }
 
 void Playfield::DrawHoldPiece(const DrawingDetails& drawingDetails) const {
   Rectangle holdTextBlock =
-    getBlockRectangle(-7, VisibleHeight, drawingDetails);
+    getBlockRectangle(-7, VISIBLE_HEIGHT, drawingDetails);
   DrawText("HOLD", holdTextBlock.x, holdTextBlock.y, drawingDetails.fontSize,
-           drawingDetails.InfoTextColor);
+           drawingDetails.INFO_TEXT_COLOR);
   Rectangle holdPieceBackground =
-    getBlockRectangle(-7, VisibleHeight + 2, drawingDetails);
+    getBlockRectangle(-7, VISIBLE_HEIGHT + 2, drawingDetails);
   holdPieceBackground.width = drawingDetails.blockLength * 6;
   holdPieceBackground.height = drawingDetails.blockLength * 4;
-  DrawRectangleRec(holdPieceBackground, drawingDetails.PiecesBackGroundColor);
+  DrawRectangleRec(holdPieceBackground, drawingDetails.PIECES_BACKGROUND_COLOR);
   DrawRectangleLinesEx(holdPieceBackground, drawingDetails.blockLength / 4,
-                       drawingDetails.PieceBoxColor);
+                       drawingDetails.PIECE_BOX_COLOR);
 
   Color holdColor = canSwap ? getTetrominoColor(holdingPiece)
-                            : drawingDetails.UnavailableHoldPieceColor;
-  drawPiece(initialTetrominoMap(holdingPiece), holdColor, -5, 4 + VisibleHeight,
-            drawingDetails);
+                            : drawingDetails.UNAVAILABLE_HOLD_PIECE_COLOR;
+  drawPiece(initialTetrominoMap(holdingPiece), holdColor, -5,
+            4 + VISIBLE_HEIGHT, drawingDetails);
 }
 
 void Playfield::DrawLineClearMessage(
@@ -710,9 +717,9 @@ void Playfield::DrawLineClearMessage(
     return;
 
   Rectangle clearTextBlock =
-    getBlockRectangle(drawingDetails.LeftBorder, Height - 4, drawingDetails);
+    getBlockRectangle(drawingDetails.LEFT_BORDER, HEIGHT - 4, drawingDetails);
   const float colorScaleFactor =
-    static_cast<float>(message.timer) / LineClearMessage::Duration;
+    static_cast<float>(message.timer) / LineClearMessage::DURATION;
   std::string lineClearMessage;
 
   Color textColor = BLANK;
@@ -749,12 +756,12 @@ void Playfield::DrawLineClearMessage(
   Color tSpinTextColor = getTetrominoColor(Tetromino::T);
   tSpinTextColor.a = alpha;
   Rectangle tSpinTextBlock =
-    getBlockRectangle(drawingDetails.LeftBorder, Height - 6, drawingDetails);
+    getBlockRectangle(drawingDetails.LEFT_BORDER, HEIGHT - 6, drawingDetails);
   DrawText("TSPIN", tSpinTextBlock.x, tSpinTextBlock.y, drawingDetails.fontSize,
            tSpinTextColor);
   if (message.spinType == SpinType::Mini) {
     Rectangle miniTSpinTextBlock =
-      getBlockRectangle(drawingDetails.LeftBorder, Height - 7, drawingDetails);
+      getBlockRectangle(drawingDetails.LEFT_BORDER, HEIGHT - 7, drawingDetails);
     DrawText("MINI", miniTSpinTextBlock.x, miniTSpinTextBlock.y,
              drawingDetails.fontSizeSmall, tSpinTextColor);
   }
@@ -764,7 +771,7 @@ void Playfield::DrawCombo(const DrawingDetails& drawingDetails) const {
   if (combo < 2)
     return;
   Rectangle comboTextBlock =
-    getBlockRectangle(drawingDetails.LeftBorder, Height - 10, drawingDetails);
+    getBlockRectangle(drawingDetails.LEFT_BORDER, HEIGHT - 10, drawingDetails);
   std::string comboText = std::format("{}", combo);
   DrawText("COMBO ", comboTextBlock.x, comboTextBlock.y,
            drawingDetails.fontSize, BLUE);
@@ -777,7 +784,7 @@ void Playfield::DrawBackToBack(const DrawingDetails& drawingDetails) const {
   if (b2b < 2)
     return;
   Rectangle b2bTextBlock =
-    getBlockRectangle(drawingDetails.LeftBorder, Height - 12, drawingDetails);
+    getBlockRectangle(drawingDetails.LEFT_BORDER, HEIGHT - 12, drawingDetails);
   std::string b2bText = std::format("{}", b2b - 1);
   DrawText("B2B ", b2bTextBlock.x, b2bTextBlock.y, drawingDetails.fontSize,
            BLUE);
@@ -788,11 +795,11 @@ void Playfield::DrawBackToBack(const DrawingDetails& drawingDetails) const {
 
 void Playfield::DrawScore(const DrawingDetails& drawingDetails) const {
   Rectangle scoreNumberBlock =
-    getBlockRectangle(Width + 1, Height - 2, drawingDetails);
+    getBlockRectangle(WIDTH + 1, HEIGHT - 2, drawingDetails);
   std::string scoreText = std::format("{:09}", score);
   DrawText(scoreText.c_str(), scoreNumberBlock.x,
            scoreNumberBlock.y + drawingDetails.blockLength * 0.5,
-           drawingDetails.fontSize, drawingDetails.InfoTextColor);
+           drawingDetails.fontSize, drawingDetails.INFO_TEXT_COLOR);
 }
 
 void Playfield::draw(const DrawingDetails& drawingDetails) const {
