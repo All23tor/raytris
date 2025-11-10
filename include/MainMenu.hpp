@@ -16,8 +16,8 @@ private:
 public:
   void draw() const;
   void update();
-  bool shouldStopRunning() const;
-  Option getSelectedOption() const;
+  bool should_stop_running() const;
+  Option get_selected_option() const;
 };
 
 #endif

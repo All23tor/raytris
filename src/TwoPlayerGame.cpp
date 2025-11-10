@@ -2,20 +2,26 @@
 #include "HandlingSettings.hpp"
 
 static DrawingDetails makeDrawingDetails1() {
-  float blockLength{DrawingDetails::HEIGHT_SCALE_FACTOR * 0.75f *
-                    GetScreenHeight() / Playfield::VISIBLE_HEIGHT};
+  float blockLength{
+    DrawingDetails::HEIGHT_SCALE_FACTOR * 0.75f * GetScreenHeight() /
+    Playfield::VISIBLE_HEIGHT
+  };
   Vector2 position{
     GetScreenWidth() / 4.0f - blockLength * Playfield::WIDTH / 2.0f,
-    GetScreenHeight() / 2.0f - blockLength * Playfield::VISIBLE_HEIGHT / 2.0f};
+    GetScreenHeight() / 2.0f - blockLength * Playfield::VISIBLE_HEIGHT / 2.0f
+  };
   return {blockLength, position};
 };
 
 static DrawingDetails makeDrawingDetails2() {
-  float blockLength{DrawingDetails::HEIGHT_SCALE_FACTOR * 0.75f *
-                    GetScreenHeight() / Playfield::VISIBLE_HEIGHT};
+  float blockLength{
+    DrawingDetails::HEIGHT_SCALE_FACTOR * 0.75f * GetScreenHeight() /
+    Playfield::VISIBLE_HEIGHT
+  };
   Vector2 position{
     (GetScreenWidth() * 3.0f / 2.0f - blockLength * Playfield::WIDTH) / 2.0f,
-    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2.0f};
+    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2.0f
+  };
   return {blockLength, position};
 };
 
@@ -53,8 +59,9 @@ static constexpr Controller CONTROLS_2{
   []() -> bool { return false; },
 };
 
-TwoPlayerGame::TwoPlayerGame(const HandlingSettings& settings1,
-                             const HandlingSettings& settings2) :
+TwoPlayerGame::TwoPlayerGame(
+  const HandlingSettings& settings1, const HandlingSettings& settings2
+) :
   game1(makeDrawingDetails1(), CONTROLS_1, settings1),
   game2(makeDrawingDetails2(), CONTROLS_2, settings2) {}
 
@@ -69,7 +76,6 @@ void TwoPlayerGame::draw() const {
   game2.draw();
 }
 
-bool TwoPlayerGame::shouldStopRunning() const {
-  return game1.controller.checkQuitInput() &&
-         (game1.paused || game1.playfield.lost());
+bool TwoPlayerGame::should_stop_running() const {
+  return game1.controller.quit() && (game1.paused || game1.playfield.lost());
 }

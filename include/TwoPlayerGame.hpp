@@ -11,7 +11,7 @@ public:
   TwoPlayerGame(const HandlingSettings&, const HandlingSettings&);
   void update();
   void draw() const;
-  bool shouldStopRunning() const;
+  bool should_stop_running() const;
 };
 
 #endif

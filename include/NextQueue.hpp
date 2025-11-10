@@ -13,7 +13,7 @@ public:
 private:
   using enum Tetromino;
   std::array<Tetromino, MAX_QUEUE_SIZE> queue = {I, O, T, S, Z, J, L};
-  std::size_t queueSize = SIZE_OF_BAG;
+  std::size_t queue_size = SIZE_OF_BAG;
   void pushNewBag();
 
 public:

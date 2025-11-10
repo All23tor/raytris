@@ -25,7 +25,7 @@ public:
   ~SettingsMenu();
   void draw() const;
   void update();
-  bool shouldStopRunning() const;
+  bool should_stop_running() const;
   static Resolution getResolution();
   static const HandlingSettings& getHandlingSettings();
 };

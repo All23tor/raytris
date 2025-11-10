@@ -4,7 +4,7 @@
 #include "Playfield.hpp"
 
 struct Game {
-  const DrawingDetails drawingDetails;
+  const DrawingDetails drawing_details;
   const Controller controller;
   const HandlingSettings settings;
   Playfield playfield;

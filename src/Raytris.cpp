@@ -6,10 +6,10 @@
 #endif
 
 Raytris::Raytris() {
-  Resolution initialResolution = SettingsMenu::getResolution();
-  auto [windowWidth, windowHeight] = resolutionPair(initialResolution);
-  InitWindow(windowWidth, windowHeight, "RayTris");
-  if (initialResolution == Resolution::FullScreen)
+  Resolution initial_resolution = SettingsMenu::getResolution();
+  auto [width, height] = resolutionPair(initial_resolution);
+  InitWindow(width, height, "RayTris");
+  if (initial_resolution == Resolution::FullScreen)
     ToggleFullscreen();
 }
 
@@ -17,19 +17,20 @@ Raytris::~Raytris() {
   CloseWindow();
 }
 
-void Raytris::handleWhereToGo(auto&& runnable) {
+void Raytris::handle_stop_runnig(auto&& runnable) {
   using T = std::decay_t<decltype(runnable)>;
   if constexpr (std::is_same_v<T, MainMenu>) {
-    switch (runnable.getSelectedOption()) {
+    switch (runnable.get_selected_option()) {
     case MainMenu::Option::Exit:
-      shouldStopRunning = true;
+      should_stop_running = true;
       break;
     case MainMenu::Option::SinglePlayer:
       raytris.emplace<SinglePlayerGame>(SettingsMenu::getHandlingSettings());
       break;
     case MainMenu::Option::TwoPlayers:
-      raytris.emplace<TwoPlayerGame>(SettingsMenu::getHandlingSettings(),
-                                     SettingsMenu::getHandlingSettings());
+      raytris.emplace<TwoPlayerGame>(
+        SettingsMenu::getHandlingSettings(), SettingsMenu::getHandlingSettings()
+      );
       break;
     case MainMenu::Option::Settings:
       raytris.emplace<SettingsMenu>();
@@ -40,29 +41,30 @@ void Raytris::handleWhereToGo(auto&& runnable) {
   }
 }
 
-void Raytris::updateDrawFrame() {
-  std::visit(
-    [this](auto&& app) {
-      app.update();
-      if (app.shouldStopRunning())
-        handleWhereToGo(app);
-      BeginDrawing();
-      ClearBackground(DrawingDetails::BACKGROUND_COLOR);
-      app.draw();
-      EndDrawing();
-    },
-    raytris);
-}
-
 void Raytris::run() {
+  static constexpr auto update_draw = [](Raytris* self) {
+    std::visit(
+      [self](auto&& app) {
+        app.update();
+        if (app.should_stop_running())
+          self->handle_stop_runnig(app);
+        BeginDrawing();
+        ClearBackground(DrawingDetails::BACKGROUND_COLOR);
+        app.draw();
+        EndDrawing();
+      },
+      self->raytris
+    );
+  };
+
 #if defined(PLATFORM_WEB)
   emscripten_set_main_loop_arg(
-    [](void* p) -> void { ((Raytris*)p)->updateDrawFrame(); }, (void*)this, 0,
-    true);
+    [](void* p) -> void { update_draw((Raytris*)p); }, (void*)this, 0, true
+  );
 #else
   SetTargetFPS(60);
-  while (!shouldStopRunning) {
-    updateDrawFrame();
+  while (!should_stop_running) {
+    update_draw(this);
   }
 #endif
 }

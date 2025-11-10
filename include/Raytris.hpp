@@ -9,10 +9,9 @@
 
 class Raytris {
   std::variant<MainMenu, SinglePlayerGame, TwoPlayerGame, SettingsMenu> raytris;
-  bool shouldStopRunning = false;
+  bool should_stop_running = false;
 
-  void handleWhereToGo(auto&&);
-  void updateDrawFrame();
+  void handle_stop_runnig(auto&&);
 
 public:
   Raytris();

@@ -6,10 +6,11 @@
 
 static DrawingDetails makeDrawingDetails() {
   float blockLength = DrawingDetails::HEIGHT_SCALE_FACTOR * GetScreenHeight() /
-                      Playfield::VISIBLE_HEIGHT;
+    Playfield::VISIBLE_HEIGHT;
   Vector2 position{
     (GetScreenWidth() - blockLength * Playfield::WIDTH) / 2.0f,
-    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2.0f};
+    (GetScreenHeight() - blockLength * Playfield::VISIBLE_HEIGHT) / 2.0f
+  };
   return {blockLength, position};
 };
 
@@ -43,7 +44,7 @@ SinglePlayerGame::~SinglePlayerGame() {
 }
 
 void SinglePlayerGame::update() {
-  if (game.controller.checkUndoInput()) {
+  if (game.controller.undo()) {
     if (!undoMoveStack.empty()) {
       game.playfield = undoMoveStack.top();
       undoMoveStack.pop();
@@ -60,7 +61,6 @@ void SinglePlayerGame::draw() const {
   game.draw();
 }
 
-bool SinglePlayerGame::shouldStopRunning() const {
-  return game.controller.checkQuitInput() &&
-         (game.paused || game.playfield.lost());
+bool SinglePlayerGame::should_stop_running() const {
+  return game.controller.quit() && (game.paused || game.playfield.lost());
 }

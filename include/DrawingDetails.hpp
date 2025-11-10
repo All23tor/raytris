@@ -19,17 +19,17 @@ struct DrawingDetails {
   static constexpr Color BACKGROUND_COLOR = LIGHTGRAY;
   static constexpr int LEFT_BORDER = -10;
 
-  const float blockLength;
-  const Vector2 position;
-  const int fontSize;
-  const int fontSizeBig;
-  const int fontSizeSmall;
+  float block_length;
+  Vector2 position;
+  int font_size;
+  int font_size_big;
+  int font_size_small;
 
   DrawingDetails(float _blockLength, Vector2 _position) :
-    blockLength(_blockLength),
-    fontSize(blockLength * 2),
-    fontSizeBig(blockLength * 5),
-    fontSizeSmall(blockLength),
+    block_length(_blockLength),
+    font_size(block_length * 2),
+    font_size_big(block_length * 5),
+    font_size_small(block_length),
     position{_position} {}
 };
 

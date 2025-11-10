@@ -27,16 +27,16 @@ struct LineClearMessage {
 
   MessageType message;
   unsigned char timer;
-  SpinType spinType;
+  SpinType spin_type;
 
   LineClearMessage() :
     message(MessageType::Empty),
     timer(0),
-    spinType(SpinType::No) {}
+    spin_type(SpinType::No) {}
   LineClearMessage(MessageType type) :
     message(type),
     timer(DURATION),
-    spinType(SpinType::No) {}
+    spin_type(SpinType::No) {}
 };
 
 class Playfield {
@@ -48,20 +48,20 @@ public:
 private:
   // Game abstractions
   std::array<std::array<Tetromino, WIDTH>, HEIGHT> grid;
-  FallingPiece fallingPiece;
-  Tetromino holdingPiece = Tetromino::Empty;
-  NextQueue nextQueue;
+  FallingPiece falling_piece;
+  Tetromino holding_piece = Tetromino::Empty;
+  NextQueue next_queue;
   // State
-  bool canSwap = true;
-  unsigned int framesSinceLastFall = 0;
-  unsigned int lockDelayFrames = 0;
-  unsigned int lockDelayMoves = 0;
-  int signedFramesPressed = 0;
+  bool can_swap = true;
+  unsigned int frames_since_last_fall = 0;
+  unsigned int lock_delay_frames = 0;
+  unsigned int lock_delay_moves = 0;
+  int frames_pressed = 0;
   unsigned int combo = 0;
-  bool hasLost = false;
+  bool has_lost = false;
   unsigned long score = 0;
   unsigned int b2b = 0;
-  bool wasLastMoveRotation = false;
+  bool last_move_rotation = false;
   LineClearMessage message;
 
 public:
@@ -74,13 +74,11 @@ public:
   friend std::istream& operator>>(std::istream&, Playfield&);
 
 private:
-  bool isValidPosition(const FallingPiece&) const;
   bool tryShifting(Shift);
   bool tryRotating(RotationType);
   SpinType isSpin() const;
   void solidify();
   void updateScore(std::size_t, SpinType);
-  bool isAllClear() const;
   void clearLines();
   bool isInDanger() const;
 
@@ -91,16 +89,16 @@ private:
   void handleShiftInput(const Controller&, const HandlingSettings&);
   void handleRotationInput(const Controller&);
   bool handleDropInput(const Controller&, const HandlingSettings&);
-  FallingPiece getGhostPiece() const;
+  FallingPiece get_ghost_piece() const;
 
-  void DrawTetrion(const DrawingDetails&) const;
-  void DrawPieces(const DrawingDetails&) const;
-  void DrawNextComingPieces(const DrawingDetails&) const;
-  void DrawHoldPiece(const DrawingDetails&) const;
-  void DrawLineClearMessage(const DrawingDetails&) const;
-  void DrawCombo(const DrawingDetails&) const;
-  void DrawBackToBack(const DrawingDetails&) const;
-  void DrawScore(const DrawingDetails&) const;
+  void draw_tetrion(const DrawingDetails&) const;
+  void draw_pieces(const DrawingDetails&) const;
+  void draw_next_pieces(const DrawingDetails&) const;
+  void draw_hold_piece(const DrawingDetails&) const;
+  void draw_line_clear_message(const DrawingDetails&) const;
+  void draw_combo(const DrawingDetails&) const;
+  void draw_b2b(const DrawingDetails&) const;
+  void draw_score(const DrawingDetails&) const;
 };
 
 #endif

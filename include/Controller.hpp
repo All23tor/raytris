@@ -3,20 +3,20 @@
 
 struct Controller {
   using Input = bool (*)();
-  const Input checkRestartInput;
-  const Input checkSwapInput;
-  const Input checkLeftInput;
-  const Input checkRightInput;
-  const Input checkLeftDasInput;
-  const Input checkRightDasInput;
-  const Input checkClockwiseInput;
-  const Input checkCounterClockwiseInput;
-  const Input checkOneEightyInput;
-  const Input checkHardDropInput;
-  const Input checkSoftDropInput;
-  const Input checkUndoInput;
-  const Input checkPauseInput;
-  const Input checkQuitInput;
+  Input restart;
+  Input swap;
+  Input left;
+  Input right;
+  Input left_das;
+  Input right_das;
+  Input clockwise;
+  Input counter_clockwise;
+  Input one_eighty;
+  Input chech_hard_drop;
+  Input soft_drop;
+  Input undo;
+  Input pause;
+  Input quit;
 };
 
 #endif

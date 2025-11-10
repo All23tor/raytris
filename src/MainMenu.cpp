@@ -4,7 +4,7 @@
 #include <utility>
 
 namespace {
-const char* optionToString(MainMenu::Option option) {
+const char* to_string(MainMenu::Option option) {
   switch (option) {
   case MainMenu::Option::SinglePlayer:
     return "Single Player";
@@ -20,15 +20,19 @@ const char* optionToString(MainMenu::Option option) {
 }; // namespace
 
 void MainMenu::draw() const {
-  const int windowWidth = GetScreenWidth();
-  const int windowHeight = GetScreenHeight();
-  const float fontSize = windowHeight / 10.0f;
-  const float fontSizeBig = windowHeight / 4.0f;
+  const int width = GetScreenWidth();
+  const int height = GetScreenHeight();
+  const float font_size = height / 10.0f;
+  const float font_size_big = height / 4.0f;
 
   ClearBackground(LIGHTGRAY);
-  DrawText("RAYTRIS",
-           (windowWidth - MeasureText("RAYTRIS", fontSizeBig)) / 2.0f,
-           windowHeight / 2.0f - fontSizeBig - fontSize, fontSizeBig, RED);
+  DrawText(
+    "RAYTRIS",
+    (width - MeasureText("RAYTRIS", font_size_big)) / 2.0f,
+    height / 2.0f - font_size_big - font_size,
+    font_size_big,
+    RED
+  );
 
   static constexpr auto OPTIONS = []() {
     std::array<Option, std::to_underlying(Option::Exit)> res;
@@ -38,21 +42,27 @@ void MainMenu::draw() const {
     return res;
   }();
 
-  const float boxWidth = 8.0f * fontSize;
-  const float separation = 1.5f * fontSize;
-  const float boxHeight = 1.3f * fontSize;
+  const float boxWidth = 8.0f * font_size;
+  const float separation = 1.5f * font_size;
+  const float boxHeight = 1.3f * font_size;
   for (int i = 0; i < OPTIONS.size(); i++) {
-    const auto s = optionToString(OPTIONS[i]);
+    const auto s = to_string(OPTIONS[i]);
     const bool isSelected = OPTIONS[i] == selectedOption;
-    const Rectangle box = {(windowWidth - boxWidth) / 2.0f,
-                           (windowHeight - boxHeight + fontSize) / 2.0f +
-                             i * separation,
-                           boxWidth, boxHeight};
+    const Rectangle box = {
+      (width - boxWidth) / 2.0f,
+      (height - boxHeight + font_size) / 2.0f + i * separation,
+      boxWidth,
+      boxHeight
+    };
     DrawRectangleRec(box, isSelected ? SKYBLUE : GRAY);
-    DrawRectangleLinesEx(box, fontSize / 10.0, isSelected ? BLUE : BLACK);
-    DrawText(s, (windowWidth - MeasureText(s, fontSize)) / 2.0,
-             windowHeight / 2.0 + i * separation, fontSize,
-             isSelected ? BLUE : BLACK);
+    DrawRectangleLinesEx(box, font_size / 10.0, isSelected ? BLUE : BLACK);
+    DrawText(
+      s,
+      (width - MeasureText(s, font_size)) / 2.0,
+      height / 2.0 + i * separation,
+      font_size,
+      isSelected ? BLUE : BLACK
+    );
   }
 }
 
@@ -60,18 +70,20 @@ void MainMenu::update() {
   constexpr auto optionsSize = std::to_underlying(Option::Exit);
   if (IsKeyPressed(KEY_DOWN)) {
     selectedOption = static_cast<Option>(
-      (std::to_underlying(selectedOption) + 1) % optionsSize);
+      (std::to_underlying(selectedOption) + 1) % optionsSize
+    );
   }
   if (IsKeyPressed(KEY_UP)) {
     selectedOption = static_cast<Option>(
-      (std::to_underlying(selectedOption) - 1 + optionsSize) % optionsSize);
+      (std::to_underlying(selectedOption) - 1 + optionsSize) % optionsSize
+    );
   }
 }
 
-bool MainMenu::shouldStopRunning() const {
+bool MainMenu::should_stop_running() const {
   return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE);
 }
 
-MainMenu::Option MainMenu::getSelectedOption() const {
+MainMenu::Option MainMenu::get_selected_option() const {
   return IsKeyDown(KEY_ENTER) ? selectedOption : Option::Exit;
 }

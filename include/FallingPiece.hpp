@@ -39,26 +39,26 @@ using OffsetTable = std::array<CoordinatePair, 5>;
 // 4 minos per Tetromino in a 5x5 matrix
 using TetrominoMap = std::array<CoordinatePair, 4>;
 
-TetrominoMap initialTetrominoMap(const Tetromino);
+TetrominoMap initial_tetromino_map(const Tetromino);
 
 struct FallingPiece {
   Tetromino tetromino;
   Orientation orientation;
-  char horizontalPosition;
-  char verticalPosition;
-  TetrominoMap tetrominoMap;
+  char x_position;
+  char y_position;
+  TetrominoMap tetromino_map;
 
   FallingPiece(Tetromino, char, char);
-  FallingPiece& fall();
-  FallingPiece& shift(Shift);
-  FallingPiece& rotate(RotationType);
-  FallingPiece& translate(CoordinatePair translation);
+  void fall();
+  void shift(Shift);
+  void rotate(RotationType);
+  void translate(CoordinatePair);
   FallingPiece fallen() const;
   FallingPiece shifted(Shift) const;
   FallingPiece rotated(RotationType) const;
   FallingPiece translated(CoordinatePair translation) const;
 };
 
-const OffsetTable& getOffsetTable(const FallingPiece&);
+const OffsetTable& get_offset_table(const FallingPiece&);
 
 #endif

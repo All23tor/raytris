@@ -61,9 +61,10 @@ std::pair<int, int> resolutionPair(Resolution resolution) {
 }
 
 void SettingsMenu::resizeScreenHigher() {
-  resolution =
-    static_cast<Resolution>((std::to_underlying(resolution) + 1) %
-                            (std::to_underlying(Resolution::FullScreen) + 1));
+  resolution = static_cast<Resolution>(
+    (std::to_underlying(resolution) + 1) %
+    (std::to_underlying(Resolution::FullScreen) + 1)
+  );
   const auto [windowWidth, windowHeight] = resolutionPair(resolution);
 
   if (IsWindowFullscreen()) {
@@ -78,10 +79,11 @@ void SettingsMenu::resizeScreenHigher() {
 }
 
 void SettingsMenu::resizeScreenLower() {
-  resolution =
-    static_cast<Resolution>((std::to_underlying(resolution) +
-                             std::to_underlying(Resolution::FullScreen)) %
-                            (std::to_underlying(Resolution::FullScreen) + 1));
+  resolution = static_cast<Resolution>(
+    (std::to_underlying(resolution) +
+     std::to_underlying(Resolution::FullScreen)) %
+    (std::to_underlying(Resolution::FullScreen) + 1)
+  );
   const auto [windowWidth, windowHeight] = resolutionPair(resolution);
 
   if (IsWindowFullscreen()) {
@@ -95,7 +97,7 @@ void SettingsMenu::resizeScreenLower() {
   }
 }
 
-bool SettingsMenu::shouldStopRunning() const {
+bool SettingsMenu::should_stop_running() const {
   return IsKeyPressed(KEY_ESCAPE);
 }
 
@@ -105,26 +107,40 @@ void SettingsMenu::draw() const {
   const float fontSize = windowHeight / 12.0;
 
   ClearBackground(LIGHTGRAY);
-  DrawText("SETTINGS",
-           (windowWidth - MeasureText("SETTINGS", fontSizeBig)) / 2.0,
-           windowHeight / 2.0 - fontSize - fontSizeBig, fontSizeBig, RED);
+  DrawText(
+    "SETTINGS",
+    (windowWidth - MeasureText("SETTINGS", fontSizeBig)) / 2.0,
+    windowHeight / 2.0 - fontSize - fontSizeBig,
+    fontSizeBig,
+    RED
+  );
 
   using option = std::pair<std::string, std::string>;
-  option resolution = {"Resolution",
-                       std::format("{} x {}", windowWidth, windowHeight)};
+  option resolution = {
+    "Resolution", std::format("{} x {}", windowWidth, windowHeight)
+  };
   option das = {"Delayed Auto Shift", std::format("{}", handlingSettings.das)};
-  option softDropFrames = {"Soft Drop Frames",
-                           std::format("{}", handlingSettings.softDropFrames)};
+  option softDropFrames = {
+    "Soft Drop Frames", std::format("{}", handlingSettings.softDropFrames)
+  };
 
   std::array options = {resolution, das, softDropFrames};
   for (std::size_t idx = 0; idx < options.size(); idx++) {
     const auto [option, value] = options[idx];
-    DrawText(option.c_str(), windowWidth / 8.0f,
-             windowHeight / 2.0f + idx * fontSize, fontSize,
-             selectedOption == idx ? BLUE : BLACK);
-    DrawText(value.c_str(), windowWidth / 1.5f,
-             windowHeight / 2.0f + idx * fontSize, fontSize,
-             selectedOption == idx ? BLUE : BLACK);
+    DrawText(
+      option.c_str(),
+      windowWidth / 8.0f,
+      windowHeight / 2.0f + idx * fontSize,
+      fontSize,
+      selectedOption == idx ? BLUE : BLACK
+    );
+    DrawText(
+      value.c_str(),
+      windowWidth / 1.5f,
+      windowHeight / 2.0f + idx * fontSize,
+      fontSize,
+      selectedOption == idx ? BLUE : BLACK
+    );
   }
 }
 
