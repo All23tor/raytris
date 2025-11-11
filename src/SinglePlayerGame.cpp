@@ -34,13 +34,13 @@ static constexpr Controller KEYBOARD_CONTROLS{
 SinglePlayerGame::SinglePlayerGame(const HandlingSettings& settings) :
   game(makeDrawingDetails(), KEYBOARD_CONTROLS, settings) {
   if (std::ifstream in("save.raytris"); in.good())
-    in >> game.playfield;
+    in.read(reinterpret_cast<char*>(&game.playfield), sizeof(Playfield));
   undoMoveStack.push(game.playfield);
 }
 
 SinglePlayerGame::~SinglePlayerGame() {
   std::ofstream out("save.raytris");
-  out << game.playfield;
+  out.write(reinterpret_cast<const char*>(&game.playfield), sizeof(Playfield));
 }
 
 void SinglePlayerGame::update() {

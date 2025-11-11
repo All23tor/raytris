@@ -2,7 +2,6 @@
 #define NEXT_QUEUE_H
 
 #include "FallingPiece.hpp"
-#include <iostream>
 
 class NextQueue {
 public:
@@ -14,15 +13,12 @@ private:
   using enum Tetromino;
   std::array<Tetromino, MAX_QUEUE_SIZE> queue = {I, O, T, S, Z, J, L};
   std::size_t queue_size = SIZE_OF_BAG;
-  void pushNewBag();
 
 public:
   NextQueue();
-  Tetromino getNextTetromino();
-  void pushNewBagIfNeeded();
+  Tetromino next_tetromino();
+  void push_new_bag_if_needed();
   const Tetromino& operator[](std::size_t index) const;
-  friend std::ostream& operator<<(std::ostream&, const NextQueue&);
-  friend std::istream& operator>>(std::istream&, NextQueue&);
 };
 
 #endif

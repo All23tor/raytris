@@ -12,7 +12,7 @@ struct Controller {
   Input clockwise;
   Input counter_clockwise;
   Input one_eighty;
-  Input chech_hard_drop;
+  Input check_hard_drop;
   Input soft_drop;
   Input undo;
   Input pause;
