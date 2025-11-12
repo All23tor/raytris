@@ -58,7 +58,7 @@ private:
   bool can_swap = true;
   unsigned int frames_since_last_fall = 0;
   unsigned int lock_delay_frames = 0;
-  unsigned int lock_delay_moves = 0;
+  unsigned int lock_delay_resets = 0;
   int frames_pressed = 0;
   unsigned int combo = 0;
   bool has_lost = false;

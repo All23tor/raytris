@@ -1,8 +1,5 @@
 #include "Playfield.hpp"
-#include "Controller.hpp"
-#include "DrawingDetails.hpp"
 #include "FallingPiece.hpp"
-#include "HandlingSettings.hpp"
 #include "raylib.h"
 #include <algorithm>
 #include <cmath>
@@ -12,27 +9,22 @@
 
 namespace sr = std::ranges;
 namespace sv = std::views;
+using Ctrlr = Controller;
+using HandS = HandlingSettings;
+using DrawD = DrawingDetails;
 
-static constexpr std::size_t INITIAL_HORIZONTAL_POSITION =
-  (Playfield::WIDTH - 1) / 2;
-static constexpr std::size_t INITIAL_VERTICAL_POSITION =
-  Playfield::VISIBLE_HEIGHT - 1;
+static constexpr std::size_t INITIAL_X_POSITION = (Playfield::WIDTH - 1) / 2;
+static constexpr std::size_t INITIAL_Y_POSITION = Playfield::VISIBLE_HEIGHT - 1;
 static constexpr FallingPiece spawn_tetromino(Tetromino tetromino) {
-  return FallingPiece(
-    tetromino, INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION
-  );
+  return FallingPiece(tetromino, INITIAL_X_POSITION, INITIAL_Y_POSITION);
 }
 
 Playfield::Playfield() :
   next_queue(),
   falling_piece(
-    next_queue.next_tetromino(),
-    INITIAL_HORIZONTAL_POSITION,
-    INITIAL_VERTICAL_POSITION
+    next_queue.next_tetromino(), INITIAL_X_POSITION, INITIAL_Y_POSITION
   ) {
-  std::array<Tetromino, WIDTH> emptyRow;
-  emptyRow.fill(Tetromino::Empty);
-  grid.fill(emptyRow);
+  sr::for_each(grid, [](auto& row) { row.fill(Tetromino::Empty); });
 }
 
 void Playfield::restart() {
@@ -45,35 +37,35 @@ bool Playfield::lost() const {
   return has_lost;
 }
 
-static bool is_valid_position(const auto& grid, const FallingPiece& piece) {
-  return sr::all_of(piece.tetromino_map, [&](auto&& coord) {
-    int x = coord.x + piece.x_position;
-    int y = coord.y + piece.y_position;
-    return x >= 0 && x < Playfield::WIDTH && y >= 0 && y < Playfield::HEIGHT &&
-      grid[y][x] == Tetromino::Empty;
+static bool valid_mino(int x, int y) {
+  return x >= 0 && x < Playfield::WIDTH && y >= 0 && y < Playfield::HEIGHT;
+}
+
+static bool valid_position(const auto& grid, const FallingPiece& piece) {
+  return sr::all_of(piece.map, [&](auto coord) {
+    int x = piece.x + coord.x;
+    int y = piece.y + coord.y;
+    return valid_mino(x, y) && grid[y][x] == Tetromino::Empty;
   });
 }
 
-SpinType is_spin(const FallingPiece& piece, auto&& grid) {
+static SpinType is_spin(const FallingPiece& piece, auto&& grid) {
   if (piece.tetromino != Tetromino::T)
     return SpinType::No;
 
-  auto fp_or_idx = std::to_underlying(piece.orientation);
   TetrominoMap corners = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
-  sr::rotate(corners, corners.begin() + fp_or_idx);
+  sr::rotate(corners, corners.begin() + std::to_underlying(piece.orientation));
 
-  auto front_count = sr::count_if(sv::take(corners, 2), [&](auto&& coord) {
-    int i = piece.x_position + coord.x;
-    int j = piece.y_position + coord.y;
-    return i < 0 || i >= Playfield::WIDTH || j < 0 || j >= Playfield::HEIGHT ||
-      grid[j][i] != Tetromino::Empty;
+  auto front_count = sr::count_if(sv::take(corners, 2), [&](auto coord) {
+    int x = piece.x + coord.x;
+    int y = piece.y + coord.y;
+    return !valid_mino(x, y) || grid[y][x] != Tetromino::Empty;
   });
 
-  auto back_count = sr::count_if(sv::drop(corners, 2), [&](auto&& coord) {
-    int i = piece.x_position + coord.x;
-    int j = piece.y_position + coord.y;
-    return i < 0 || i >= Playfield::WIDTH || j < 0 || j >= Playfield::HEIGHT ||
-      grid[j][i] != Tetromino::Empty;
+  auto back_count = sr::count_if(sv::drop(corners, 2), [&](auto coord) {
+    int x = piece.x + coord.x;
+    int y = piece.y + coord.y;
+    return !valid_mino(x, y) || grid[y][x] != Tetromino::Empty;
   });
 
   if (front_count + back_count < 3)
@@ -84,26 +76,25 @@ SpinType is_spin(const FallingPiece& piece, auto&& grid) {
 }
 
 void Playfield::solidify_piece() {
-  bool anyMinoSolidifedAboveVisibleHeight = false;
+  bool topped_out = false;
 
-  for (auto&& coord : falling_piece.tetromino_map) {
-    int x = coord.x + falling_piece.x_position;
-    int y = coord.y + falling_piece.y_position;
+  for (auto coord : falling_piece.map) {
+    int x = coord.x + falling_piece.x;
+    int y = coord.y + falling_piece.y;
     grid[y][x] = falling_piece.tetromino;
 
     if (y >= VISIBLE_HEIGHT)
-      anyMinoSolidifedAboveVisibleHeight = true;
+      topped_out = true;
   }
 
   std::array<std::size_t, 4> rows_to_clear;
   std::size_t cleared_lines = 0;
-  for (std::size_t j = 0; j < HEIGHT && cleared_lines != 4; ++j) {
-    bool isRowFull = std::all_of(grid[j].begin(), grid[j].end(), [](auto mino) {
-      return mino != Tetromino::Empty;
-    });
-
-    if (isRowFull)
-      rows_to_clear[cleared_lines++] = j;
+  for (int y{}; auto&& row : grid) {
+    if (sr::all_of(row, [](auto mino) { return mino != Tetromino::Empty; }))
+      rows_to_clear[cleared_lines++] = y;
+    if (cleared_lines == 4)
+      break;
+    y++;
   }
 
   SpinType spin_type =
@@ -111,7 +102,7 @@ void Playfield::solidify_piece() {
   for (std::size_t index = 0; index < cleared_lines; index++) {
     std::size_t row_idx = rows_to_clear[index];
     sr::copy_backward(sv::take(grid, row_idx), grid.begin() + row_idx + 1);
-    grid[0].fill(Tetromino::Empty);
+    grid.front().fill(Tetromino::Empty);
   }
 
   if (cleared_lines == 0) {
@@ -130,17 +121,16 @@ void Playfield::solidify_piece() {
   falling_piece = spawn_tetromino(next_tetromino);
   frames_since_last_fall = 0;
   lock_delay_frames = 0;
-  lock_delay_moves = 0;
+  lock_delay_resets = 0;
   can_swap = true;
 
-  bool canSpawnPiece =
-    sr::all_of(falling_piece.tetromino_map, [&](auto&& coord) {
-      int i = coord.x + falling_piece.x_position;
-      int j = coord.y + falling_piece.y_position;
-      return grid[j][i] == Tetromino::Empty;
-    });
+  bool can_spawn_piece = sr::all_of(falling_piece.map, [&](auto coord) {
+    int x = coord.x + falling_piece.x;
+    int y = coord.y + falling_piece.y;
+    return grid[y][x] == Tetromino::Empty;
+  });
 
-  has_lost = !anyMinoSolidifedAboveVisibleHeight || !canSpawnPiece;
+  has_lost = !topped_out || !can_spawn_piece;
 }
 
 void Playfield::update_score(std::size_t cleared_lines, SpinType spin_type) {
@@ -202,8 +192,8 @@ void Playfield::update_score(std::size_t cleared_lines, SpinType spin_type) {
   }
 }
 
-void Playfield::handle_swap(const Controller& ctrl) {
-  if (!ctrl.swap() || !can_swap)
+void Playfield::handle_swap(const Ctrlr& ctrlr) {
+  if (!ctrlr.swap() || !can_swap)
     return;
 
   Tetromino currentTetromino = falling_piece.tetromino;
@@ -215,52 +205,50 @@ void Playfield::handle_swap(const Controller& ctrl) {
   can_swap = false;
   frames_since_last_fall = 0;
   lock_delay_frames = 0;
-  lock_delay_moves = 0;
+  lock_delay_resets = 0;
   last_move_rotation = false;
 }
 
-void Playfield::handle_shifts(
-  const Controller& ctrl, const HandlingSettings& settings
-) {
+void Playfield::handle_shifts(const Ctrlr& ctrlr, const HandS& hand_set) {
   auto try_shifting = [this](Shift shift) {
     const FallingPiece shiftedPiece = falling_piece.shifted(shift);
-    if (is_valid_position(grid, shiftedPiece)) {
+    if (valid_position(grid, shiftedPiece)) {
       falling_piece = shiftedPiece;
       lock_delay_frames = 0;
-      lock_delay_moves += 1;
+      lock_delay_resets += 1;
       last_move_rotation = false;
     }
   };
   auto try_das = [this](Shift shift) {
     FallingPiece shiftedPiece = falling_piece.shifted(shift);
-    while (is_valid_position(grid, shiftedPiece)) {
+    while (valid_position(grid, shiftedPiece)) {
       falling_piece = shiftedPiece;
       lock_delay_frames = 0;
-      lock_delay_moves += 1;
+      lock_delay_resets += 1;
       last_move_rotation = false;
       shiftedPiece = falling_piece.shifted(shift);
     }
   };
 
-  if (ctrl.left())
+  if (ctrlr.left())
     try_shifting(Shift::Left);
-  else if (ctrl.right())
+  else if (ctrlr.right())
     try_shifting(Shift::Right);
 
-  if (ctrl.left_das()) {
+  if (ctrlr.left_das()) {
     frames_pressed = std::max(0, frames_pressed) + 1;
-    if (frames_pressed > settings.das)
+    if (frames_pressed > hand_set.das)
       try_das(Shift::Left);
-  } else if (ctrl.right_das()) {
+  } else if (ctrlr.right_das()) {
     frames_pressed = std::min(0, frames_pressed) - 1;
-    if (-frames_pressed > settings.das)
+    if (-frames_pressed > hand_set.das)
       try_das(Shift::Right);
   } else {
     frames_pressed = 0;
   }
 }
 
-void Playfield::handle_rotations(const Controller& ctrl) {
+void Playfield::handle_rotations(const Ctrlr& ctrlr) {
   auto try_rotating = [this](RotationType rotationType) {
     const FallingPiece rotated_piece = falling_piece.rotated(rotationType);
     auto offsets = sv::transform(
@@ -273,29 +261,27 @@ void Playfield::handle_rotations(const Controller& ctrl) {
 
     for (auto&& offset : offsets) {
       const auto translated_piece = rotated_piece.translated(offset);
-      if (is_valid_position(grid, translated_piece)) {
+      if (valid_position(grid, translated_piece)) {
         falling_piece = translated_piece;
         lock_delay_frames = 0;
-        lock_delay_moves += 1;
+        lock_delay_resets += 1;
         last_move_rotation = true;
         return;
       }
     }
   };
 
-  if (ctrl.clockwise())
+  if (ctrlr.clockwise())
     try_rotating(RotationType::Clockwise);
-  if (ctrl.counter_clockwise())
+  if (ctrlr.counter_clockwise())
     try_rotating(RotationType::CounterClockwise);
-  if (ctrl.one_eighty())
+  if (ctrlr.one_eighty())
     try_rotating(RotationType::OneEighty);
 }
 
-bool Playfield::handle_drops(
-  const Controller& ctrl, const HandlingSettings& settings
-) {
-  if (ctrl.check_hard_drop()) {
-    while (is_valid_position(grid, falling_piece.fallen())) {
+bool Playfield::handle_drops(const Ctrlr& ctrlr, const HandS& hand_set) {
+  if (ctrlr.check_hard_drop()) {
+    while (valid_position(grid, falling_piece.fallen())) {
       falling_piece.fall();
       last_move_rotation = false;
     }
@@ -304,43 +290,43 @@ bool Playfield::handle_drops(
   }
 
   bool is_fall_step = false;
-  if (ctrl.soft_drop()) {
+  if (ctrlr.soft_drop()) {
     // Soft Drop
-    if (frames_since_last_fall >= settings.softDropFrames) {
+    if (frames_since_last_fall >= hand_set.soft_drop) {
       frames_since_last_fall = 0;
       is_fall_step = true;
     }
-  } else if (frames_since_last_fall >= settings.gravityFrames) {
+  } else if (frames_since_last_fall >= hand_set.gravity) {
     // Gravity
     frames_since_last_fall = 0;
     is_fall_step = true;
   }
 
-  if (is_valid_position(grid, falling_piece.fallen())) {
+  if (valid_position(grid, falling_piece.fallen())) {
     // Is not touching ground
     if (is_fall_step) {
       last_move_rotation = false;
       falling_piece.fall();
       lock_delay_frames = 0;
-      lock_delay_moves = 0;
+      lock_delay_resets = 0;
     }
 
     return false;
   }
   // Is touching ground
-  if (lock_delay_frames > settings.maxLockDelayFrames ||
-      lock_delay_moves > settings.maxLockDelayResets) {
+  if (lock_delay_frames > hand_set.lock_delay_frames ||
+      lock_delay_resets > hand_set.lock_delay_resets) {
     solidify_piece();
     return true;
   }
   return false;
 }
 
-bool Playfield::update(const Controller& ctrl, const HandlingSettings& hand_s) {
+bool Playfield::update(const Ctrlr& ctrlr, const HandS& hand_set) {
   if (has_lost)
     return false;
 
-  handle_swap(ctrl);
+  handle_swap(ctrlr);
 
   frames_since_last_fall += 1;
   lock_delay_frames += 1;
@@ -349,9 +335,9 @@ bool Playfield::update(const Controller& ctrl, const HandlingSettings& hand_s) {
 
   next_queue.push_new_bag_if_needed();
 
-  handle_shifts(ctrl, hand_s);
-  handle_rotations(ctrl);
-  return handle_drops(ctrl, hand_s);
+  handle_shifts(ctrlr, hand_set);
+  handle_rotations(ctrlr);
+  return handle_drops(ctrlr, hand_set);
 }
 
 namespace {
@@ -376,7 +362,7 @@ constexpr Color tetromino_color(Tetromino tetromino) {
   }
 }
 
-inline Rectangle get_block(int i, int j, const DrawingDetails& draw_d) {
+inline Rectangle get_block(int i, int j, const DrawD& draw_d) {
   return {
     draw_d.position.x + i * draw_d.block_length,
     draw_d.position.y +
@@ -386,39 +372,37 @@ inline Rectangle get_block(int i, int j, const DrawingDetails& draw_d) {
   };
 }
 
-void draw_block_pretty(
-  int i, int j, const DrawingDetails& details, Color fill
-) {
+void draw_block_pretty(int i, int j, const DrawD& draw_d, Color fill) {
   if (fill.a == 0)
     return;
 
-  Rectangle rec = get_block(i, j, details);
+  Rectangle rec = get_block(i, j, draw_d);
   DrawRectangleRec(rec, fill);
   DrawRectangle(
-    rec.x + details.block_length / 3,
-    rec.y + details.block_length / 3,
+    rec.x + draw_d.block_length / 3,
+    rec.y + draw_d.block_length / 3,
     rec.width / 3,
     rec.height / 3,
-    DrawingDetails::DEFAULT_PRETTY_OUTLINE
+    DrawD::DEFAULT_PRETTY_OUTLINE
   );
   DrawRectangleLinesEx(
-    rec, details.block_length / 8, DrawingDetails::DEFAULT_PRETTY_OUTLINE
+    rec, draw_d.block_length / 8, DrawD::DEFAULT_PRETTY_OUTLINE
   );
 }
 
-void draw_block_danger(int i, int j, const DrawingDetails& details) {
-  Rectangle rec = get_block(i, j, details);
-  DrawRectangleLinesEx(rec, details.block_length / 8, {255, 0, 0, 150});
+void draw_block_danger(int i, int j, const DrawD& draw_d) {
+  Rectangle rec = get_block(i, j, draw_d);
+  DrawRectangleLinesEx(rec, draw_d.block_length / 8, {255, 0, 0, 150});
   DrawLineEx(
     {rec.x + rec.width * 0.25f, rec.y + rec.height * 0.25f},
     {rec.x + rec.width * 0.75f, rec.y + rec.height * 0.75f},
-    details.block_length * 0.1f,
+    draw_d.block_length * 0.1f,
     RED
   );
   DrawLineEx(
     {rec.x + rec.width * 0.75f, rec.y + rec.height * 0.25f},
     {rec.x + rec.width * 0.25f, rec.y + rec.height * 0.75f},
-    details.block_length * 0.1f,
+    draw_d.block_length * 0.1f,
     {255, 0, 0, 150}
   );
 }
@@ -426,29 +410,27 @@ void draw_block_danger(int i, int j, const DrawingDetails& details) {
 void draw_piece(
   const TetrominoMap& map,
   Color color,
-  int horizontalOffset,
-  int verticalOffset,
-  const DrawingDetails& draw_d
+  int x_offset,
+  int y_offset,
+  const DrawD& draw_d
 ) {
-  for (auto&& coord : map) {
-    int x = coord.x + horizontalOffset;
-    int y = coord.y + verticalOffset;
+  for (auto coord : map) {
+    int x = coord.x + x_offset;
+    int y = coord.y + y_offset;
     draw_block_pretty(x, y, draw_d, color);
   }
 }
 
-void draw_piece_danger(
-  const FallingPiece& piece, const DrawingDetails& details
-) {
-  for (auto&& coord : piece.tetromino_map) {
-    int x = coord.x + piece.x_position;
-    int y = coord.y + piece.y_position;
-    draw_block_danger(x, y, details);
+void draw_piece_danger(Tetromino tetromino, const DrawD& draw_d) {
+  for (auto coord : initial_tetromino_map(tetromino)) {
+    int x = coord.x + INITIAL_X_POSITION;
+    int y = coord.y + INITIAL_Y_POSITION;
+    draw_block_danger(x, y, draw_d);
   }
 }
 }; // namespace
 
-void Playfield::draw_tetrion(const DrawingDetails& draw_d) const {
+void Playfield::draw_tetrion(const DrawD& draw_d) const {
   Rectangle tetrion = Rectangle{
     draw_d.position.x,
     draw_d.position.y,
@@ -489,31 +471,23 @@ void Playfield::draw_tetrion(const DrawingDetails& draw_d) const {
       draw_block_pretty(i, j, draw_d, tetromino_color(grid[j][i]));
 }
 
-void Playfield::draw_tetrion_pieces(const DrawingDetails& draw_d) const {
-  static constexpr auto X_DANGER_RANGE =
-    std::views::iota(WIDTH / 2 - 2, WIDTH / 2 + 2);
-  static constexpr auto Y_DANGER_RANGE =
-    std::views::iota(INITIAL_VERTICAL_POSITION, INITIAL_VERTICAL_POSITION + 5);
-
-  FallingPiece ghostPiece = falling_piece;
-  while (is_valid_position(grid, ghostPiece.fallen()))
-    ghostPiece.fall();
-  draw_piece(
-    ghostPiece.tetromino_map,
-    GRAY,
-    ghostPiece.x_position,
-    ghostPiece.y_position,
-    draw_d
-  );
+void Playfield::draw_tetrion_pieces(const DrawD& draw_d) const {
+  FallingPiece ghost_piece = falling_piece;
+  while (valid_position(grid, ghost_piece.fallen()))
+    ghost_piece.fall();
+  draw_piece(ghost_piece.map, GRAY, ghost_piece.x, ghost_piece.y, draw_d);
 
   draw_piece(
-    falling_piece.tetromino_map,
+    falling_piece.map,
     tetromino_color(falling_piece.tetromino),
-    falling_piece.x_position,
-    falling_piece.y_position,
+    falling_piece.x,
+    falling_piece.y,
     draw_d
   );
 
+  static constexpr auto X_DANGER_RANGE = sv::iota(WIDTH / 2 - 2, WIDTH / 2 + 2);
+  static constexpr auto Y_DANGER_RANGE =
+    sv::iota(INITIAL_Y_POSITION, INITIAL_Y_POSITION + 5);
   bool is_in_danger = sr::any_of(X_DANGER_RANGE, [this](auto x) {
     return sr::any_of(Y_DANGER_RANGE, [this, x](auto y) {
       return grid[y][x] != Tetromino::Empty;
@@ -521,68 +495,49 @@ void Playfield::draw_tetrion_pieces(const DrawingDetails& draw_d) const {
   });
 
   if (is_in_danger) {
-    draw_piece_danger(
-      {next_queue[0], INITIAL_HORIZONTAL_POSITION, INITIAL_VERTICAL_POSITION},
-      draw_d
-    );
+    draw_piece_danger(next_queue[0], draw_d);
   }
 }
 
-void Playfield::draw_next_queue(const DrawingDetails& draw_d) const {
-  Rectangle nextTextBlock = get_block(WIDTH + 1, VISIBLE_HEIGHT, draw_d);
-  Rectangle nextQueueBackground =
-    get_block(WIDTH + 1, VISIBLE_HEIGHT + 2, draw_d);
-  nextQueueBackground.width = draw_d.block_length * 6;
-  nextQueueBackground.height =
-    draw_d.block_length * (3 * (NextQueue::NEXT_COMING_SIZE) + 1);
-  DrawRectangleRec(nextQueueBackground, draw_d.PIECES_BACKGROUND_COLOR);
+void Playfield::draw_next_queue(const DrawD& draw_d) const {
+  Rectangle text_rect = get_block(WIDTH + 1, VISIBLE_HEIGHT, draw_d);
+  Rectangle background = get_block(WIDTH + 1, VISIBLE_HEIGHT + 2, draw_d);
+  background.width = draw_d.block_length * 6;
+  background.height = draw_d.block_length * (3 * (NextQueue::NEXT_SIZE) + 1);
+  DrawRectangleRec(background, draw_d.PIECES_BACKGROUND_COLOR);
   DrawRectangleLinesEx(
-    nextQueueBackground, draw_d.block_length / 4, draw_d.PIECE_BOX_COLOR
+    background, draw_d.block_length / 4, draw_d.PIECE_BOX_COLOR
   );
   DrawText(
-    "NEXT",
-    nextTextBlock.x,
-    nextTextBlock.y,
-    draw_d.font_size,
-    draw_d.INFO_TEXT_COLOR
+    "NEXT", text_rect.x, text_rect.y, draw_d.font_size, draw_d.INFO_TEXT_COLOR
   );
-  for (int id = 0; id < NextQueue::NEXT_COMING_SIZE; ++id) {
-    Tetromino currentTetromino = next_queue[id];
+  for (int id = 0; id < NextQueue::NEXT_SIZE; ++id)
     draw_piece(
-      initial_tetromino_map(currentTetromino),
-      tetromino_color(currentTetromino),
+      initial_tetromino_map(next_queue[id]),
+      tetromino_color(next_queue[id]),
       WIDTH + 3,
       3 * (id + 1) + VISIBLE_HEIGHT + 1,
       draw_d
     );
-  }
 }
 
-void Playfield::draw_hold_piece(const DrawingDetails& draw_d) const {
-  Rectangle holdTextBlock = get_block(-7, VISIBLE_HEIGHT, draw_d);
+void Playfield::draw_hold_piece(const DrawD& draw_d) const {
+  Rectangle text_rect = get_block(-7, VISIBLE_HEIGHT, draw_d);
   DrawText(
-    "HOLD",
-    holdTextBlock.x,
-    holdTextBlock.y,
-    draw_d.font_size,
-    draw_d.INFO_TEXT_COLOR
+    "HOLD", text_rect.x, text_rect.y, draw_d.font_size, draw_d.INFO_TEXT_COLOR
   );
-  Rectangle holdPieceBackground = get_block(-7, VISIBLE_HEIGHT + 2, draw_d);
-  holdPieceBackground.width = draw_d.block_length * 6;
-  holdPieceBackground.height = draw_d.block_length * 4;
-  DrawRectangleRec(holdPieceBackground, draw_d.PIECES_BACKGROUND_COLOR);
+  Rectangle background = get_block(-7, VISIBLE_HEIGHT + 2, draw_d);
+  background.width = draw_d.block_length * 6;
+  background.height = draw_d.block_length * 4;
+  DrawRectangleRec(background, draw_d.PIECES_BACKGROUND_COLOR);
   DrawRectangleLinesEx(
-    holdPieceBackground, draw_d.block_length / 4, draw_d.PIECE_BOX_COLOR
+    background, draw_d.block_length / 4, draw_d.PIECE_BOX_COLOR
   );
 
-  Color holdColor = can_swap ? tetromino_color(holding_piece) :
-                               draw_d.UNAVAILABLE_HOLD_PIECE_COLOR;
+  Color color = can_swap ? tetromino_color(holding_piece) :
+                           draw_d.UNAVAILABLE_HOLD_PIECE_COLOR;
   draw_piece(
-    initial_tetromino_map(holding_piece),
-    holdColor,
-    -5,
-    4 + VISIBLE_HEIGHT,
-    draw_d
+    initial_tetromino_map(holding_piece), color, -5, 4 + VISIBLE_HEIGHT, draw_d
   );
 }
 
@@ -603,18 +558,13 @@ std::pair<const char*, Color> message_info(MessageType message) {
   }
 }
 
-void Playfield::draw_info(const DrawingDetails& draw_d) const {
+void Playfield::draw_info(const DrawD& draw_d) const {
   if (message.timer > 0) {
-    Rectangle clear_rect = get_block(draw_d.LEFT_BORDER, HEIGHT - 4, draw_d);
-    const float color_scalar =
-      static_cast<float>(message.timer) / LineClearMessage::DURATION;
-
-    auto [line_clear_msg, text_color] = message_info(message.message);
-    unsigned char alpha = (255 * color_scalar);
-    text_color.a = alpha;
-    DrawText(
-      line_clear_msg, clear_rect.x, clear_rect.y, draw_d.font_size, text_color
-    );
+    Rectangle text_rect = get_block(draw_d.LEFT_BORDER, HEIGHT - 4, draw_d);
+    auto [msg, color] = message_info(message.message);
+    unsigned char alpha = (255.0 * message.timer) / LineClearMessage::DURATION;
+    color.a = alpha;
+    DrawText(msg, text_rect.x, text_rect.y, draw_d.font_size, color);
 
     if (message.spin_type != SpinType::No) {
       Color spin_color = tetromino_color(Tetromino::T);
@@ -622,9 +572,9 @@ void Playfield::draw_info(const DrawingDetails& draw_d) const {
       Rectangle spin_rect = get_block(draw_d.LEFT_BORDER, HEIGHT - 6, draw_d);
       DrawText("TSPIN", spin_rect.x, spin_rect.y, draw_d.font_size, spin_color);
       if (message.spin_type == SpinType::Mini) {
-        Rectangle min_block = get_block(draw_d.LEFT_BORDER, HEIGHT - 7, draw_d);
+        Rectangle mini_rect = get_block(draw_d.LEFT_BORDER, HEIGHT - 7, draw_d);
         DrawText(
-          "MINI", min_block.x, min_block.y, draw_d.font_size_small, spin_color
+          "MINI", mini_rect.x, mini_rect.y, draw_d.font_size_small, spin_color
         );
       }
     }
@@ -664,7 +614,7 @@ void Playfield::draw_info(const DrawingDetails& draw_d) const {
   );
 }
 
-void Playfield::draw(const DrawingDetails& draw_d) const {
+void Playfield::draw(const DrawD& draw_d) const {
   draw_tetrion(draw_d);
   draw_tetrion_pieces(draw_d);
   draw_next_queue(draw_d);

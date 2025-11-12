@@ -44,9 +44,9 @@ TetrominoMap initial_tetromino_map(const Tetromino);
 struct FallingPiece {
   Tetromino tetromino;
   Orientation orientation;
-  char x_position;
-  char y_position;
-  TetrominoMap tetromino_map;
+  char x;
+  char y;
+  TetrominoMap map;
 
   FallingPiece(Tetromino, char, char);
   void fall();

@@ -2,10 +2,10 @@
 #define HANDLING_SETTINGS_HPP
 
 struct HandlingSettings {
-  int gravityFrames;
-  int softDropFrames;
-  int maxLockDelayFrames;
-  int maxLockDelayResets;
+  int gravity;
+  int soft_drop;
+  int lock_delay_frames;
+  int lock_delay_resets;
   int das;
 };
 

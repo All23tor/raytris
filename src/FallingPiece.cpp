@@ -6,9 +6,9 @@ FallingPiece::FallingPiece(
 ) :
   tetromino(_tetromino),
   orientation(Orientation::Up),
-  x_position(_horizontal_position),
-  y_position(_vertical_position),
-  tetromino_map(initial_tetromino_map(tetromino)) {}
+  x(_horizontal_position),
+  y(_vertical_position),
+  map(initial_tetromino_map(tetromino)) {}
 
 TetrominoMap initial_tetromino_map(Tetromino tetromino) {
   switch (tetromino) {
@@ -32,18 +32,18 @@ TetrominoMap initial_tetromino_map(Tetromino tetromino) {
 }
 
 void FallingPiece::fall() {
-  y_position += 1;
+  y += 1;
 }
 
 void FallingPiece::shift(Shift shift) {
   if (shift == Shift::Left)
-    x_position -= 1;
+    x -= 1;
   else if (shift == Shift::Right)
-    x_position += 1;
+    x += 1;
 }
 
 void FallingPiece::rotate(RotationType rotationType) {
-  for (CoordinatePair& pcp : tetromino_map)
+  for (CoordinatePair& pcp : map)
     if (rotationType == RotationType::Clockwise)
       pcp = {static_cast<signed char>(-pcp.y), pcp.x};
     else if (rotationType == RotationType::CounterClockwise)
@@ -63,8 +63,8 @@ void FallingPiece::rotate(RotationType rotationType) {
 }
 
 void FallingPiece::translate(CoordinatePair translation) {
-  x_position += translation.x;
-  y_position += translation.y;
+  x += translation.x;
+  y += translation.y;
 }
 
 FallingPiece FallingPiece::fallen() const {

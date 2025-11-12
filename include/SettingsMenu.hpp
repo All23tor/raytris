@@ -11,23 +11,23 @@ enum class Resolution {
   FullScreen
 };
 
-std::pair<int, int> resolutionPair(Resolution resolution);
+std::pair<int, int> resolution_pair(Resolution resolution);
 
 class SettingsMenu {
-  static Resolution resolution;
-  static inline HandlingSettings handling_settings = {20, 1, 30, 15, 7};
+  static constexpr int OPTIONS = 3;
   int selected_option = 0;
-
-  void resizeScreenHigher();
-  void resizeScreenLower();
 
 public:
   ~SettingsMenu();
   void draw() const;
   void update();
   bool should_stop_running() const;
-  static Resolution getResolution();
-  static const HandlingSettings& getHandlingSettings();
+
+  struct Config {
+    Resolution resolution;
+    HandlingSettings handling_settings;
+  };
+  static const Config& config();
 };
 
 #endif

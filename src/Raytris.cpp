@@ -6,11 +6,13 @@
 #endif
 
 Raytris::Raytris() {
-  Resolution initial_resolution = SettingsMenu::getResolution();
-  auto [width, height] = resolutionPair(initial_resolution);
+  Resolution resolution = SettingsMenu::config().resolution;
+  auto [width, height] = resolution_pair(resolution);
   InitWindow(width, height, "RayTris");
-  if (initial_resolution == Resolution::FullScreen)
+#if !defined(PLATFORM_WEB)
+  if (resolution == Resolution::FullScreen)
     ToggleFullscreen();
+#endif
 }
 
 Raytris::~Raytris() {
@@ -20,17 +22,16 @@ Raytris::~Raytris() {
 void Raytris::handle_stop_runnig(auto&& runnable) {
   using T = std::decay_t<decltype(runnable)>;
   if constexpr (std::is_same_v<T, MainMenu>) {
+    auto&& handling_settings = SettingsMenu::config().handling_settings;
     switch (runnable.get_selected_option()) {
     case MainMenu::Option::Exit:
       should_stop_running = true;
       break;
     case MainMenu::Option::SinglePlayer:
-      raytris.emplace<SinglePlayerGame>(SettingsMenu::getHandlingSettings());
+      raytris.emplace<SinglePlayerGame>(handling_settings);
       break;
     case MainMenu::Option::TwoPlayers:
-      raytris.emplace<TwoPlayerGame>(
-        SettingsMenu::getHandlingSettings(), SettingsMenu::getHandlingSettings()
-      );
+      raytris.emplace<TwoPlayerGame>(handling_settings, handling_settings);
       break;
     case MainMenu::Option::Settings:
       raytris.emplace<SettingsMenu>();

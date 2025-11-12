@@ -1,33 +1,32 @@
 #include "SettingsMenu.hpp"
 #include "HandlingSettings.hpp"
 #include "raylib.h"
+#include <algorithm>
 #include <format>
 #include <fstream>
 #include <utility>
 
-// TODO: Change this initialization aberration
-Resolution SettingsMenu::resolution = [] {
+SettingsMenu::Config global_config = [] {
   std::ifstream in("settings.raytris");
   if (!in.good())
-    return Resolution::Small;
+    return SettingsMenu::Config{Resolution::Small, {20, 1, 30, 15, 7}};
 
-  Resolution resolution;
-  in.read(reinterpret_cast<char*>(&resolution), sizeof(resolution));
-  in.read(
-    reinterpret_cast<char*>(&handling_settings), sizeof(handling_settings)
-  );
-  return resolution;
+  in.read(reinterpret_cast<char*>(&global_config), sizeof(global_config));
+  return global_config;
 }();
+
+const SettingsMenu::Config& SettingsMenu::config() {
+  return global_config;
+}
 
 SettingsMenu::~SettingsMenu() {
   std::ofstream out("settings.raytris");
-  out.write(reinterpret_cast<const char*>(&resolution), sizeof(resolution));
   out.write(
-    reinterpret_cast<const char*>(&handling_settings), sizeof(handling_settings)
+    reinterpret_cast<const char*>(&global_config), sizeof(global_config)
   );
 }
 
-std::pair<int, int> resolutionPair(Resolution resolution) {
+std::pair<int, int> resolution_pair(Resolution resolution) {
   switch (resolution) {
   case Resolution::Small:
     return {640, 360};
@@ -44,41 +43,28 @@ std::pair<int, int> resolutionPair(Resolution resolution) {
   }
 }
 
-void SettingsMenu::resizeScreenHigher() {
-  resolution = static_cast<Resolution>(
-    (std::to_underlying(resolution) + 1) %
-    (std::to_underlying(Resolution::FullScreen) + 1)
-  );
-  const auto [windowWidth, windowHeight] = resolutionPair(resolution);
+template <bool HIGHER>
+static void resize() {
+  constexpr auto RESOLUTIONS = std::to_underlying(Resolution::FullScreen) + 1;
+  auto&& resolution = global_config.resolution;
+  auto inner = std::to_underlying(resolution);
+  if constexpr (HIGHER)
+    inner = (inner + 1) % RESOLUTIONS;
+  else
+    inner = (inner + RESOLUTIONS - 1) % RESOLUTIONS;
+  resolution = static_cast<Resolution>(inner);
 
-  if (IsWindowFullscreen()) {
+  const auto [width, height] = resolution_pair(resolution);
+
+#if !defined(PLATFORM_WEB)
+  if (IsWindowFullscreen())
     ToggleFullscreen();
-  }
-
-  SetWindowSize(windowWidth, windowHeight);
-
-  if (resolution == Resolution::FullScreen) {
+  SetWindowSize(width, height);
+  if (resolution == Resolution::FullScreen)
     ToggleFullscreen();
-  }
-}
-
-void SettingsMenu::resizeScreenLower() {
-  resolution = static_cast<Resolution>(
-    (std::to_underlying(resolution) +
-     std::to_underlying(Resolution::FullScreen)) %
-    (std::to_underlying(Resolution::FullScreen) + 1)
-  );
-  const auto [windowWidth, windowHeight] = resolutionPair(resolution);
-
-  if (IsWindowFullscreen()) {
-    ToggleFullscreen();
-  }
-
-  SetWindowSize(windowWidth, windowHeight);
-
-  if (resolution == Resolution::FullScreen) {
-    ToggleFullscreen();
-  }
+#else
+  SetWindowSize(width, height);
+#endif
 }
 
 bool SettingsMenu::should_stop_running() const {
@@ -86,26 +72,27 @@ bool SettingsMenu::should_stop_running() const {
 }
 
 void SettingsMenu::draw() const {
-  const auto [windowWidth, windowHeight] = resolutionPair(resolution);
-  const float fontSizeBig = windowHeight / 4.0;
-  const float fontSize = windowHeight / 12.0;
+  const auto [width, height] = resolution_pair(global_config.resolution);
+  const float fontSizeBig = height / 4.0;
+  const float fontSize = height / 12.0;
 
   ClearBackground(LIGHTGRAY);
   DrawText(
     "SETTINGS",
-    (windowWidth - MeasureText("SETTINGS", fontSizeBig)) / 2.0,
-    windowHeight / 2.0 - fontSize - fontSizeBig,
+    (width - MeasureText("SETTINGS", fontSizeBig)) / 2.0,
+    height / 2.0 - fontSize - fontSizeBig,
     fontSizeBig,
     RED
   );
 
   using option = std::pair<std::string, std::string>;
-  option resolution = {
-    "Resolution", std::format("{} x {}", windowWidth, windowHeight)
+  option resolution = {"Resolution", std::format("{} x {}", width, height)};
+  option das = {
+    "Delayed Auto Shift", std::format("{}", global_config.handling_settings.das)
   };
-  option das = {"Delayed Auto Shift", std::format("{}", handling_settings.das)};
   option softDropFrames = {
-    "Soft Drop Frames", std::format("{}", handling_settings.softDropFrames)
+    "Soft Drop Frames",
+    std::format("{}", global_config.handling_settings.soft_drop)
   };
 
   std::array options = {resolution, das, softDropFrames};
@@ -113,15 +100,15 @@ void SettingsMenu::draw() const {
     const auto [option, value] = options[idx];
     DrawText(
       option.c_str(),
-      windowWidth / 8.0f,
-      windowHeight / 2.0f + idx * fontSize,
+      width / 8.0f,
+      height / 2.0f + idx * fontSize,
       fontSize,
       selected_option == idx ? BLUE : BLACK
     );
     DrawText(
       value.c_str(),
-      windowWidth / 1.5f,
-      windowHeight / 2.0f + idx * fontSize,
+      width / 1.5f,
+      height / 2.0f + idx * fontSize,
       fontSize,
       selected_option == idx ? BLUE : BLACK
     );
@@ -129,33 +116,29 @@ void SettingsMenu::draw() const {
 }
 
 void SettingsMenu::update() {
+  auto&& hand_set = global_config.handling_settings;
+
   if (IsKeyPressed(KEY_UP))
-    selected_option = (selected_option + 2) % 3;
+    selected_option = (selected_option + OPTIONS - 1) % OPTIONS;
   if (IsKeyPressed(KEY_DOWN))
-    selected_option = (selected_option + 1) % 3;
+    selected_option = (selected_option + 1) % OPTIONS;
 
   if (selected_option == 0) {
     if (IsKeyPressed(KEY_RIGHT))
-      resizeScreenHigher();
+      resize<true>();
     if (IsKeyPressed(KEY_LEFT))
-      resizeScreenLower();
+      resize<false>();
   } else if (selected_option == 1) {
-    if (IsKeyPressed(KEY_LEFT) && handling_settings.das > 0)
-      handling_settings.das -= 1;
-    if (IsKeyPressed(KEY_RIGHT) && handling_settings.das < 20)
-      handling_settings.das += 1;
+    if (IsKeyPressed(KEY_LEFT))
+      hand_set.das -= 1;
+    if (IsKeyPressed(KEY_RIGHT))
+      hand_set.das += 1;
+    hand_set.das = std::clamp(hand_set.das, 0, 20);
   } else if (selected_option == 2) {
-    if (IsKeyPressed(KEY_LEFT) && handling_settings.softDropFrames > 0)
-      handling_settings.softDropFrames -= 1;
-    if (IsKeyPressed(KEY_RIGHT) && handling_settings.softDropFrames < 20)
-      handling_settings.softDropFrames += 1;
+    if (IsKeyPressed(KEY_LEFT))
+      hand_set.soft_drop -= 1;
+    if (IsKeyPressed(KEY_RIGHT))
+      hand_set.soft_drop += 1;
+    hand_set.soft_drop = std::clamp(hand_set.soft_drop, 0, 20);
   }
-}
-
-Resolution SettingsMenu::getResolution() {
-  return resolution;
-}
-
-const HandlingSettings& SettingsMenu::getHandlingSettings() {
-  return handling_settings;
 }

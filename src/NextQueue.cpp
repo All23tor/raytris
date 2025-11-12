@@ -14,12 +14,12 @@ Tetromino NextQueue::next_tetromino() {
 }
 
 void NextQueue::push_new_bag_if_needed() {
-  if (queue_size > NEXT_COMING_SIZE)
+  if (queue_size > NEXT_SIZE)
     return;
 
   using enum Tetromino;
   std::array<Tetromino, SIZE_OF_BAG> newBag = {I, O, T, S, Z, J, L};
-  std::shuffle(newBag.begin(), newBag.end(), generator);
+  std::ranges::shuffle(newBag, generator);
   for (std::size_t index = queue_size; index >= 1; index--)
     queue[index + SIZE_OF_BAG - 1] = queue[index - 1];
 
