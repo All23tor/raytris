@@ -208,7 +208,7 @@ void Playfield::handle_rotations(const Ctrlr& ctrlr) {
   auto try_rotating = [this](RotationType rotationType) {
     const FallingPiece rotated_piece = falling_piece.rotated(rotationType);
     auto offsets = sv::transform(
-      sv::zip(get_offset_table(falling_piece), get_offset_table(rotated_piece)),
+      sv::zip(offset_table(falling_piece), offset_table(rotated_piece)),
       [](auto ps) {
         auto [p1, p2] = ps;
         return CoordinatePair(p1.x - p2.x, p1.y - p2.y);
@@ -218,7 +218,7 @@ void Playfield::handle_rotations(const Ctrlr& ctrlr) {
       return valid_position(grid, rotated_piece.translated(offset));
     });
     if (valid_offset != offsets.end()) {
-      falling_piece.translate(*valid_offset);
+      falling_piece = rotated_piece.translated(*valid_offset);
       lock_delay_frames = 0;
       lock_delay_resets += 1;
       last_move_rotation = true;
@@ -227,9 +227,9 @@ void Playfield::handle_rotations(const Ctrlr& ctrlr) {
 
   if (ctrlr.clockwise())
     try_rotating(RotationType::Clockwise);
-  if (ctrlr.counter_clockwise())
+  else if (ctrlr.counter_clockwise())
     try_rotating(RotationType::CounterClockwise);
-  if (ctrlr.one_eighty())
+  else if (ctrlr.one_eighty())
     try_rotating(RotationType::OneEighty);
 }
 
@@ -279,8 +279,6 @@ bool Playfield::update(const Ctrlr& ctrlr, const HandS& hand_set) {
   lock_delay_frames += 1;
   if (message.timer > 0)
     message.timer -= 1;
-
-  next_queue.push_new_bag_if_needed();
 
   handle_shifts(ctrlr, hand_set);
   handle_rotations(ctrlr);

@@ -10,14 +10,12 @@ public:
   static constexpr std::size_t MAX_QUEUE_SIZE = NEXT_SIZE + SIZE_OF_BAG;
 
 private:
-  using enum Tetromino;
-  std::array<Tetromino, MAX_QUEUE_SIZE> queue = {I, O, T, S, Z, J, L};
-  std::size_t queue_size = SIZE_OF_BAG;
+  std::array<Tetromino, MAX_QUEUE_SIZE> queue;
+  std::size_t queue_size;
 
 public:
   NextQueue();
   Tetromino next_tetromino();
-  void push_new_bag_if_needed();
   const Tetromino& operator[](std::size_t index) const;
 };
 

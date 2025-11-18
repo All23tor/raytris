@@ -91,7 +91,7 @@ FallingPiece FallingPiece::translated(CoordinatePair translation) const {
   return new_piece;
 }
 
-const OffsetTable& get_offset_table(const FallingPiece& piece) {
+const OffsetTable& offset_table(const FallingPiece& piece) {
   static constexpr OffsetTable I_TABLE[4] = {
     {{{0, 0}, {-1, 0}, {2, 0}, {-1, 0}, {2, 0}}},
     {{{-1, 0}, {0, 0}, {0, 0}, {0, -1}, {0, 2}}},
