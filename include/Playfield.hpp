@@ -7,18 +7,18 @@
 #include "NextQueue.hpp"
 
 enum class MessageType : unsigned char {
+  Empty,
   Single,
   Double,
   Triple,
   Tetris,
   AllClear,
-  Empty
 };
 
 enum class SpinType {
   No,
+  Mini,
   Proper,
-  Mini
 };
 
 struct LineClearMessage {
@@ -56,7 +56,7 @@ private:
   FallingPiece falling_piece;
   Tetromino holding_piece = Tetromino::Empty;
   bool can_swap = true;
-  unsigned int frames_since_last_fall = 0;
+  unsigned int frames_since_drop = 0;
   unsigned int lock_delay_frames = 0;
   unsigned int lock_delay_resets = 0;
   int frames_pressed = 0;
@@ -72,7 +72,6 @@ private:
   void handle_rotations(const Controller&);
   bool handle_drops(const Controller&, const HandlingSettings&);
   void solidify_piece();
-  void update_score(std::size_t, SpinType);
 
   void draw_tetrion(const DrawingDetails&) const;
   void draw_tetrion_pieces(const DrawingDetails&) const;

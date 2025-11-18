@@ -15,22 +15,20 @@ using DrawD = DrawingDetails;
 
 static constexpr std::size_t INITIAL_X_POSITION = (Playfield::WIDTH - 1) / 2;
 static constexpr std::size_t INITIAL_Y_POSITION = Playfield::VISIBLE_HEIGHT - 1;
-static constexpr FallingPiece spawn_tetromino(Tetromino tetromino) {
+static FallingPiece spawn_tetromino(Tetromino tetromino) {
   return FallingPiece(tetromino, INITIAL_X_POSITION, INITIAL_Y_POSITION);
 }
 
 Playfield::Playfield() :
   next_queue(),
-  falling_piece(
-    next_queue.next_tetromino(), INITIAL_X_POSITION, INITIAL_Y_POSITION
-  ) {
+  falling_piece(spawn_tetromino(next_queue.next_tetromino())) {
   sr::for_each(grid, [](auto& row) { row.fill(Tetromino::Empty); });
 }
 
 void Playfield::restart() {
-  auto lastScore = this->score;
+  auto last_score = this->score;
   *this = Playfield();
-  this->score = lastScore;
+  this->score = last_score;
 }
 
 bool Playfield::lost() const {
@@ -76,7 +74,7 @@ static SpinType is_spin(const FallingPiece& piece, auto&& grid) {
 }
 
 void Playfield::solidify_piece() {
-  bool topped_out = false;
+  bool topped_out = true;
 
   for (auto coord : falling_piece.map) {
     int x = coord.x + falling_piece.x;
@@ -84,25 +82,19 @@ void Playfield::solidify_piece() {
     grid[y][x] = falling_piece.tetromino;
 
     if (y >= VISIBLE_HEIGHT)
-      topped_out = true;
-  }
-
-  std::array<std::size_t, 4> rows_to_clear;
-  std::size_t cleared_lines = 0;
-  for (int y{}; auto&& row : grid) {
-    if (sr::all_of(row, [](auto mino) { return mino != Tetromino::Empty; }))
-      rows_to_clear[cleared_lines++] = y;
-    if (cleared_lines == 4)
-      break;
-    y++;
+      topped_out = false;
   }
 
   SpinType spin_type =
     last_move_rotation ? is_spin(falling_piece, grid) : SpinType::No;
-  for (std::size_t index = 0; index < cleared_lines; index++) {
-    std::size_t row_idx = rows_to_clear[index];
+
+  int cleared_lines = 0;
+  for (std::size_t row_idx = 0; row_idx < HEIGHT; row_idx++) {
+    if (sr::any_of(grid[row_idx], [](auto m) { return m == Tetromino::Empty; }))
+      continue;
     sr::copy_backward(sv::take(grid, row_idx), grid.begin() + row_idx + 1);
     grid.front().fill(Tetromino::Empty);
+    cleared_lines++;
   }
 
   if (cleared_lines == 0) {
@@ -115,11 +107,34 @@ void Playfield::solidify_piece() {
       b2b = 0;
   }
 
-  update_score(cleared_lines, spin_type);
+  score += combo * 50;
+  int b2b_factor = (b2b >= 2) ? 3 : 2;
+  static constexpr std::array<std::array<int, 5>, 3> score_table = {{
+    /* cleared:  0   1    2    3    4  */
+    /*NoSpin */ {0, 100, 300, 500, 800},
+    /*Mini   */ {100, 200, 400, 0, 0},
+    /*Proper */ {400, 800, 1200, 1600, 0},
+  }};
+  auto spin_index = std::to_underlying(spin_type);
+  score += b2b_factor * score_table[spin_index][cleared_lines] / 2;
+
+  message = static_cast<MessageType>(cleared_lines);
+  message.spin_type = spin_type;
+
+  bool is_all_clear = sr::all_of(grid, [](const auto& row) {
+    return sr::all_of(row, [](Tetromino mino) {
+      return mino == Tetromino::Empty;
+    });
+  });
+
+  if (is_all_clear) {
+    message.message = MessageType::AllClear;
+    score += 3500 * b2b_factor / 2;
+  }
 
   Tetromino next_tetromino = next_queue.next_tetromino();
   falling_piece = spawn_tetromino(next_tetromino);
-  frames_since_last_fall = 0;
+  frames_since_drop = 0;
   lock_delay_frames = 0;
   lock_delay_resets = 0;
   can_swap = true;
@@ -130,66 +145,7 @@ void Playfield::solidify_piece() {
     return grid[y][x] == Tetromino::Empty;
   });
 
-  has_lost = !topped_out || !can_spawn_piece;
-}
-
-void Playfield::update_score(std::size_t cleared_lines, SpinType spin_type) {
-  score += combo * 50;
-  float b2bFactor = (b2b >= 2) ? 1.5f : 1.0f;
-
-  if (spin_type == SpinType::Proper) {
-    if (cleared_lines == 1) {
-      message = MessageType::Single;
-      score += 800 * b2bFactor;
-    } else if (cleared_lines == 2) {
-      message = MessageType::Double;
-      score += 1200 * b2bFactor;
-    } else if (cleared_lines == 3) {
-      message = MessageType::Triple;
-      score += 1600 * b2bFactor;
-    } else {
-      message = MessageType::Empty;
-      score += 400 * b2bFactor;
-    }
-    message.spin_type = SpinType::Proper;
-  } else if (spin_type == SpinType::Mini) {
-    if (cleared_lines == 1) {
-      message = MessageType::Single;
-      score += 200 * b2bFactor;
-    } else if (cleared_lines == 2) {
-      message = MessageType::Double;
-      score += 400 * b2bFactor;
-    } else {
-      message = MessageType::Empty;
-      score += 100 * b2bFactor;
-    }
-    message.spin_type = SpinType::Mini;
-  } else {
-    if (cleared_lines == 1) {
-      message = MessageType::Single;
-      score += 100 * b2bFactor;
-    } else if (cleared_lines == 2) {
-      message = MessageType::Double;
-      score += 300 * b2bFactor;
-    } else if (cleared_lines == 3) {
-      message = MessageType::Triple;
-      score += 500 * b2bFactor;
-    } else if (cleared_lines == 4) {
-      message = MessageType::Tetris;
-      score += 800 * b2bFactor;
-    }
-  }
-
-  bool is_all_clear = sr::all_of(grid, [](const auto& row) {
-    return sr::all_of(row, [](Tetromino mino) {
-      return mino == Tetromino::Empty;
-    });
-  });
-
-  if (is_all_clear) {
-    message = MessageType::AllClear;
-    score += 3500 * b2bFactor;
-  }
+  has_lost = topped_out || !can_spawn_piece;
 }
 
 void Playfield::handle_swap(const Ctrlr& ctrlr) {
@@ -203,7 +159,7 @@ void Playfield::handle_swap(const Ctrlr& ctrlr) {
     falling_piece = spawn_tetromino(next_queue.next_tetromino());
   holding_piece = currentTetromino;
   can_swap = false;
-  frames_since_last_fall = 0;
+  frames_since_drop = 0;
   lock_delay_frames = 0;
   lock_delay_resets = 0;
   last_move_rotation = false;
@@ -258,16 +214,14 @@ void Playfield::handle_rotations(const Ctrlr& ctrlr) {
         return CoordinatePair(p1.x - p2.x, p1.y - p2.y);
       }
     );
-
-    for (auto&& offset : offsets) {
-      const auto translated_piece = rotated_piece.translated(offset);
-      if (valid_position(grid, translated_piece)) {
-        falling_piece = translated_piece;
-        lock_delay_frames = 0;
-        lock_delay_resets += 1;
-        last_move_rotation = true;
-        return;
-      }
+    auto valid_offset = sr::find_if(offsets, [&](auto offset) {
+      return valid_position(grid, rotated_piece.translated(offset));
+    });
+    if (valid_offset != offsets.end()) {
+      falling_piece.translate(*valid_offset);
+      lock_delay_frames = 0;
+      lock_delay_resets += 1;
+      last_move_rotation = true;
     }
   };
 
@@ -281,44 +235,37 @@ void Playfield::handle_rotations(const Ctrlr& ctrlr) {
 
 bool Playfield::handle_drops(const Ctrlr& ctrlr, const HandS& hand_set) {
   if (ctrlr.check_hard_drop()) {
-    while (valid_position(grid, falling_piece.fallen())) {
-      falling_piece.fall();
+    auto fallen = falling_piece.fallen();
+    while (valid_position(grid, fallen)) {
+      falling_piece = fallen;
+      fallen = falling_piece.fallen();
       last_move_rotation = false;
     }
     solidify_piece();
     return true;
   }
 
-  bool is_fall_step = false;
-  if (ctrlr.soft_drop()) {
-    // Soft Drop
-    if (frames_since_last_fall >= hand_set.soft_drop) {
-      frames_since_last_fall = 0;
-      is_fall_step = true;
-    }
-  } else if (frames_since_last_fall >= hand_set.gravity) {
-    // Gravity
-    frames_since_last_fall = 0;
-    is_fall_step = true;
-  }
+  bool soft_fall = ctrlr.soft_drop() && frames_since_drop >= hand_set.soft_drop;
+  bool gravity_fall = frames_since_drop >= hand_set.gravity;
+  bool is_fall_step = soft_fall || gravity_fall;
+  if (is_fall_step)
+    frames_since_drop = 0;
 
-  if (valid_position(grid, falling_piece.fallen())) {
-    // Is not touching ground
-    if (is_fall_step) {
-      last_move_rotation = false;
-      falling_piece.fall();
-      lock_delay_frames = 0;
-      lock_delay_resets = 0;
-    }
-
-    return false;
-  }
-  // Is touching ground
-  if (lock_delay_frames > hand_set.lock_delay_frames ||
-      lock_delay_resets > hand_set.lock_delay_resets) {
+  bool can_fall = valid_position(grid, falling_piece.fallen());
+  bool can_wait = lock_delay_frames < hand_set.lock_delay_frames;
+  bool can_reset = lock_delay_resets < hand_set.lock_delay_resets;
+  if (!can_fall && (!can_wait || !can_reset)) {
     solidify_piece();
     return true;
   }
+
+  if (can_fall && is_fall_step) {
+    last_move_rotation = false;
+    falling_piece.fall();
+    lock_delay_frames = 0;
+    lock_delay_resets = 0;
+  }
+
   return false;
 }
 
@@ -328,7 +275,7 @@ bool Playfield::update(const Ctrlr& ctrlr, const HandS& hand_set) {
 
   handle_swap(ctrlr);
 
-  frames_since_last_fall += 1;
+  frames_since_drop += 1;
   lock_delay_frames += 1;
   if (message.timer > 0)
     message.timer -= 1;
@@ -342,24 +289,17 @@ bool Playfield::update(const Ctrlr& ctrlr, const HandS& hand_set) {
 
 namespace {
 constexpr Color tetromino_color(Tetromino tetromino) {
-  switch (tetromino) {
-  case Tetromino::I:
-    return (Color){49, 199, 239, 255};
-  case Tetromino::O:
-    return (Color){247, 211, 8, 255};
-  case Tetromino::T:
-    return (Color){173, 77, 156, 255};
-  case Tetromino::S:
-    return (Color){66, 182, 66, 255};
-  case Tetromino::Z:
-    return (Color){239, 32, 41, 255};
-  case Tetromino::J:
-    return (Color){90, 101, 173, 255};
-  case Tetromino::L:
-    return (Color){239, 121, 33, 255};
-  default:
-    return BLANK;
-  }
+  static constexpr std::array<Color, 8> colors = {
+    {{49, 199, 239, 255},
+     {247, 211, 8, 255},
+     {173, 77, 156, 255},
+     {239, 32, 41, 255},
+     {66, 182, 66, 255},
+     {90, 101, 173, 255},
+     {239, 121, 33, 255},
+     BLANK}
+  };
+  return colors.at(std::to_underlying(tetromino));
 }
 
 inline Rectangle get_block(int i, int j, const DrawD& draw_d) {
@@ -428,6 +368,18 @@ void draw_piece_danger(Tetromino tetromino, const DrawD& draw_d) {
     draw_block_danger(x, y, draw_d);
   }
 }
+
+std::pair<const char*, Color> message_info(MessageType message) {
+  static constexpr std::array<std::pair<const char*, Color>, 6> info = {
+    {{"", BLANK},
+     {"SINGLE", {0, 0, 0, 255}},
+     {"DOUBLE", {235, 149, 52, 255}},
+     {"TRIPLE", {88, 235, 52, 255}},
+     {"TETRIS", {52, 164, 236, 255}},
+     {"ALL\nCLEAR", {235, 52, 213, 255}}}
+  };
+  return info.at(std::to_underlying(message));
+}
 }; // namespace
 
 void Playfield::draw_tetrion(const DrawD& draw_d) const {
@@ -494,9 +446,8 @@ void Playfield::draw_tetrion_pieces(const DrawD& draw_d) const {
     });
   });
 
-  if (is_in_danger) {
+  if (is_in_danger)
     draw_piece_danger(next_queue[0], draw_d);
-  }
 }
 
 void Playfield::draw_next_queue(const DrawD& draw_d) const {
@@ -539,23 +490,6 @@ void Playfield::draw_hold_piece(const DrawD& draw_d) const {
   draw_piece(
     initial_tetromino_map(holding_piece), color, -5, 4 + VISIBLE_HEIGHT, draw_d
   );
-}
-
-std::pair<const char*, Color> message_info(MessageType message) {
-  switch (message) {
-  case MessageType::Single:
-    return {"SINGLE", {0, 0, 0, 255}};
-  case MessageType::Double:
-    return {"DOUBLE", {235, 149, 52, 255}};
-  case MessageType::Triple:
-    return {"TRIPLE", {88, 235, 52, 255}};
-  case MessageType::Tetris:
-    return {"TETRIS", {52, 164, 236, 255}};
-  case MessageType::AllClear:
-    return {"ALL\nCLEAR", {235, 52, 213, 255}};
-  default:
-    return {"", BLANK};
-  }
 }
 
 void Playfield::draw_info(const DrawD& draw_d) const {
